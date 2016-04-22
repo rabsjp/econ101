@@ -16,4 +16,11 @@
     <!--Custom scripts-->
     <script type="text/javascript" src="{% static 'global/custom.js' %}"></script>
 
+    <script
+    	src="{% static 'bower_components/webcomponentsjs/webcomponents-lite.min.js' %}">
+    </script>
+    <link
+    	rel="import"
+    	href="{% static 'webcomponents/otree-chat/otree-chat.html' %}" />
+
 {% endblock %}

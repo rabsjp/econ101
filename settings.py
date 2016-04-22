@@ -206,6 +206,14 @@ SESSION_CONFIGS = [
         ],
     },
     {
+        'name': 'battle_of_the_sexes_with_chat',
+        'display_name': "Battle of the Sexes (with Chat)",
+        'num_demo_participants': 2,
+        'app_sequence': [
+            'battle_of_the_sexes_with_chat', 'payment_info'
+        ],
+    },
+    {
         'name': 'vickrey_auction',
         'display_name': "Vickrey Auction",
         'num_demo_participants': 3,

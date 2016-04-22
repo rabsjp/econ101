@@ -1,0 +1,29 @@
+{% extends "global/Base.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Decide
+{% endblock %}
+
+{% block content %}
+
+
+<p>
+    You are <strong>{{ player.role }}</strong>. What will you do for the evening?
+</p>
+
+    {% formfield player.decision with label='Please make a choice:' %}
+
+	<otree-chat
+		session="{{ session.code }}"
+		subsession="{{ subsession }}"
+		round="{{ player.round_number }}"
+		group="{{ player.group.id_in_subsession }}"
+		sender="{{ player.role }}">
+	</otree-chat>
+
+    {% next_button %}
+
+    {% include 'battle_of_the_sexes_with_chat/Instructions.html' %}
+
+{% endblock %}
