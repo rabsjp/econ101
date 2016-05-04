@@ -1,0 +1,19 @@
+{
+  "name": "oTree",
+  "homepage": "https://github.com/Leeps-Lab/oTree",
+  "description": "Web-based multiplayer strategy games and economics experiments http://www.otree.org/",
+  "main": "",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "firebase-element": "GoogleWebComponents/firebase-element#^1.0.12",
+    "polymer": "Polymer/polymer#^1.4.0"
+  }
+}
