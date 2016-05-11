@@ -135,6 +135,12 @@ SESSION_CONFIG_DEFAULTS = {
 
 SESSION_CONFIGS = [
     {
+        'name': 'bimatrix_with_chat',
+        'display_name': "Bimatrix Game with Chat",
+        'num_demo_participants': 2,
+        'app_sequence': ['bimatrix_with_chat', 'payment_info'],
+    },
+    {
         'name': 'public_goods',
         'display_name': "Public Goods",
         'num_demo_participants': 3,
