@@ -5,6 +5,30 @@
 		rel="import"
 		href="/static/bower_components/firebase-element/firebase-collection.html" />
 
+<!--
+`<otree-chat>` displays a real-time chatroom on the subject's page.
+
+In typical use, you can use oTree's built-in page variables to configure the
+component.
+
+Example:
+
+  <otree-chat
+		session="{{ session.code }}"
+		subsession="{{ subsession }}"
+		round="{{ player.round_number }}"
+		group="{{ player.group.id_in_subsession }}"
+		sender="{{ player.role }}"
+		canned-msgs="['foo', 'bar', 'baz']">
+	</otree-chat>
+
+The chat is scoped by session, subsession, round, and group. Within the group,
+subject's are scoped by their current "role". Note that roles are often
+randomized between subsessions, so subjects must be clearly told that their
+counterpart in the current subsession might be a completely different person
+from the last. oTree must be configured for stable roles if needed for, e.g.
+repeated games.
+-->
 <dom-module id="otree-chat">
 
 	<template>
@@ -55,11 +79,21 @@
 		Polymer({
 			is: 'otree-chat',
 			properties: {
+				/** Unique code for the session, e.g. {{ session.code }} */
 				session: String,
-				subsession: String,
-				round: String,
-				group: String,
+				/** Subsession number, e.g. {{ subsession }} */
+				subsession: Number,
+				/** Round number, e.g. {{ player.round_number }} */
+				round: Number,
+				/** Group number, e.g. {{ player.group.id_in_subsession }} */
+				group: Number,
+				/** Sender name to display in chat, e.g. {{ player.role }} */
 				sender: String,
+				/** List of canned messages, if set buttons appear for each message
+				    and only these message can be sent. */
+				cannedMsgs: Array,
+				/** TODO */
+				msgs: Array,
 				msg_: String,
 				fbRef_: {
 					type: String,

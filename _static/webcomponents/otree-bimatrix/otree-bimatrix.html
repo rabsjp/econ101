@@ -1,0 +1,37 @@
+<link
+		rel="import"
+		href="/static/bower_components/polymer/polymer.html" />
+
+<!--
+`<otree-bimatrix>` lets subjects select a strategy from a set of
+possibilities. Their decision and the results are  displayed using the usual
+matrix form.
+
+Example:
+
+	<otree-bimatrix>
+	</otree-bimatrix>
+-->
+<dom-module id="otree-bimatrix">
+
+	<template>
+
+		<style>
+		</style>
+
+		<p>[[ rowLabels ]]</p>
+		<p>[[ payoffMatrix ]]</p>
+
+	</template>
+
+	<script>
+		Polymer({
+			is: 'otree-bimatrix',
+			properties: {
+				rowLabels: String,
+				payoffMatrix: String
+			},
+		});
+	</script>
+
+</dom-module>
