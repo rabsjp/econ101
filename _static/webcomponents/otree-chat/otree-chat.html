@@ -4,6 +4,12 @@
 <link
 		rel="import"
 		href="/static/bower_components/firebase-element/firebase-collection.html" />
+<link
+		rel="import"
+		href="/static/webcomponents/otree-vars/otree-vars.html" />
+<link
+		rel="import"
+		href="/static/webcomponents/otree-log/otree-log.html" />
 
 <!--
 `<otree-chat>` displays a real-time chatroom on the subject's page.
@@ -13,7 +19,7 @@ component.
 
 Example:
 
-  <otree-chat
+ 	<otree-chat
 		session="{{ session.code }}"
 		subsession="{{ subsession }}"
 		round="{{ player.round_number }}"
@@ -40,10 +46,14 @@ repeated games.
 		</style>
 
 		<firebase-collection
-      location="[[fbRef_]]"
-      data="{{msgs}}"
-      order-by-child="timestamp">
-    </firebase-collection>
+	      location="[[fbRef_]]"
+	      data="{{msgs}}"
+	      order-by-child="timestamp">
+	    </firebase-collection>
+
+	    <otree-vars id="vars"></otree-vars>
+
+	    <otree-log id="log"></otree-log>
 
 		<div class="panel panel-default">
 			<div class="panel-heading">
@@ -79,14 +89,6 @@ repeated games.
 		Polymer({
 			is: 'otree-chat',
 			properties: {
-				/** Unique code for the session, e.g. {{ session.code }} */
-				session: String,
-				/** Subsession number, e.g. {{ subsession }} */
-				subsession: Number,
-				/** Round number, e.g. {{ player.round_number }} */
-				round: Number,
-				/** Group number, e.g. {{ player.group.id_in_subsession }} */
-				group: Number,
 				/** Sender name to display in chat, e.g. {{ player.role }} */
 				sender: String,
 				/** List of canned messages, if set buttons appear for each message
@@ -95,19 +97,16 @@ repeated games.
 				/** TODO */
 				msgs: Array,
 				msg_: String,
-				fbRef_: {
-					type: String,
-					computed: 'computeFbRef_(session, subsession, round, group)'
-				} 
+				fbRef_: String
 			},
-			computeFbRef_: function(session, subsession, round, group) {
-				return (
-					'https://otree.firebaseio.com/' +
-					'/component/otree-chat/' +
-					'/session/' + session +
-					'/subsession/' + subsession +
-					'/round/' + round +
-					'/group/' + group +
+			ready: function() {
+				this.fbRef_ = (
+					'https://otree.firebaseio.com' +
+					'/component/otree-chat' +
+					'/session/' + this.$.vars.session +
+					'/subsession/' + this.$.vars.subsession +
+					'/round/' + this.$.vars.round +
+					'/group/' + this.$.vars.group +
 					'/msgs');
 			},
 			send_: function(e) {
@@ -119,6 +118,11 @@ repeated games.
 					content: this.msg_,
 					sender: this.sender,
 					timestamp: Date.now()
+				});
+				this.$.log.write({
+					component: 'otree-chat',
+					event: 'msg',
+					msg: this.msg_
 				});
 				this.set('msg_', '');
 			}

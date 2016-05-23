@@ -12,16 +12,31 @@
     <script src="//code.highcharts.com/highcharts.js"></script>
     <script src="//code.highcharts.com/highcharts-3d.js"></script>
     <script src="//code.highcharts.com/modules/exporting.js"></script>
-    
+
     <!--Custom scripts-->
     <script type="text/javascript" src="{% static 'global/custom.js' %}"></script>
 
     <script
     	src="{% static 'bower_components/webcomponentsjs/webcomponents-lite.min.js' %}">
     </script>
+
     <link
-    	rel="import"
-    	href="{% static 'webcomponents/otree-chat/otree-chat.html' %}" />
+        rel="import"
+        href="{% static 'webcomponents/otree-vars/otree-vars.html' %}" />
+
+    <!-- Initialize otree variables and Firebase -->
+    <otree-vars
+        session="{{ session.code }}"
+        subsession=" {{ subsession }}"
+        round="{{ player.round_number }}"
+        group="{{ player.group.id_in_subsession }}"
+        role="{{ player.role }}"
+        participant-code="{{ player.participant.code }}">
+    </otree-vars>
+    
+    <link
+        rel="import"
+        href="{% static 'webcomponents/otree-chat/otree-chat.html' %}" />
     <link
         rel="import"
         href="{% static 'webcomponents/otree-bimatrix/otree-bimatrix.html' %}" />
