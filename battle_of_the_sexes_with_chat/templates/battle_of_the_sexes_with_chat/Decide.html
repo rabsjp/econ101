@@ -14,13 +14,7 @@
 
     {% formfield player.decision with label='Please make a choice:' %}
 
-	<otree-chat
-		session="{{ session.code }}"
-		subsession="{{ subsession }}"
-		round="{{ player.round_number }}"
-		group="{{ player.group.id_in_subsession }}"
-		sender="{{ player.role }}">
-	</otree-chat>
+	<otree-chat sender="{{ player.role }}"></otree-chat>
 
     {% next_button %}
 

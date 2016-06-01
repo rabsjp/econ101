@@ -1,0 +1,48 @@
+<link
+		rel="import"
+		href="/static/bower_components/polymer/polymer.html" />
+<link
+		rel="import"
+		href="/static/webcomponents/otree-vars/otree-vars.html" />
+
+<!--
+`<otree-log>` ...
+
+Example:
+
+	<otree-log id="log"></otree-log>
+
+In your component:
+
+	this.$.log.write({
+		type: 'something happened',
+		value: 42
+	});
+
+-->
+<dom-module id="otree-log">
+
+	<template>
+
+		<otree-vars id="vars"></otree-vars>
+
+	</template>
+
+	<script>
+		Polymer({
+			is: 'otree-log',
+			write: function(event) {
+				this.$.vars.fbref.child('log/' + this.$.vars.session).push({
+					subsession: this.$.vars.subsession,
+					round: this.$.vars.round,
+					group: this.$.vars.group,
+					role: this.$.vars.role,
+					participantCode: this.$.vars.participantCode,
+					timestamp: Date.now(),
+					event: event
+				});
+			}
+		});
+	</script>
+
+</dom-module>

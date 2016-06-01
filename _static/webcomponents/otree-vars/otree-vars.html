@@ -1,0 +1,103 @@
+<link
+		rel="import"
+		href="/static/bower_components/polymer/polymer.html" />
+
+<!--
+`<otree-vars>` ...
+
+-->
+<dom-module id="otree-vars">
+
+	<template>
+	</template>
+
+	<script src="/static/bower_components/firebase/firebase.js"></script>
+	<script>
+		var session = undefined;
+		var subsession = undefined;
+		var round = undefined;
+		var group = undefined;
+		var role = undefined;
+		var participantCode = undefined;
+		var fbref = undefined;
+
+		Polymer({
+			is: 'otree-vars',
+			properties: {
+				/** Unique code for the session, e.g. {{ session.code }} */
+				session: String,
+				/** Subsession number, e.g. {{ subsession }} */
+				subsession: Number,
+				/** Round number, e.g. {{ player.round_number }} */
+				round: Number,
+				/** Group number, e.g. {{ player.group.id_in_subsession }} */
+				group: Number,
+				/** Player's role, e.g. {{ player.role }} */
+				role: String,
+				/** Participant's unique subject code, e.g. {{ player.participant.code }} */
+				participantCode: String,
+				/** Firebase application object */
+				fbref: Object
+			},
+			ready: function() {
+				if (fbref === undefined) {
+					fbref = new Firebase("https://otree.firebaseio.com");
+					fbref.onAuth(function(creds) {
+						if (creds === null) {
+							fbref.authWithOAuthRedirect("google", function(error, authData) {
+							  if (error) {
+							    console.log(error);
+							  }
+							});
+						}
+					});
+				}
+				this.fbref = fbref;
+
+				if (session === undefined) {
+					session = this.session;
+				} else {
+					this.session = session;
+				}
+				if (subsession === undefined) {
+					subsession = this.subsession;
+				} else {
+					this.subsession = subsession;
+				}
+				if (round === undefined) {
+					round = this.round;
+				} else {
+					this.round = round;
+				}
+				if (group === undefined) {
+					group = this.group;
+				} else {
+					this.group = group;
+				}
+				if (role === undefined) {
+					role = this.role;
+				} else {
+					this.role = role;
+				}
+				if (participantCode === undefined) {
+					participantCode = this.participantCode;
+				} else {
+					this.participantCode = participantCode;
+				}
+			},
+			doAuth_: function() {
+				var provider = new firebase.auth.GoogleAuthProvider();
+				var auth = this.fbapp.auth();
+				auth.getRedirectResult().then(function(result) {
+				  var user = result.user;
+				  if (user === null) {
+				  	auth.signInWithRedirect(provider);
+				  }
+				}).catch(function(error) {
+					console.log(err);
+				});				
+			}
+		});
+	</script>
+
+</dom-module>
