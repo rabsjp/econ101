@@ -1,6 +1,15 @@
 <link
 		rel="import"
 		href="/static/bower_components/polymer/polymer.html" />
+<link
+		rel="import"
+		href="/static/bower_components/firebase-element/firebase-document.html" />
+<link
+		rel="import"
+		href="/static/webcomponents/otree-vars/otree-vars.html" />
+<link
+		rel="import"
+		href="/static/webcomponents/otree-log/otree-log.html" />
 
 <!--
 `<otree-bimatrix>` lets subjects select a strategy from a set of
@@ -19,6 +28,53 @@ Example:
 		<style>
 		</style>
 
+		<firebase-document
+	      location="[[fbRef_]]"
+	      data="{{state}}">
+	    </firebase-document>
+
+	    <otree-vars id="vars"></otree-vars>
+
+	    <otree-log id="log"></otree-log>
+
+		<table class="table">
+			<tr>
+				<td></td>
+				<template
+					is="dom-repeat"
+					items="[[rowLabels]]"
+					as="label">
+					<td>[[label]]</td>
+				</template>
+			</tr>
+			<tr>
+				<td>
+					<span>[[_arrayItem(rowLabels.*, 0)]]</span>	
+					<input
+						checked$="[[_equals(0, decision)]]"
+						name="decision"
+						on-tap="_setDecision"
+						type="radio"
+						value="0">
+				</td>
+				<td>[[_payoff(payoffMatrix.*, 0, 0)]]</td>
+				<td>[[_payoff(payoffMatrix.*, 0, 1)]]</td>
+			</tr>
+			<tr>
+				<td>
+					<span>[[_arrayItem(rowLabels.*, 1)]]</span>	
+					<input
+						checked$="[[_equals(1, decision)]]"
+						name="decision"
+						on-tap="_setDecision"
+						type="radio"
+						value="1">
+				</td>
+				<td>[[_payoff(payoffMatrix.*, 1, 0)]]</td>
+				<td>[[_payoff(payoffMatrix.*, 1, 1)]]</td>
+			</tr>
+		</table>
+
 		<p>[[ rowLabels ]]</p>
 		<p>[[ payoffMatrix ]]</p>
 
@@ -28,9 +84,49 @@ Example:
 		Polymer({
 			is: 'otree-bimatrix',
 			properties: {
-				rowLabels: String,
-				payoffMatrix: String
+				rowLabels: Array,
+				payoffMatrix: Array,
+				decision: Number,
+				state: {
+					type: Object,
+					observer: '_stateChanged'
+				},
+				fbRef_: String
 			},
+			ready: function() {
+				this.fbRef_ = (
+					'https://otree.firebaseio.com' +
+					'/component/otree-bimatrix' +
+					'/session/' + this.$.vars.session +
+					'/subsession/' + this.$.vars.subsession +
+					'/round/' + this.$.vars.round +
+					'/group/' + this.$.vars.group +
+					'/state');
+			},
+			_equals(d, decision) {
+				return d == decision;
+			},
+			_setDecision(event) {
+				var d = parseInt(event.target.value)
+				if (this.state === null) {
+					var state = {};
+					state[this.$.vars.participantCode] = d
+					this.state = state;
+				}
+				var pcode = this.$.vars.participantCode;
+				this.set('state.' + pcode, d);
+				this.decision = d;
+			},
+			_stateChanged() {
+				var pcode = this.$.vars.participantCode;
+				this.decision = this.state[pcode];
+			},
+			_arrayItem(change, index) {
+				return change.base[index];
+			},
+			_payoff(change, x, y) {
+				return change.base[x][y];
+			}
 		});
 	</script>
 
