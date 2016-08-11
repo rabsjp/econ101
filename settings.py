@@ -4,8 +4,10 @@ from os import environ
 import dj_database_url
 from boto.mturk import qualification
 
-import otree.settings
+import firewatch
+firewatch.watch()
 
+import otree.settings
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 

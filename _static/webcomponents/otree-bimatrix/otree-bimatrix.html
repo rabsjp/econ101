@@ -18,7 +18,27 @@ matrix form.
 
 Example:
 
-	<otree-bimatrix>
+	<otree-bimatrix
+		row-labels='["Cooperate", "Defect"]'
+		payoff-matrix=
+        '[
+            [
+                "{{ Constants.cooperate_amount }}",
+                "{{ Constants.cooperate_amount }}"
+            ],
+            [
+                "{{ Constants.cooperate_defect_amount }}",
+                "{{ Constants.defect_cooperate_amount }}"
+            ],
+            [
+                "{{ Constants.defect_cooperate_amount }}",
+                "{{ Constants.cooperate_defect_amount }}"
+            ],
+            [
+                "{{ Constants.defect_amount }}",
+                "{{ Constants.defect_amount }}"
+            ]
+        ]'>
 	</otree-bimatrix>
 -->
 <dom-module id="otree-bimatrix">
@@ -26,11 +46,14 @@ Example:
 	<template>
 
 		<style>
+			.highlight {
+				background: #90CAF9;
+			}
 		</style>
 
 		<firebase-document
 	      location="[[fbRef_]]"
-	      data="{{state}}">
+	      data="{{decisions}}">
 	    </firebase-document>
 
 	    <otree-vars id="vars"></otree-vars>
@@ -51,32 +74,37 @@ Example:
 				<td>
 					<span>[[_arrayItem(rowLabels.*, 0)]]</span>	
 					<input
-						checked$="[[_equals(0, decision)]]"
-						name="decision"
-						on-tap="_setDecision"
+						checked$="[[_equals(0, my_decision)]]"
+						name="my_decision"
+						on-tap="_setMyDecision"
 						type="radio"
 						value="0">
 				</td>
-				<td>[[_payoff(payoffMatrix.*, 0, 0)]]</td>
-				<td>[[_payoff(payoffMatrix.*, 0, 1)]]</td>
+				<td class$="[[_highlight(decisions, 0, 0)]]">
+					[[_payoff(payoffMatrix.*, 0, 0)]]
+				</td>
+				<td class$="[[_highlight(decisions, 0, 1)]]">
+					[[_payoff(payoffMatrix.*, 0, 1)]]
+				</td>
 			</tr>
 			<tr>
 				<td>
 					<span>[[_arrayItem(rowLabels.*, 1)]]</span>	
 					<input
-						checked$="[[_equals(1, decision)]]"
-						name="decision"
-						on-tap="_setDecision"
+						checked$="[[_equals(1, my_decision)]]"
+						name="my_decision"
+						on-tap="_setMyDecision"
 						type="radio"
 						value="1">
 				</td>
-				<td>[[_payoff(payoffMatrix.*, 1, 0)]]</td>
-				<td>[[_payoff(payoffMatrix.*, 1, 1)]]</td>
+				<td class$="[[_highlight(decisions, 1, 0)]]">
+					[[_payoff(payoffMatrix.*, 1, 0)]]
+				</td>
+				<td class$="[[_highlight(decisions, 1, 1)]]">
+					[[_payoff(payoffMatrix.*, 1, 1)]]
+				</td>
 			</tr>
 		</table>
-
-		<p>[[ rowLabels ]]</p>
-		<p>[[ payoffMatrix ]]</p>
 
 	</template>
 
@@ -86,10 +114,10 @@ Example:
 			properties: {
 				rowLabels: Array,
 				payoffMatrix: Array,
-				decision: Number,
-				state: {
+				my_decision: Number,
+				decisions: {
 					type: Object,
-					observer: '_stateChanged'
+					observer: '_decisionsChanged'
 				},
 				fbRef_: String
 			},
@@ -101,31 +129,47 @@ Example:
 					'/subsession/' + this.$.vars.subsession +
 					'/round/' + this.$.vars.round +
 					'/group/' + this.$.vars.group +
-					'/state');
+					'/decisions');
 			},
 			_equals(d, decision) {
 				return d == decision;
 			},
-			_setDecision(event) {
+			_setMyDecision(event) {
 				var d = parseInt(event.target.value)
-				if (this.state === null) {
-					var state = {};
-					state[this.$.vars.participantCode] = d
-					this.state = state;
+				if (this.decisions === null) {
+					var decisions = {};
+					decisions[this.$.vars.participantCode] = d
+					this.decisions = decisions;
 				}
 				var pcode = this.$.vars.participantCode;
-				this.set('state.' + pcode, d);
-				this.decision = d;
+				this.set('decisions.' + pcode, d);
+				this.my_decision = d;
 			},
-			_stateChanged() {
+			_decisionsChanged() {
 				var pcode = this.$.vars.participantCode;
-				this.decision = this.state[pcode];
+				this.my_decision = this.decisions[pcode];
 			},
 			_arrayItem(change, index) {
 				return change.base[index];
 			},
 			_payoff(change, x, y) {
 				return change.base[x][y];
+			},
+			_highlight(decisions, x, y) {
+				// TODO(jpettit): Wrap into concept of a
+				// "decision vector", maybe as pluggable
+				// behavior.
+				var pcode = this.$.vars.participantCode;
+				if (decisions[pcode] == x) {
+					for (var key in decisions) {
+						if (key != pcode) {
+							if (decisions[key] == y) {
+								return 'highlight';
+							}
+						}
+					}
+				}
+				return '';
 			}
 		});
 	</script>
