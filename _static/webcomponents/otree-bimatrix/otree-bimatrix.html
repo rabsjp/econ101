@@ -1,6 +1,15 @@
 <link
 		rel="import"
 		href="/static/bower_components/polymer/polymer.html" />
+<link
+		rel="import"
+		href="/static/bower_components/firebase-element/firebase-document.html" />
+<link
+		rel="import"
+		href="/static/webcomponents/otree-vars/otree-vars.html" />
+<link
+		rel="import"
+		href="/static/webcomponents/otree-log/otree-log.html" />
 
 <!--
 `<otree-bimatrix>` lets subjects select a strategy from a set of
@@ -9,7 +18,27 @@ matrix form.
 
 Example:
 
-	<otree-bimatrix>
+	<otree-bimatrix
+		row-labels='["Cooperate", "Defect"]'
+		payoff-matrix=
+        '[
+            [
+                "{{ Constants.cooperate_amount }}",
+                "{{ Constants.cooperate_amount }}"
+            ],
+            [
+                "{{ Constants.cooperate_defect_amount }}",
+                "{{ Constants.defect_cooperate_amount }}"
+            ],
+            [
+                "{{ Constants.defect_cooperate_amount }}",
+                "{{ Constants.cooperate_defect_amount }}"
+            ],
+            [
+                "{{ Constants.defect_amount }}",
+                "{{ Constants.defect_amount }}"
+            ]
+        ]'>
 	</otree-bimatrix>
 -->
 <dom-module id="otree-bimatrix">
@@ -17,10 +46,65 @@ Example:
 	<template>
 
 		<style>
+			.highlight {
+				background: #90CAF9;
+			}
 		</style>
 
-		<p>[[ rowLabels ]]</p>
-		<p>[[ payoffMatrix ]]</p>
+		<firebase-document
+	      location="[[fbRef_]]"
+	      data="{{decisions}}">
+	    </firebase-document>
+
+	    <otree-vars id="vars"></otree-vars>
+
+	    <otree-log id="log"></otree-log>
+
+		<table class="table">
+			<tr>
+				<td></td>
+				<template
+					is="dom-repeat"
+					items="[[rowLabels]]"
+					as="label">
+					<td>[[label]]</td>
+				</template>
+			</tr>
+			<tr>
+				<td>
+					<span>[[_arrayItem(rowLabels.*, 0)]]</span>	
+					<input
+						checked$="[[_equals(0, my_decision)]]"
+						name="my_decision"
+						on-tap="_setMyDecision"
+						type="radio"
+						value="0">
+				</td>
+				<td class$="[[_highlight(decisions, 0, 0)]]">
+					[[_payoff(payoffMatrix.*, 0, 0)]]
+				</td>
+				<td class$="[[_highlight(decisions, 0, 1)]]">
+					[[_payoff(payoffMatrix.*, 0, 1)]]
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<span>[[_arrayItem(rowLabels.*, 1)]]</span>	
+					<input
+						checked$="[[_equals(1, my_decision)]]"
+						name="my_decision"
+						on-tap="_setMyDecision"
+						type="radio"
+						value="1">
+				</td>
+				<td class$="[[_highlight(decisions, 1, 0)]]">
+					[[_payoff(payoffMatrix.*, 1, 0)]]
+				</td>
+				<td class$="[[_highlight(decisions, 1, 1)]]">
+					[[_payoff(payoffMatrix.*, 1, 1)]]
+				</td>
+			</tr>
+		</table>
 
 	</template>
 
@@ -28,9 +112,65 @@ Example:
 		Polymer({
 			is: 'otree-bimatrix',
 			properties: {
-				rowLabels: String,
-				payoffMatrix: String
+				rowLabels: Array,
+				payoffMatrix: Array,
+				my_decision: Number,
+				decisions: {
+					type: Object,
+					observer: '_decisionsChanged'
+				},
+				fbRef_: String
 			},
+			ready: function() {
+				this.fbRef_ = (
+					'https://otree.firebaseio.com' +
+					'/component/otree-bimatrix' +
+					'/session/' + this.$.vars.session +
+					'/subsession/' + this.$.vars.subsession +
+					'/round/' + this.$.vars.round +
+					'/group/' + this.$.vars.group +
+					'/decisions');
+			},
+			_equals(d, decision) {
+				return d == decision;
+			},
+			_setMyDecision(event) {
+				var d = parseInt(event.target.value)
+				if (this.decisions === null) {
+					var decisions = {};
+					decisions[this.$.vars.participantCode] = d
+					this.decisions = decisions;
+				}
+				var pcode = this.$.vars.participantCode;
+				this.set('decisions.' + pcode, d);
+				this.my_decision = d;
+			},
+			_decisionsChanged() {
+				var pcode = this.$.vars.participantCode;
+				this.my_decision = this.decisions[pcode];
+			},
+			_arrayItem(change, index) {
+				return change.base[index];
+			},
+			_payoff(change, x, y) {
+				return change.base[x][y];
+			},
+			_highlight(decisions, x, y) {
+				// TODO(jpettit): Wrap into concept of a
+				// "decision vector", maybe as pluggable
+				// behavior.
+				var pcode = this.$.vars.participantCode;
+				if (decisions[pcode] == x) {
+					for (var key in decisions) {
+						if (key != pcode) {
+							if (decisions[key] == y) {
+								return 'highlight';
+							}
+						}
+					}
+				}
+				return '';
+			}
 		});
 	</script>
 

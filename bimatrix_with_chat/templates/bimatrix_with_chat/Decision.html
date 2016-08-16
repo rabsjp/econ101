@@ -17,17 +17,31 @@
 
 {% block content %}
 
-    <otree-chat sender="{{ player.role }}"></otree-chat>
-
+    <otree-timer></otree-timer>
     <otree-bimatrix
-        row-labels="['Cooperate', 'Defect']"
-        payoff-matrix="[
-            [{{ Constants.cooperate_amount }}, {{ Constants.cooperate_amount }}],
-            [0, {{ Constants.defect_cooperate_amount }}],
-            [{{ Constants.defect_cooperate_amount }}, 0],
-            [{{ Constants.defect_amount }}, {{ Constants.defect_amount }}]
-        ]">
+        row-labels='["Cooperate", "Defect"]'
+        payoff-matrix=
+        '[
+            [
+                "{{ Constants.cooperate_amount }}",
+                "{{ Constants.cooperate_amount }}"
+            ],
+            [
+                "{{ Constants.cooperate_defect_amount }}",
+                "{{ Constants.defect_cooperate_amount }}"
+            ],
+            [
+                "{{ Constants.defect_cooperate_amount }}",
+                "{{ Constants.cooperate_defect_amount }}"
+            ],
+            [
+                "{{ Constants.defect_amount }}",
+                "{{ Constants.defect_amount }}"
+            ]
+        ]'>
     </otree-bimatrix>
+    
+    <otree-chat sender="{{ player.role }}"></otree-chat>
 
     {% include 'prisoner/Instructions.html' %}
 
