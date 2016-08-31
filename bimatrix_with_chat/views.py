@@ -27,6 +27,7 @@ class Question(Page):
 
     timeout_seconds = 100
 
+
 class Feedback1(Page):
 
     template_name = 'prisoner/Feedback.html'
@@ -38,14 +39,9 @@ class Feedback1(Page):
 
 class Decision(Page):
 
-    form_model = models.Player
-    form_fields = ['decision']
-
-
+    timeout_seconds = 120
 
 class ResultsWaitPage(WaitPage):
-
-
 
     body_text = 'Waiting for the other participant to choose.'
 
@@ -57,14 +53,10 @@ class ResultsWaitPage(WaitPage):
 class Results(Page):
 
     def vars_for_template(self):
-
-
         self.player.set_payoff()
 
         return {
-            'my_decision': self.player.decision.lower(),
-            'other_player_decision': self.player.other_player().decision.lower(),
-            'same_choice': self.player.decision == self.player.other_player().decision,
+            'decisions_over_time': self.player.decisions_over_time,
             'total_plus_base': self.player.payoff + Constants.base_points
         }
 

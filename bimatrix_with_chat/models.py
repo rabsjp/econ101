@@ -3,7 +3,7 @@
 from __future__ import division
 from otree.db import models
 from otree.constants import BaseConstants
-from otree.models import BaseSubsession, BaseGroup, BasePlayer
+from otree.models import BaseSubsession, BaseGroup, BasePlayer, Decision
 
 from otree import widgets
 from otree.common import Currency as c, currency_range
@@ -60,21 +60,14 @@ class Player(BasePlayer):
     def is_training_question_1_correct(self):
         return self.training_question_1 == Constants.training_1_correct
 
-    decision = models.CharField(
-        choices=['Cooperate', 'Defect'],
-        doc="""This player's decision""",
-        widget=widgets.RadioSelect()
-    )
-
     def other_player(self):
         return self.get_others_in_group()[0]
 
     def set_payoff(self):
-        points_matrix = {'Cooperate': {'Cooperate': Constants.cooperate_amount,
-                                       'Defect': Constants.cooperate_defect_amount},
-                         'Defect':   {'Cooperate': Constants.defect_cooperate_amount,
-                                      'Defect': Constants.defect_amount}}
-
-        self.payoff = (points_matrix[self.decision]
-                                           [self.other_player().decision])
-
+        self.decisions_over_time = Decision.objects.filter(
+                component='otree-bimatrix',
+                session=self.session,
+                subsession=self.subsession.name(),
+                round=self.round_number,
+                group=self.group.id_in_subsession)
+        self.payoff = 10

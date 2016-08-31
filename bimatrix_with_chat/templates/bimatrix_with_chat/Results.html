@@ -7,15 +7,21 @@
 
 {% block content %}
 
-
-
-    <p>
-        {% if same_choice %}
-            Both of you chose to {{ my_decision }}.
-        {% else %}
-            You chose to {{ my_decision }} and the other participant chose to {{ other_player_decision }}.
-        {% endif %}
-    </p>
+    <p>I can't actually calculate payoffs yet, but I can show you the record of decisions over time. For reference, you were participant {{ player.participant }}.</p>
+    <table class="table">
+        <tr>
+            <th>Timestamp</th>
+            <th>Participant</th>
+            <th>Decision</th>
+        </tr>
+        {% for decision in decisions_over_time %}
+        <tr>
+            <td>{{decision.timestamp}}</td>
+            <td>{{decision.participant}}</td>
+            <td>{{decision.decision}}</td>
+        </tr>
+        {% endfor %}
+    </table>
 
     <table class="table" style="width:400px; margin-top:20px; margin-bottom:10px">
         <tr>
