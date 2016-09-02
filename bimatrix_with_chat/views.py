@@ -5,6 +5,9 @@ from ._builtin import Page, WaitPage
 from otree.common import Currency as c, currency_range
 from .models import Constants
 
+from django.utils import timezone
+from datetime import timedelta
+
 def vars_for_all_templates(self):
 
     return {
@@ -37,17 +40,17 @@ class Feedback1(Page):
                 'question': 'Suppose Alice chose to defect and Bob chose to cooperate. How many points would Alice and Bob receive, respectively?',
                 }
 
-class Decision(Page):
 
-    timeout_seconds = 120
-
-class ResultsWaitPage(WaitPage):
-
-    body_text = 'Waiting for the other participant to choose.'
+class DecisionWaitPage(WaitPage):
+    body_text = 'Waiting for everyone to answer comprehension question'
 
     def after_all_players_arrive(self):
-        for p in self.group.get_players():
-            p.set_payoff()
+        self.session.vars['end_time'] = timezone.now() + timedelta(seconds=Constants.game_length)
+
+
+class Decision(Page):
+
+    timeout_seconds = Constants.game_length
 
 
 class Results(Page):
@@ -66,7 +69,7 @@ page_sequence = [
         Introduction,
         Question,
         Feedback1,
+        DecisionWaitPage,
         Decision,
-        ResultsWaitPage,
         Results
     ]
