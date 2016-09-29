@@ -133,6 +133,12 @@ SESSION_CONFIG_DEFAULTS = {
 
 
 SESSION_CONFIGS = [
+{
+        'name': 'continuous_bimatrix',
+        'display_name': "Continuous Bimatrix Game",
+        'num_demo_participants': 2,
+        'app_sequence': ['continuous_bimatrix', 'payment_info'],
+    },
     {
         'name': 'bimatrix_with_chat',
         'display_name': "Bimatrix Game with Chat",

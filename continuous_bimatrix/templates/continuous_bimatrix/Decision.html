@@ -1,0 +1,45 @@
+{% extends "global/Base.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Your Choice
+{% endblock %}
+
+{% block styles %}
+
+    <style>
+        .highlight-row-on-hover:hover td {
+            background-color: #fcf8e3;
+        }
+    </style>
+
+{% endblock %}
+
+{% block content %}
+
+    <otree-bimatrix-ms
+        row-labels='["Cooperate", "Defect"]'
+        payoff-matrix=
+        '[
+            [
+                "{{ Constants.cooperate_amount }}",
+                "{{ Constants.cooperate_amount }}"
+            ],
+            [
+                "{{ Constants.cooperate_defect_amount }}",
+                "{{ Constants.defect_cooperate_amount }}"
+            ],
+            [
+                "{{ Constants.defect_cooperate_amount }}",
+                "{{ Constants.cooperate_defect_amount }}"
+            ],
+            [
+                "{{ Constants.defect_amount }}",
+                "{{ Constants.defect_amount }}"
+            ]
+        ]'>
+    </otree-bimatrix-ms>
+    
+    {% include 'prisoner/Instructions.html' %}
+
+{% endblock %}
