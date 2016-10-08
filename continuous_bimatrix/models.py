@@ -85,16 +85,10 @@ class Player(BasePlayer):
                 other_state = change.decision
 
             if my_state != None and other_state != None:
-                if my_state == 0:
-                    if other_state == 0:
-                        cur_payoff = float(Constants.cooperate_amount) / Constants.game_length
-                    else:
-                        cur_payoff = float(Constants.cooperate_defect_amount) / Constants.game_length
-                else:
-                    if other_state == 0:
-                        cur_payoff = float(Constants.defect_cooperate_amount) / Constants.game_length
-                    else:
-                        cur_payoff = float(Constants.defect_amount) / Constants.game_length
+                cur_payoff = ((Constants.cooperate_amount / Constants.game_length * my_state * other_state) +
+                              (Constants.cooperate_defect_amount / Constants.game_length * my_state * (1 - other_state)) +
+                              (Constants.defect_cooperate_amount / Constants.game_length * (1 - my_state) * other_state) +
+                              (Constants.defect_amount / Constants.game_length * (1 - my_state) * (1 - other_state)))
 
                 if i == len(self.decisions_over_time) - 1:
                     next_change_time = self.session.vars['end_time']
@@ -104,4 +98,3 @@ class Player(BasePlayer):
                 payoff += (next_change_time - change.timestamp).total_seconds() * cur_payoff
 
         self.payoff = payoff
-

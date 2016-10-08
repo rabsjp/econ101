@@ -49,8 +49,7 @@ class DecisionWaitPage(WaitPage):
 
 
 class Decision(Page):
-    pass
-    #timeout_seconds = Constants.game_length
+    timeout_seconds = Constants.game_length
 
 
 class Results(Page):
