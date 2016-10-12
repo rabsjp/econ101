@@ -27,11 +27,11 @@
             ],
             [
                 "{{ Constants.cooperate_defect_amount }}",
-                "{{ Constants.defect_cooperate_amount }}"
+                "{{ Constants.cooperate_defect_amount }}"
             ],
             [
                 "{{ Constants.defect_cooperate_amount }}",
-                "{{ Constants.cooperate_defect_amount }}"
+                "{{ Constants.defect_cooperate_amount }}"
             ],
             [
                 "{{ Constants.defect_amount }}",
@@ -41,6 +41,6 @@
         payoff-index='{{ player.id_in_group|add:"-1" }}'>
     </otree-continuous-bimatrix>
     
-    {% include 'prisoner/Instructions.html' %}
+    {% include 'continuous_bimatrix/Instructions.html' %}
 
 {% endblock %}
