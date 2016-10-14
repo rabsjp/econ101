@@ -76,24 +76,33 @@ class Player(BasePlayer):
                 group=self.group.id_in_subsession)
 
         payoff = 0
-        my_state = None
-        other_state = None
+
+        # default state when no decisions have been made
+        my_state = .5
+        other_state = .5
+
+        # add payoff for portion of game before any decisions were made
+        cur_payoff = (Constants.cooperate_amount + Constants.cooperate_defect_amount + Constants.defect_cooperate_amount + Constants.defect_amount) * .25 / Constants.game_length
+        next_change_time = self.session.vars['end_time']
+        if (len(self.decisions_over_time) > 0):
+            next_change_time = self.decisions_over_time[0].timestamp
+        payoff += (next_change_time - self.session.vars['start_time']).total_seconds() * cur_payoff
+
         for i, change in enumerate(self.decisions_over_time):
             if change.participant == self.participant:
                 my_state = change.decision
             else:
                 other_state = change.decision
 
-            if my_state != None and other_state != None:
-                cur_payoff = ((Constants.cooperate_amount / Constants.game_length * my_state * other_state) +
-                              (Constants.cooperate_defect_amount / Constants.game_length * my_state * (1 - other_state)) +
-                              (Constants.defect_cooperate_amount / Constants.game_length * (1 - my_state) * other_state) +
-                              (Constants.defect_amount / Constants.game_length * (1 - my_state) * (1 - other_state)))
+            cur_payoff = ((Constants.cooperate_amount * my_state * other_state) +
+                          (Constants.cooperate_defect_amount * my_state * (1 - other_state)) +
+                          (Constants.defect_cooperate_amount * (1 - my_state) * other_state) +
+                          (Constants.defect_amount * (1 - my_state) * (1 - other_state))) / Constants.game_length
 
-                if i == len(self.decisions_over_time) - 1:
-                    next_change_time = self.session.vars['end_time']
-                else:
-                    next_change_time = self.decisions_over_time[i + 1].timestamp
+            if i == len(self.decisions_over_time) - 1:
+                next_change_time = self.session.vars['end_time']
+            else:
+                next_change_time = self.decisions_over_time[i + 1].timestamp
 
                 payoff += (next_change_time - change.timestamp).total_seconds() * cur_payoff
 
