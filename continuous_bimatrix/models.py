@@ -36,12 +36,12 @@ class Constants(BaseConstants):
     #p2_B_p1_B_amount = 0
 
     #  Points made if player defects and the other cooperates""",
-    defect_cooperate_amount = 300
+    #defect_cooperate_amount = 300
 
     # Points made if both players cooperate
-    cooperate_amount = 200
-    cooperate_defect_amount = 0
-    defect_amount = 100
+    #cooperate_amount = 200
+    #cooperate_defect_amount = 0
+    #defect_amount = 100
     base_points = 50
 
 
