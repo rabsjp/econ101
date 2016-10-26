@@ -1,1 +1,1 @@
-git+https://github.com/Leeps-Lab/otree-core.git@0a987bc
+-U git+https://github.com/Leeps-Lab/otree-core.git@0a987bc
