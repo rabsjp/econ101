@@ -23,6 +23,18 @@ class Constants(BaseConstants):
     players_per_group = 2
     num_rounds = 1
 
+    #p1 payoffs
+    #p1_A_p2_A_amount = 8
+    #p1_A_p2_B_amount = 0
+    #p1_B_p2_A_amount = 0
+    #p1_B_p2_B_amount = 2
+
+    #p2 payoffs
+    #p2_A_p1_A_amount = 2
+    #p2_A_p1_B_amount = 2
+    #p2_B_p1_A_amount = 2
+    #p2_B_p1_B_amount = 0
+
     #  Points made if player defects and the other cooperates""",
     defect_cooperate_amount = 300
 
@@ -31,6 +43,7 @@ class Constants(BaseConstants):
     cooperate_defect_amount = 0
     defect_amount = 100
     base_points = 50
+
 
     # Amount of time the game stays on the decision page in seconds
     game_length = 120
