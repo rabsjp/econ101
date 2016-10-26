@@ -1,1 +1,1 @@
--r requirements_heroku.txt
+-U -r requirements_heroku.txt
