@@ -50,7 +50,8 @@ class Constants(BaseConstants):
     training_1_correct = training_1_choices[0]
 
 class Subsession(BaseSubsession):
-    pass
+    def before_session_starts(self):
+        self.group_randomly();
 
 class Group(BaseGroup):
     pass

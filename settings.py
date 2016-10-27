@@ -133,7 +133,7 @@ SESSION_CONFIG_DEFAULTS = {
 
 
 SESSION_CONFIGS = [
-{
+    {
         'name': 'continuous_bimatrix',
         'display_name': "Continuous Bimatrix Game",
         'num_demo_participants': 2,
