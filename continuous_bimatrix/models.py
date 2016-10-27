@@ -24,26 +24,18 @@ class Constants(BaseConstants):
     num_rounds = 1
 
     #p1 payoffs
-    #p1_A_p2_A_amount = 8
-    #p1_A_p2_B_amount = 0
-    #p1_B_p2_A_amount = 0
-    #p1_B_p2_B_amount = 2
+    p1_A_p2_A_amount = 8
+    p1_A_p2_B_amount = 0
+    p1_B_p2_A_amount = 0
+    p1_B_p2_B_amount = 2
 
     #p2 payoffs
-    #p2_A_p1_A_amount = 2
-    #p2_A_p1_B_amount = 2
-    #p2_B_p1_A_amount = 2
-    #p2_B_p1_B_amount = 0
+    p2_A_p1_A_amount = 2
+    p2_A_p1_B_amount = 2
+    p2_B_p1_A_amount = 2
+    p2_B_p1_B_amount = 0
 
-    #  Points made if player defects and the other cooperates""",
-    #defect_cooperate_amount = 300
-
-    # Points made if both players cooperate
-    #cooperate_amount = 200
-    #cooperate_defect_amount = 0
-    #defect_amount = 100
-    base_points = 50
-
+    base_points = 0
 
     # Amount of time the game stays on the decision page in seconds
     game_length = 120
@@ -56,7 +48,6 @@ class Constants(BaseConstants):
     ]
 
     training_1_correct = training_1_choices[0]
-
 
 class Subsession(BaseSubsession):
     pass
@@ -94,8 +85,19 @@ class Player(BasePlayer):
         my_state = .5
         other_state = .5
 
-        # add payoff for portion of game before any decisions were made
-        cur_payoff = (Constants.cooperate_amount + Constants.cooperate_defect_amount + Constants.defect_cooperate_amount + Constants.defect_amount) * .25 / Constants.game_length
+
+        if (self.id_in_group == 1):
+            A_A_payoff = Constants.p1_A_p2_A_amount
+            A_B_payoff = Constants.p1_A_p2_B_amount
+            B_A_payoff = Constants.p1_B_p2_A_amount
+            B_B_payoff = Constants.p1_B_p2_B_amount
+        else:
+            A_A_payoff = Constants.p2_A_p1_A_amount
+            A_B_payoff = Constants.p2_A_p1_B_amount
+            B_A_payoff = Constants.p2_B_p1_A_amount
+            B_B_payoff = Constants.p2_B_p1_B_amount
+
+        cur_payoff = (A_A_payoff + A_B_payoff + B_A_payoff + B_B_payoff) * .25 / Constants.game_length
         next_change_time = self.session.vars['end_time']
         if (len(self.decisions_over_time) > 0):
             next_change_time = self.decisions_over_time[0].timestamp
@@ -107,10 +109,10 @@ class Player(BasePlayer):
             else:
                 other_state = change.decision
 
-            cur_payoff = ((Constants.cooperate_amount * my_state * other_state) +
-                          (Constants.cooperate_defect_amount * my_state * (1 - other_state)) +
-                          (Constants.defect_cooperate_amount * (1 - my_state) * other_state) +
-                          (Constants.defect_amount * (1 - my_state) * (1 - other_state))) / Constants.game_length
+            cur_payoff = ((A_A_payoff * my_state * other_state) +
+                          (A_B_payoff * my_state * (1 - other_state)) +
+                          (B_A_payoff * (1 - my_state) * other_state) +
+                          (B_B_payoff * (1 - my_state) * (1 - other_state))) / Constants.game_length
 
             if i == len(self.decisions_over_time) - 1:
                 next_change_time = self.session.vars['end_time']

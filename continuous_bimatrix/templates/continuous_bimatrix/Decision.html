@@ -12,20 +12,20 @@
         payoff-matrix=
         '[
             [
-                "{{ Constants.cooperate_amount }}",
-                "{{ Constants.cooperate_amount }}"
+                "{{ Constants.p1_A_p2_A_amount }}",
+                "{{ Constants.p2_A_p1_A_amount }}"
             ],
             [
-                "{{ Constants.cooperate_defect_amount }}",
-                "{{ Constants.cooperate_defect_amount }}"
+                "{{ Constants.p1_A_p2_B_amount }}",
+                "{{ Constants.p2_A_p1_B_amount }}"
             ],
             [
-                "{{ Constants.defect_cooperate_amount }}",
-                "{{ Constants.defect_cooperate_amount }}"
+                "{{ Constants.p1_B_p2_A_amount }}",
+                "{{ Constants.p2_B_p1_A_amount }}"
             ],
             [
-                "{{ Constants.defect_amount }}",
-                "{{ Constants.defect_amount }}"
+                "{{ Constants.p1_B_p2_B_amount }}",
+                "{{ Constants.p2_B_p1_B_amount }}"
             ]
         ]'
         payoff-index='{{ player.id_in_group|add:"-1" }}'
