@@ -131,6 +131,13 @@ SESSION_CONFIG_DEFAULTS = {
     'mturk_hit_settings': mturk_hit_settings,
 }
 
+ROOMS = [
+	{
+		'name': 'leeps',
+		'display_name': 'Leeps Lab',
+		'participant_label_file': 'leeps_room_labels.txt'
+	}
+]
 
 SESSION_CONFIGS = [
     {
