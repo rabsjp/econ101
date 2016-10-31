@@ -98,9 +98,10 @@ class Player(BasePlayer):
             B_B_payoff = Constants.p2_B_p1_B_amount
 
         cur_payoff = (A_A_payoff + A_B_payoff + B_A_payoff + B_B_payoff) * .25 / Constants.game_length
-        next_change_time = self.session.vars['end_time']
         if (len(self.decisions_over_time) > 0):
             next_change_time = self.decisions_over_time[0].timestamp
+        else:
+            next_change_time = self.session.vars['end_time']
         payoff += (next_change_time - self.session.vars['start_time']).total_seconds() * cur_payoff
 
         for i, change in enumerate(self.decisions_over_time):
@@ -119,6 +120,6 @@ class Player(BasePlayer):
             else:
                 next_change_time = self.decisions_over_time[i + 1].timestamp
 
-                payoff += (next_change_time - change.timestamp).total_seconds() * cur_payoff
+            payoff += (next_change_time - change.timestamp).total_seconds() * cur_payoff
 
         self.payoff = payoff
