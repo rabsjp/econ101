@@ -141,6 +141,12 @@ ROOMS = [
 
 SESSION_CONFIGS = [
     {
+        'name': 'bimatrix',
+        'display_name': "Discrete Bimatrix Game",
+        'num_demo_participants': 2,
+        'app_sequence': ['bimatrix', 'payment_info'],
+    },
+    {
         'name': 'continuous_bimatrix',
         'display_name': "Continuous Bimatrix Game",
         'num_demo_participants': 2,
