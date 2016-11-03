@@ -1,2 +1,2 @@
 timeoutworker: otree timeoutworker
-web: otree webandworkers
+web: otree collectstatic --noinput; otree webandworkers

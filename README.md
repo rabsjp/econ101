@@ -23,6 +23,22 @@ otree resetdb
 otree runserver
 ```
 
+## Heroku
+This version of oTree is being continuously tested on TravisCI and
+deployed on Heroku at http://leeps-otree.herokuapp.com.
+
+To get into the machine run the following commands:
+```
+heroku login
+heroku run bash --app leeps-otree
+```
+
+If site asks to run ```otree resetdb``` run the following commands:
+```
+heroku login
+heroku run otree resetdb --app leeps-otree
+```
+
 ## Contact
 chris@otree.org (you can also add me on Skype by searching this email address; please mention oTree in your contact request)
 
