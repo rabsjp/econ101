@@ -40,33 +40,16 @@ class Constants(BaseConstants):
     # Amount of time the game stays on the decision page in seconds
     game_length = 120
 
-    training_1_choices = [
-        'Alice gets 300 points, Bob gets 0 points',
-        'Alice gets 200 points, Bob gets 200 points',
-        'Alice gets 0 points, Bob gets 300 points',
-        'Alice gets 100 points, Bob gets 100 points'
-    ]
-
-    training_1_correct = training_1_choices[0]
-
 class Subsession(BaseSubsession):
     def before_session_starts(self):
         self.group_randomly()
+
 
 class Group(BaseGroup):
     pass
 
 
 class Player(BasePlayer):
-
-    training_question_1 = models.CharField(
-        choices=Constants.training_1_choices,
-        widget=widgets.RadioSelect(),
-        #timeout_default=Constants.training_1_choices[1]
-    )
-
-    def is_training_question_1_correct(self):
-        return self.training_question_1 == Constants.training_1_correct
 
     def other_player(self):
         return self.get_others_in_group()[0]
