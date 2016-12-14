@@ -3,10 +3,12 @@ from __future__ import division
 from . import models
 from ._builtin import Page, WaitPage
 from otree.common import Currency as c, currency_range
+from otree.firebase.events import start_emitter
 from .models import Constants
 
 from django.utils import timezone
 from datetime import timedelta
+import logging
 
 def vars_for_all_templates(self):
     if (self.player.id_in_group == 1):
@@ -44,11 +46,12 @@ class DecisionWaitPage(WaitPage):
 
     def after_all_players_arrive(self):
         self.session.vars['start_time'] = timezone.now()
-        self.session.vars['end_time'] = timezone.now() + timedelta(seconds=Constants.game_length)
+        self.session.vars['end_time'] = timezone.now() + timedelta(seconds=Constants.period_length)
+        start_emitter(self, Constants.period_length, Constants.num_subperiods)
 
 
 class Decision(Page):
-    timeout_seconds = Constants.game_length
+    timeout_seconds = Constants.period_length
 
 
 class Results(Page):
