@@ -38,7 +38,9 @@
         round="{{ player.round_number }}"
         group="{{ player.group.id_in_subsession }}"
         role="{{ player.role }}"
-        participant-code="{{ player.participant.code }}">
+        participant-code="{{ player.participant.code }}"
+        app-name="{{ subsession.app_name }}"
+        page="tmp"> <!-- TODO: fill with actual page name-->
     </otree-vars>
 
     <link
