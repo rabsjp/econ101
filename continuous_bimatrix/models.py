@@ -39,8 +39,7 @@ class Constants(BaseConstants):
 
     # Amount of time the game stays on the decision page in seconds.
     period_length = 120
-    # Number of discrete time subperiods in a single period.
-    num_subperiods = 10
+
 
 class Subsession(BaseSubsession):
     def before_session_starts(self):

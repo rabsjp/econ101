@@ -46,8 +46,8 @@ class DecisionWaitPage(WaitPage):
 
     def after_all_players_arrive(self):
         self.session.vars['start_time'] = timezone.now()
-        self.session.vars['end_time'] = timezone.now() + timedelta(seconds=Constants.period_length)
-        start_emitter(self, Constants.period_length, Constants.num_subperiods)
+        self.session.vars['end_time'] = (
+            timezone.now() + timedelta(seconds=Constants.period_length))
 
 
 class Decision(Page):
