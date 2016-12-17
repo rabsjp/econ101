@@ -58,7 +58,7 @@ chris@otree.org (you can also add me on Skype by searching this email address; p
 # Docs
 
 http://otree.readthedocs.org
+![RTD Badge](https://readthedocs.org/projects/otree/badge/?version=latest)
 
 # Status
-
-![RTD Badge](https://readthedocs.org/projects/otree/badge/?version=latest)
+[![Build Status](https://travis-ci.org/Leeps-Lab/otree-core.svg?branch=master)](https://travis-ci.org/Leeps-Lab/otree-core)
