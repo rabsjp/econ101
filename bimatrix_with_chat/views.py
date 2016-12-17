@@ -45,12 +45,12 @@ class DecisionWaitPage(WaitPage):
     body_text = 'Waiting for everyone to answer comprehension question'
 
     def after_all_players_arrive(self):
-        self.session.vars['end_time'] = timezone.now() + timedelta(seconds=Constants.game_length)
+        self.session.vars['end_time'] = timezone.now() + timedelta(seconds=Constants.period_length)
 
 
 class Decision(Page):
 
-    timeout_seconds = Constants.game_length
+    timeout_seconds = Constants.period_length
 
 
 class Results(Page):

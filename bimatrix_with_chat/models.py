@@ -33,7 +33,7 @@ class Constants(BaseConstants):
     base_points = c(50)
 
     # Amount of time the game stays on the decision page in seconds
-    game_length = 120
+    period_length = 120
 
     training_1_choices = [
         'Alice gets 300 points, Bob gets 0 points',
@@ -87,14 +87,14 @@ class Player(BasePlayer):
             if my_state != None and other_state != None:
                 if my_state == 0:
                     if other_state == 0:
-                        cur_payoff = float(Constants.cooperate_amount) / Constants.game_length
+                        cur_payoff = float(Constants.cooperate_amount) / Constants.period_length
                     else:
-                        cur_payoff = float(Constants.cooperate_defect_amount) / Constants.game_length
+                        cur_payoff = float(Constants.cooperate_defect_amount) / Constants.period_length
                 else:
                     if other_state == 0:
-                        cur_payoff = float(Constants.defect_cooperate_amount) / Constants.game_length
+                        cur_payoff = float(Constants.defect_cooperate_amount) / Constants.period_length
                     else:
-                        cur_payoff = float(Constants.defect_amount) / Constants.game_length
+                        cur_payoff = float(Constants.defect_amount) / Constants.period_length
 
                 if i == len(self.decisions_over_time) - 1:
                     next_change_time = self.session.vars['end_time']

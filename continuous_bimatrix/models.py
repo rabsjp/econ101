@@ -37,8 +37,9 @@ class Constants(BaseConstants):
 
     base_points = 0
 
-    # Amount of time the game stays on the decision page in seconds
-    game_length = 120
+    # Amount of time the game stays on the decision page in seconds.
+    period_length = 120
+
 
 class Subsession(BaseSubsession):
     def before_session_starts(self):
@@ -80,7 +81,7 @@ class Player(BasePlayer):
             B_A_payoff = Constants.p2_B_p1_A_amount
             B_B_payoff = Constants.p2_B_p1_B_amount
 
-        cur_payoff = (A_A_payoff + A_B_payoff + B_A_payoff + B_B_payoff) * .25 / Constants.game_length
+        cur_payoff = (A_A_payoff + A_B_payoff + B_A_payoff + B_B_payoff) * .25 / Constants.period_length
         if (len(self.decisions_over_time) > 0):
             next_change_time = self.decisions_over_time[0].timestamp
         else:
@@ -96,7 +97,7 @@ class Player(BasePlayer):
             cur_payoff = ((A_A_payoff * my_state * other_state) +
                           (A_B_payoff * my_state * (1 - other_state)) +
                           (B_A_payoff * (1 - my_state) * other_state) +
-                          (B_B_payoff * (1 - my_state) * (1 - other_state))) / Constants.game_length
+                          (B_B_payoff * (1 - my_state) * (1 - other_state))) / Constants.period_length
 
             if i == len(self.decisions_over_time) - 1:
                 next_change_time = self.session.vars['end_time']
