@@ -85,8 +85,8 @@ class Player(BasePlayer):
         if (len(self.decisions_over_time) > 0):
             next_change_time = self.decisions_over_time[0].timestamp
         else:
-            next_change_time = self.session.vars['end_time']
-        payoff += (next_change_time - self.session.vars['start_time']).total_seconds() * cur_payoff
+            next_change_time = self.session.vars['end_time_{}'.format(self.group.id_in_subsession)]
+        payoff += (next_change_time - self.session.vars['start_time_{}'.format(self.group.id_in_subsession)]).total_seconds() * cur_payoff
 
         for i, change in enumerate(self.decisions_over_time):
             if change.participant == self.participant:
@@ -100,7 +100,7 @@ class Player(BasePlayer):
                           (B_B_payoff * (1 - my_state) * (1 - other_state))) / Constants.period_length
 
             if i == len(self.decisions_over_time) - 1:
-                next_change_time = self.session.vars['end_time']
+                next_change_time = self.session.vars['end_time_{}'.format(self.group.id_in_subsession)]
             else:
                 next_change_time = self.decisions_over_time[i + 1].timestamp
 
