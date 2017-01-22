@@ -1,0 +1,314 @@
+<!--hello-->
+<link
+        rel="import"
+        href="/static/bower_components/polymer/polymer.html"/>
+<link
+        rel="import"
+        href="/static/bower_components/polymerfire/firebase-document.html"/>
+<link
+        rel="import"
+        href="/static/webcomponents/otree-vars/otree-vars.html"/>
+<link
+        rel="import"
+        href="/static/webcomponents/otree-log/otree-log.html"/>
+
+<script src="heatmap.js"></script>
+
+<script src="jquery.min.js"></script>
+<script src="jquery.flot.min.js"></script>
+<!--
+`<otree-continuous-bimatrix>` lets subjects select a strategy from a set of
+possibilities. Their decision and the results are  displayed using the usual
+matrix form.
+
+Example:
+
+    <otree-bimatrix
+        row-labels='["Cooperate", "Defect"]'
+        payoff-matrix=
+        '[
+            [
+                "{{ Constants.cooperate_amount }}",
+                "{{ Constants.cooperate_amount }}"
+            ],
+            [
+                "{{ Constants.cooperate_defect_amount }}",
+                "{{ Constants.defect_cooperate_amount }}"
+            ],
+            [
+                "{{ Constants.defect_cooperate_amount }}",
+                "{{ Constants.cooperate_defect_amount }}"
+            ],
+            [
+                "{{ Constants.defect_amount }}",
+                "{{ Constants.defect_amount }}"
+            ]
+            payoff-index='{{ player.id_in_group|add:"-1" }}'
+        ]'>
+    </otree-bimatrix>
+-->
+<dom-module id="otree-continuous-bimatrix">
+
+    <template>
+
+        <link rel="stylesheet" type="text/css" href="styles.css">
+
+        <!--
+        polymer element to interface with firebase
+        takes a path as its path attribute and makes data reflect whatever is stored in firebase at that path-->
+        <firebase-document
+                id="fbdoc"
+                path="[[path_]]"
+                data="{{ decisions }}">
+        </firebase-document>
+
+        <!--
+        polymer element with useful otree variables as attributes (current group, round, etc.)
+        -->
+        <otree-vars id="vars"></otree-vars>
+
+        <otree-log id="log"></otree-log>
+
+        <!--
+        container for both heatmaps
+        only contains this player's heatmap if the opponent heatmap option is not specified
+        -->
+        <div style="text-align: center">
+            <div id="my-bimatrix-container">
+                <!--
+                slider for choosing strategy
+                -->
+                <input id="slider" type="range" min="0" max="1" step=".01" defaultValue=".5" on-up="_setMyDecision"/>
+                <div id="my-heatmap">
+                    <!--
+                    canvas will be filled with heatmap in javascript
+                    see heatmap.js
+                    -->
+                    <canvas width="360" height="360" id="my-canvas"></canvas>
+                    <!--
+                    labels showing payoff at each corner of heatmap
+                    -->
+                    <span class="payoff_labels" style="top: -25px; left: 10px;">[[_payoff(payoffMatrix.*, 0, payoffIndex)]]</span>
+                    <span class="payoff_labels" style="top: -25px; right: 10px;">[[_payoff(payoffMatrix.*, 1, payoffIndex)]]</span>
+                    <span class="payoff_labels" style="bottom: -25px; left: 10px;">[[_payoff(payoffMatrix.*, 2, payoffIndex)]]</span>
+                    <span class="payoff_labels" style="bottom: -25px; right: 10px;">[[_payoff(payoffMatrix.*, 3, payoffIndex)]]</span>
+                    <!--
+                    lines showing current strategy and opponent's strategy
+                    set height or width using data binding and set a border on only one side to make a moving line
+                    -->
+                    <div id="my-val" style$="height: [[_calcPercent(my_decision)]];"></div>
+                    <div id="other-val" style$="width: [[_calcPercent(other_decision)]];"></div>
+                </div>
+            </div>
+            <!--
+            other heatmap is exactly the same as this player's, just smaller
+            container is hidden by default, but is unhidden in js if opponent heatmap option is chosen
+            -->
+            <div id="other-bimatrix-container" style="display: none">
+                <div id="other-heatmap">
+                    <canvas width="240" height="240" id="other-canvas"></canvas>
+                    <span class="payoff_labels" style="top: -25px; left: 10px;">[[_payoff(payoffMatrix.*, 0, otherPayoffIndex)]]</span>
+                    <span class="payoff_labels" style="top: -25px; right: 10px;">[[_payoff(payoffMatrix.*, 2, otherPayoffIndex)]]</span>
+                    <span class="payoff_labels" style="bottom: -25px; left: 10px;">[[_payoff(payoffMatrix.*, 1, otherPayoffIndex)]]</span>
+                    <span class="payoff_labels" style="bottom: -25px; right: 10px;">[[_payoff(payoffMatrix.*, 3, otherPayoffIndex)]]</span>
+                    <div id="my-val" style$="height: [[_calcPercent(my_decision)]];"></div>
+                    <div id="other-val" style$="width: [[_calcPercent(other_decision)]];"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="graph" style="width: 600px; height: 300px;"></div>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'otree-continuous-bimatrix',
+            properties: {
+                // labels for strategies. not currently being used
+                rowLabels: Array,
+                // 2x2 array of payoffs for each player. see block comment at top for details
+                payoffMatrix: Array,
+                // index describing which entry in payoff matrix is to be used by this player
+                payoffIndex: Number,
+                // boolean to choose whether or not to show opponent's heatmap
+                opponentHeatmap: String,
+                // associative array relating participant code to current decision
+                // holds this player's decision and the opponent's decision
+                decisions: {
+                    type: Object,
+                    observer: '_decisionsChanged'
+                },
+                // path to use with firebase
+                path_: String,
+                periodLength: Number
+            },
+            listeners: {
+                'keyup': '_setMyDecision'
+            },
+            ready: function () {
+                // set firebase path to appropriate scope
+                this.path_ = (
+                '/session/' + this.$.vars.session +
+                '/app/' + this.$.vars.appName +
+                '/subsession/' + this.$.vars.subsession +
+                '/round/' + this.$.vars.round +
+                '/group/' + this.$.vars.group +
+                '/page/' + this.$.vars.page +
+                '/component/otree-bimatrix' +
+                '/decisions');
+                // variables for this player's decision and the opponent's decision
+                this.my_decision = .5;
+                this.other_decision = .5;
+                this.otherPayoffIndex = this.payoffIndex == 0 ? 1 : 0;
+
+                // extract the set of payoffs corresponding to this player's payoff index and display this player's heatmap
+                my_payoffs = this.payoffMatrix.map(function (current_val) {
+                    return current_val[this.payoffIndex];
+                }, this);
+                make_heatmap("my-canvas", my_payoffs);
+
+                // if opponentHeatmap is true, get other player's payoffs and display their heatmap
+                if (this.opponentHeatmap == "true") {
+                    this.$["other-bimatrix-container"].style.display = "";
+                    other_payoffs = this.payoffMatrix.map(function (current_val) {
+                        return current_val[this.otherPayoffIndex];
+                    }, this);
+                    var tmp = other_payoffs[1];
+                    other_payoffs[1] = other_payoffs[2];
+                    other_payoffs[2] = tmp;
+                    make_heatmap("other-canvas", other_payoffs);
+                }
+
+                // run graph setup function with delay so that it runs after display is rendered
+                window.setTimeout(this._setupGraph.bind(this), 100);
+                // save start time to reference later
+                this.start_time = Date.now();
+            },
+            // compare two decisions
+            _equals(d, decision) {
+                return d == decision;
+            },
+            // set my current decision. triggered by the player releasing the slider
+            _setMyDecision(event) {
+                if (event.type === 'keyup' && !(event.key === 'ArrowDown') && !(event.key === 'ArrowUp')) {
+                    return;
+                }
+                var d = parseFloat(event.target.value);
+                // if decisions hasn't been created yet, create it
+                if (this.decisions === null) {
+                    this.decisions = {};
+                }
+                // pcode is this player's participant code
+                var pcode = this.$.vars.participantCode;
+                // use polymer this.set to change decisions. I don't really know why I have to do this but it doesn't work if I don't
+                this.set('decisions.' + pcode, d);
+                this.my_decision = d;
+
+                // get current dataset from graph object
+                var dataset = this.graph_obj.getData();
+                // calculate new decision's timestamp as a value between 0 and 1
+                var xval = (Date.now() - this.start_time) / (this.periodLength * 1000);
+                // remove previous current value data point
+                dataset[0].data.pop();
+                // add new decision
+                dataset[0].data.push([xval, d]);
+                // add another copy to be the new current value (will be updated by _updateGraph)
+                dataset[0].data.push([xval, d]);
+                this.graph_obj.setData(dataset);
+                this.graph_obj.draw();
+            },
+            // listener on firebase decisions array. reacts to the opponent changing their strategy
+            _decisionsChanged() {
+                if (this.decisions === null) {
+                    return;
+                }
+                var pcode = this.$.vars.participantCode;
+                // if I haven't set a decision yet, use my decision from firebase. here in case someone refreshes the page
+                if (this.decisions[pcode]) {
+                    this.my_decision = this.decisions[pcode];
+                    this.$.slider.value = this.my_decision;
+                }
+
+                // get other player's decision by picking the key that isn't yours
+                // there's probably a better way of doing this
+                for (var key in this.decisions) {
+                    if (key != pcode) {
+                        this.other_decision = this.decisions[key];
+
+                        // update decision graph with other player's decision
+                        // same process as in _setMyDecision
+                        var dataset = this.graph_obj.getData();
+                        var xval = (Date.now() - this.start_time) / (this.periodLength * 1000);
+                        dataset[1].data.pop();
+                        dataset[1].data.push([xval, this.other_decision]);
+                        dataset[1].data.push([xval, this.other_decision]);
+                        this.graph_obj.setData(dataset);
+                        this.graph_obj.draw();
+                        break;
+                    }
+                }
+            },
+            // format a decision as a CSS percent value
+            _calcPercent(decision) {
+                return decision * 100 + "%";
+            },
+            // returns a specific entry in the payoff table. I don't really know what's going on here, it's more polymer weirdness
+            _payoff: function (change, x, y) {
+                return change.base[x][y];
+            },
+            _setupGraph() {
+                // call flot setup function
+                this.graph_obj = $.plot(
+                        // pass graph div as jquery object
+                        $(this.$.graph),
+                        // set initial data for both decision plots
+                        // put two copies of start value because second copy represents the current decision and will be updated by _updateGraph
+                        [ [[0, .5], [0, .5]], [[0, .5], [0, .5]] ],
+                        // set flot graph options
+                        {
+                            series: {
+                                shadowSize: 0,
+                                lines: { steps: true }
+                            },
+                            xaxis: {
+                                show: false,
+                                min: 0,
+                                max: 1
+                            },
+                            yaxis: {
+                                min: 0,
+                                max: 1
+                            }
+                        }
+                );
+
+                // start update function
+                this._updateGraph();
+            },
+            _updateGraph() {
+                var dataset = this.graph_obj.getData();
+                // calculate x value for current time
+                var xval = (Date.now() - this.start_time) / (this.periodLength * 1000);
+
+                // for both decision graphs
+                for (i in [0, 1]) {
+                    // get last element in data set
+                    var cur_data = dataset[i].data.pop();
+                    // update x value to current time
+                    cur_data[0] = xval;
+                    // put updated element back in data set
+                    dataset[i].data.push(cur_data);
+                }
+
+                // update data and redraw
+                this.graph_obj.setData(dataset);
+                this.graph_obj.draw();
+
+                // recursively call update after a delay
+                window.setTimeout(this._updateGraph.bind(this), 50);
+            }
+        });
+    </script>
+
+</dom-module>
