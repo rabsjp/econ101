@@ -1,4 +1,3 @@
-<!--hello-->
 <link
         rel="import"
         href="/static/bower_components/polymer/polymer.html"/>
@@ -12,10 +11,11 @@
         rel="import"
         href="/static/webcomponents/otree-log/otree-log.html"/>
 
+<script src="/static/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="/static/bower_components/Flot/jquery.flot.js"></script>
+
 <script src="heatmap.js"></script>
 
-<script src="jquery.min.js"></script>
-<script src="jquery.flot.min.js"></script>
 <!--
 `<otree-continuous-bimatrix>` lets subjects select a strategy from a set of
 possibilities. Their decision and the results are  displayed using the usual
@@ -45,7 +45,7 @@ Example:
             ]
             payoff-index='{{ player.id_in_group|add:"-1" }}'
         ]'>
-    </otree-bimatrix>
+    </otree-continuous-bimatrix>
 -->
 <dom-module id="otree-continuous-bimatrix">
 
