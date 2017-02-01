@@ -1,0 +1,55 @@
+<link
+		rel="import"
+		href="/static/bower_components/polymer/polymer.html" />
+<link
+		rel="import"
+		href="/static/webcomponents/otree-vars/otree-vars.html" />
+
+<!--
+`<otree-log>` ...
+
+Example:
+
+	<otree-log id="log"></otree-log>
+
+In your component:
+
+	this.$.log.write({
+		type: 'something happened',
+		value: 42
+	});
+
+-->
+<dom-module id="otree-log">
+
+	<template>
+
+		<otree-vars id="vars"></otree-vars>
+
+	</template>
+
+	<script>
+		Polymer({
+			is: 'otree-log',
+			properties: {
+				fbRef_: Object,
+			},
+			ready: function() {
+				this.fbRef_ = document.querySelector('firebase-app')
+					.app.database().ref('log/' + this.$.vars.session);
+			},
+			write: function(event) {
+				const subsession = isNaN(this.$.vars.subsession) ? null : this.$.vars.subsession;
+				this.fbRef_.push({
+					subsession: subsession,
+					round: this.$.vars.round,
+					group: this.$.vars.group,
+					role: this.$.vars.role,
+					participant_code: this.$.vars.participantCode,
+					event: event
+				});
+			}
+		});
+	</script>
+
+</dom-module>

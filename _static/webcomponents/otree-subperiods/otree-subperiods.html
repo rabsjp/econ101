@@ -1,0 +1,60 @@
+<link
+        rel="import"
+        href="/static/bower_components/polymer/polymer.html" />
+<link
+        rel="import"
+        href="/static/bower_components/polymerfire/firebase-query.html" />
+<link
+        rel="import"
+        href="/static/webcomponents/otree-vars/otree-vars.html" />
+
+<!--
+`<otree-subperiods>` ...
+-->
+<dom-module id="otree-subperiods">
+
+    <template>
+
+        <firebase-query
+            path="[[path_]]"
+            data="{{subperiods}}">
+        </firebase-query>
+
+        <otree-vars id="vars"></otree-vars>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'otree-subperiods',
+            properties: {
+                subperiods: {
+                    type: Array,
+                    notify: true
+                },
+                lastSubperiod: {
+                    type: Object,
+                    notify: true
+                },
+                path_: String
+            },
+            observers: [
+                "_subperiodsChanged(subperiods.splices)",
+            ],
+            ready: function() {
+                this.path_ = (
+                    '/session/' + this.$.vars.session +
+                    '/app/' + this.$.vars.appName +
+                    '/subsession/' + this.$.vars.subsession +
+                    '/round/' + this.$.vars.round +
+                    '/group/' + this.$.vars.group +
+                    '/page/' + this.$.vars.page +
+                    '/subperiods');
+            },
+            _subperiodsChanged: function() {
+                this.lastSubperiod = this.subperiods[this.subperiods.length-1];
+            }
+        });
+    </script>
+
+</dom-module>
