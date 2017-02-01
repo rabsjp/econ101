@@ -75,3 +75,24 @@ input[type=range] {
     top: -2%;
     border-left: 2px solid black;
 }
+
+.graph-container {
+    margin: auto;
+    margin-top: 40px;
+    width: 630px;
+    height: 300px;
+}
+
+#thermometer {
+    float: left;
+    border: 1px black solid;
+    margin-top: 8px;
+    width: 20px;
+    height: 90%;
+}
+
+#graph {
+    width: 600px;
+    height: 100%;
+    float: right;
+}

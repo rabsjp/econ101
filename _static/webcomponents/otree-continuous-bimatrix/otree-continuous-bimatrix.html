@@ -11,13 +11,10 @@
         rel="import"
         href="/static/webcomponents/otree-log/otree-log.html"/>
 
-<script src="/static/bower_components/jquery/dist/jquery.min.js"></script>
-<script src="/static/bower_components/Flot/jquery.flot.js"></script>
-
 <script src="heatmap.js"></script>
 
 <!--
-`<otree-continuous-bimatrix>` lets subjects select a strategy from a set of
+`<otree-bimatrix>` lets subjects select a strategy from a set of
 possibilities. Their decision and the results are  displayed using the usual
 matrix form.
 
@@ -45,7 +42,7 @@ Example:
             ]
             payoff-index='{{ player.id_in_group|add:"-1" }}'
         ]'>
-    </otree-continuous-bimatrix>
+    </otree-bimatrix>
 -->
 <dom-module id="otree-continuous-bimatrix">
 
@@ -117,7 +114,10 @@ Example:
             </div>
         </div>
 
-        <div id="graph" style="width: 600px; height: 300px;"></div>
+        <div class="graph-container">
+            <canvas id="thermometer"></canvas>
+            <div id="graph"></div>
+        </div>
 
     </template>
 
@@ -146,7 +146,7 @@ Example:
             listeners: {
                 'keyup': '_setMyDecision'
             },
-            ready: function () {
+            ready() {
                 // set firebase path to appropriate scope
                 this.path_ = (
                 '/session/' + this.$.vars.session +
@@ -180,10 +180,12 @@ Example:
                     make_heatmap("other-canvas", other_payoffs);
                 }
 
-                // run graph setup function with delay so that it runs after display is rendered
-                window.setTimeout(this._setupGraph.bind(this), 100);
-                // save start time to reference later
-                this.start_time = Date.now();
+                // initialize thermometer
+                make_thermometer("thermometer");
+            },
+            attached() {
+                this._setupGraph();
+                this.start_time = performance.now();
             },
             // compare two decisions
             _equals(d, decision) {
@@ -205,18 +207,7 @@ Example:
                 this.set('decisions.' + pcode, d);
                 this.my_decision = d;
 
-                // get current dataset from graph object
-                var dataset = this.graph_obj.getData();
-                // calculate new decision's timestamp as a value between 0 and 1
-                var xval = (Date.now() - this.start_time) / (this.periodLength * 1000);
-                // remove previous current value data point
-                dataset[0].data.pop();
-                // add new decision
-                dataset[0].data.push([xval, d]);
-                // add another copy to be the new current value (will be updated by _updateGraph)
-                dataset[0].data.push([xval, d]);
-                this.graph_obj.setData(dataset);
-                this.graph_obj.draw();
+                this._graphUpdatePayoffs();
             },
             // listener on firebase decisions array. reacts to the opponent changing their strategy
             _decisionsChanged() {
@@ -236,15 +227,7 @@ Example:
                     if (key != pcode) {
                         this.other_decision = this.decisions[key];
 
-                        // update decision graph with other player's decision
-                        // same process as in _setMyDecision
-                        var dataset = this.graph_obj.getData();
-                        var xval = (Date.now() - this.start_time) / (this.periodLength * 1000);
-                        dataset[1].data.pop();
-                        dataset[1].data.push([xval, this.other_decision]);
-                        dataset[1].data.push([xval, this.other_decision]);
-                        this.graph_obj.setData(dataset);
-                        this.graph_obj.draw();
+                        this._graphUpdatePayoffs();
                         break;
                     }
                 }
@@ -257,56 +240,91 @@ Example:
             _payoff: function (change, x, y) {
                 return change.base[x][y];
             },
+            // sets up payoff over time graph
             _setupGraph() {
-                // call flot setup function
-                this.graph_obj = $.plot(
-                        // pass graph div as jquery object
-                        $(this.$.graph),
-                        // set initial data for both decision plots
-                        // put two copies of start value because second copy represents the current decision and will be updated by _updateGraph
-                        [ [[0, .5], [0, .5]], [[0, .5], [0, .5]] ],
-                        // set flot graph options
-                        {
-                            series: {
-                                shadowSize: 0,
-                                lines: { steps: true }
-                            },
-                            xaxis: {
-                                show: false,
-                                min: 0,
-                                max: 1
-                            },
-                            yaxis: {
-                                min: 0,
-                                max: 1
+                var my_payoffs = this.payoffMatrix.map(function (current_val) {
+                    return parseInt(current_val[this.payoffIndex]);
+                }, this);
+
+                var initialPayoff = (my_payoffs[0] + my_payoffs[1] + my_payoffs[2] + my_payoffs[3]) / 4;
+
+                var maxPayoff = Math.max(my_payoffs[0], my_payoffs[1], my_payoffs[2], my_payoffs[3]);
+
+                // call highcharts setup function
+                this.graph_obj = Highcharts.chart({
+                    chart: {
+                        animation: false,
+                        renderTo: 'graph',
+                        type: 'area',
+                    },
+                    title: { text: null },
+                    exporting: { enabled: false },
+                    tooltip: { enabled: false },
+                    legend: { enabled: false },
+                    xAxis: {
+                        min: 0,
+                        max: 1,
+                        labels: { enabled: false }
+                    },
+                    yAxis: {
+                        title: { text: undefined },
+                        min: 0,
+                        max: maxPayoff
+                    },
+                    line: {
+                        marker: {
+                            enabled: false,
+                            states: {
+                                hover: { enabled: false },
+                                select: { enabled: false }
                             }
                         }
-                );
+                    },
+                    series: [{
+                        data: [ [0, initialPayoff], [0, initialPayoff] ],
+                        step: "left"
+                    }]
+                });
 
                 // start update function
-                this._updateGraph();
+                window.requestAnimationFrame(this._updateGraph.bind(this));
             },
-            _updateGraph() {
-                var dataset = this.graph_obj.getData();
+            // updates current payoff value every 50 ms
+            _updateGraph(timestamp) {
+                var dataset = this.graph_obj.series[0];
                 // calculate x value for current time
-                var xval = (Date.now() - this.start_time) / (this.periodLength * 1000);
+                var xval = (timestamp - this.start_time) / (this.periodLength * 1000);
 
-                // for both decision graphs
-                for (i in [0, 1]) {
-                    // get last element in data set
-                    var cur_data = dataset[i].data.pop();
-                    // update x value to current time
-                    cur_data[0] = xval;
-                    // put updated element back in data set
-                    dataset[i].data.push(cur_data);
-                }
+                var len = dataset.data.length;
+                dataset.data[len - 1].update({x: xval});
 
-                // update data and redraw
-                this.graph_obj.setData(dataset);
-                this.graph_obj.draw();
+                // recursively call update
+                window.requestAnimationFrame(this._updateGraph.bind(this));
+            },
+            // is called everytime someone's decision changes and update payoff graph
+            _graphUpdatePayoffs() {
+                // if graph hasn't been initialized, don't do anything
+                if (!this.graph_obj) return;
 
-                // recursively call update after a delay
-                window.setTimeout(this._updateGraph.bind(this), 50);
+                // gets this player's payoff array
+                var my_payoffs = this.payoffMatrix.map(function (current_val) {
+                    return current_val[this.payoffIndex];
+                }, this);
+
+                // calculate the payoff with current decision values
+                var point_payoff = (this.my_decision * this.other_decision * my_payoffs[0]) +
+                                   (this.my_decision * (1 - this.other_decision) * my_payoffs[1]) +
+                                   ((1 - this.my_decision) * this.other_decision * my_payoffs[2]) +
+                                   ((1 - this.my_decision) * (1 - this.other_decision) * my_payoffs[3]);
+
+                // calculate new decision's timestamp as a value between 0 and 1
+                var xval = (performance.now() - this.start_time) / (this.periodLength * 1000);
+
+                var dataset = this.graph_obj.series[0];
+                var len = dataset.data.length;
+                dataset.data[len - 1].remove();
+                dataset.addPoint([xval, point_payoff], false, false);
+                dataset.addPoint([xval + Number.EPSILON, point_payoff], true, false);
             }
         });
     </script>
