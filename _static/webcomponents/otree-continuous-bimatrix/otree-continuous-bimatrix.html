@@ -267,6 +267,7 @@ Example:
                     exporting: { enabled: false },
                     tooltip: { enabled: false },
                     legend: { enabled: false },
+                    credits: { enabled: false },
                     xAxis: {
                         min: 0,
                         max: 1,
@@ -278,6 +279,8 @@ Example:
                         max: maxPayoff
                     },
                     plotOptions: {
+                        line: {marker: {enabled: false}},
+                        area: {marker: {enabled: false}},
                         series: {
                             states: {
                                 hover: {
@@ -322,6 +325,7 @@ Example:
                     exporting: { enabled: false },
                     tooltip: { enabled: false },
                     legend: { enabled: false },
+                    credits: { enabled: false },
                     xAxis: {
                         min: 0,
                         max: 1,
@@ -333,6 +337,7 @@ Example:
                         max: 1
                     },
                     plotOptions: {
+                        line: {marker: {enabled: false}},
                         series: {
                             states: {
                                 hover: {
@@ -382,7 +387,7 @@ Example:
                 dataset.data[len - 1].update({x: xval});
 
                 // recursively call update
-                window.requestAnimationFrame(this._updateGraph.bind(this));              
+                window.requestAnimationFrame(this._updateGraph.bind(this));
             },
             // is called everytime someone's decision changes and update payoff graph
             _graphUpdatePayoffs() {
@@ -403,12 +408,14 @@ Example:
                 // calculate new decision's timestamp as a value between 0 and 1
                 var xval = (performance.now() - this.start_time) / (this.periodLength * 1000);
 
+                // add point for my new decision
                 dataset = this.strategy_graph_obj.series[0];
                 len = dataset.data.length;
                 dataset.data[len - 1].remove();
                 dataset.addPoint([xval, this.my_decision], false, false);
                 dataset.addPoint([xval, this.my_decision], true, false);
 
+                // add point for others' new decision
                 dataset = this.strategy_graph_obj.series[1];
                 len = dataset.data.length;
                 dataset.data[len - 1].remove();
@@ -416,8 +423,8 @@ Example:
                 dataset.addPoint([xval, this.other_decision], true, false);
 
                 // add point for my payoff
-                var dataset = this.payoff_graph_obj.series[0];
-                var len = dataset.data.length;
+                dataset = this.payoff_graph_obj.series[0];
+                len = dataset.data.length;
                 dataset.data[len - 1].remove();
                 dataset.addPoint([xval, my_point_payoff], false, false);
                 dataset.addPoint([xval, my_point_payoff], true, false);
