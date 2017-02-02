@@ -116,9 +116,9 @@ Example:
 
         <div class="graph-container">
             <canvas id="thermometer"></canvas>
-            <div id="payoffGraph"></div>
+            <div id="payoff_graph"></div>
         </div>
-        <div id="strategyGraph"</div>
+        <div id="strategy_graph"</div>
     </template>
 
     <script>
@@ -162,18 +162,22 @@ Example:
                 this.other_decision = .5;
                 this.otherPayoffIndex = this.payoffIndex == 0 ? 1 : 0;
 
-                // extract the set of payoffs corresponding to this player's payoff index and display this player's heatmap
-                my_payoffs = this.payoffMatrix.map(function (current_val) {
-                    return current_val[this.payoffIndex];
+                // separate each player's payoffs into two separate arrays
+                this.my_payoffs = this.payoffMatrix.map(function (current_val) {
+                    return parseInt(current_val[this.payoffIndex]);
                 }, this);
-                make_heatmap("my-canvas", my_payoffs);
 
-                // if opponentHeatmap is true, get other player's payoffs and display their heatmap
+                this.other_payoffs = this.payoffMatrix.map(function (current_val) {
+                        return parseInt(current_val[this.otherPayoffIndex]);
+                }, this);
+
+                // make this player's heatmap
+                make_heatmap("my-canvas", this.my_payoffs);
+
+                // if opponentHeatmap is true, take inverse of other player's payoffs and display their heatmap
                 if (this.opponentHeatmap == "true") {
                     this.$["other-bimatrix-container"].style.display = "";
-                    other_payoffs = this.payoffMatrix.map(function (current_val) {
-                        return current_val[this.otherPayoffIndex];
-                    }, this);
+                    var other_payoffs = this.other_payoffs.slice();
                     var tmp = other_payoffs[1];
                     other_payoffs[1] = other_payoffs[2];
                     other_payoffs[2] = tmp;
@@ -187,6 +191,8 @@ Example:
                 this._setupPayoffGraph();
                 this._setupStrategyGraph();
                 this.start_time = performance.now();
+                // start update function
+                window.requestAnimationFrame(this._updateGraph.bind(this));
             },
             // compare two decisions
             _equals(d, decision) {
@@ -243,20 +249,18 @@ Example:
             },
             // sets up payoff over time graph
             _setupPayoffGraph() {
-                var my_payoffs = this.payoffMatrix.map(function (current_val) {
-                    return parseInt(current_val[this.payoffIndex]);
-                }, this);
-
-                var initialPayoff = (my_payoffs[0] + my_payoffs[1] + my_payoffs[2] + my_payoffs[3]) / 4;
-
-                var maxPayoff = Math.max(my_payoffs[0], my_payoffs[1], my_payoffs[2], my_payoffs[3]);
+                // readability is overrated
+                // just sums each set of payoffs and divides by 4
+                var myInitialPayoff = this.my_payoffs.reduce((a, b) => a + b, 0) / 4;
+                var otherInitialPayoff = this.other_payoffs.reduce((a, b) => a + b, 0) / 4;
+                // finds max of all payoffs
+                var maxPayoff = Math.max.apply(null, this.my_payoffs.concat(this.other_payoffs));
 
                 // call highcharts setup function
-                this.payoffGraph_obj = Highcharts.chart({
+                this.payoff_graph_obj = Highcharts.chart({
                     chart: {
                         animation: false,
-                        renderTo: 'payoffGraph',
-                        type: 'area',
+                        renderTo: 'payoff_graph',
                     },
                     title: { text: null },
                     exporting: { enabled: false },
@@ -281,23 +285,27 @@ Example:
                             }
                         }
                     },
-                    series: [{
-                        data: [ [0, initialPayoff], [0, initialPayoff] ],
-                        step: "left"
-                    }]
+                    series: [
+                        {
+                            type: "area",
+                            data: [[0, myInitialPayoff], [0, myInitialPayoff]],
+                            step: "left"
+                        },
+                        {
+                            type: "line",
+                            data: [[0, otherInitialPayoff], [0, otherInitialPayoff]],
+                            step: "left"
+                        }
+                    ]
                 });
-
-                // start update function
-                window.requestAnimationFrame(this._updateGraph.bind(this));
             },
-            // sets up payoff over time graph
+            // sets up strategy over time graph
             _setupStrategyGraph() {
-
                 // call highcharts setup function
-                this.strategyGraph_obj = Highcharts.chart({
+                this.strategy_graph_obj = Highcharts.chart({
                     chart: {
                         animation: false,
-                        renderTo: 'strategyGraph',
+                        renderTo: 'strategy_graph',
                         type: 'line',
                     },
                     title: { text: null },
@@ -332,66 +340,75 @@ Example:
                         step: "left"
                     }]
                 });
-
-                // start update function
-                window.requestAnimationFrame(this._updateGraph.bind(this));
             },
             // updates current payoff value every 50 ms
             _updateGraph(timestamp) {
-                var dataset = this.payoffGraph_obj.series[0];
                 // calculate x value for current time
                 var xval = (timestamp - this.start_time) / (this.periodLength * 1000);
 
+                var dataset = this.payoff_graph_obj.series[0];
                 var len = dataset.data.length;
                 dataset.data[len - 1].update({x: xval});
 
-                // recursively call update
-                window.requestAnimationFrame(this._updateGraph.bind(this));
+                dataset = this.payoff_graph_obj.series[1];
+                len = dataset.data.length;
+                dataset.data[len - 1].update({x: xval});
 
-                var dataset = this.strategyGraph_obj.series[0];
-                var len = dataset.data.length;
+                dataset = this.strategy_graph_obj.series[0];
+                len = dataset.data.length;
                 dataset.data[len - 1].update({x: xval});  
 
-                var dataset = this.strategyGraph_obj.series[1];
-                var len = dataset.data.length;
-                dataset.data[len - 1].update({x: xval});                
+                dataset = this.strategy_graph_obj.series[1];
+                len = dataset.data.length;
+                dataset.data[len - 1].update({x: xval});
+
+                // recursively call update
+                window.requestAnimationFrame(this._updateGraph.bind(this));              
             },
             // is called everytime someone's decision changes and update payoff graph
             _graphUpdatePayoffs() {
                 // if graph hasn't been initialized, don't do anything
-                if (!this.payoffGraph_obj) return;
-
-                // gets this player's payoff array
-                var my_payoffs = this.payoffMatrix.map(function (current_val) {
-                    return current_val[this.payoffIndex];
-                }, this);
+                if (!this.payoff_graph_obj) return;
 
                 // calculate the payoff with current decision values
-                var point_payoff = (this.my_decision * this.other_decision * my_payoffs[0]) +
-                                   (this.my_decision * (1 - this.other_decision) * my_payoffs[1]) +
-                                   ((1 - this.my_decision) * this.other_decision * my_payoffs[2]) +
-                                   ((1 - this.my_decision) * (1 - this.other_decision) * my_payoffs[3]);
+                var my_point_payoff = (this.my_decision * this.other_decision * this.my_payoffs[0]) +
+                                      (this.my_decision * (1 - this.other_decision) * this.my_payoffs[1]) +
+                                      ((1 - this.my_decision) * this.other_decision * this.my_payoffs[2]) +
+                                      ((1 - this.my_decision) * (1 - this.other_decision) * this.my_payoffs[3]);
+
+               var other_point_payoff = (this.other_decision * this.my_decision * this.other_payoffs[0]) +
+                                        (this.other_decision * (1 - this.my_decision) * this.other_payoffs[1]) +
+                                        ((1 - this.other_decision) * this.my_decision * this.other_payoffs[2]) +
+                                        ((1 - this.other_decision) * (1 - this.my_decision) * this.other_payoffs[3]);
 
                 // calculate new decision's timestamp as a value between 0 and 1
                 var xval = (performance.now() - this.start_time) / (this.periodLength * 1000);
 
-                var dataset = this.payoffGraph_obj.series[0];
-                var len = dataset.data.length;
-                dataset.data[len - 1].remove();
-                dataset.addPoint([xval, point_payoff], false, false);
-                dataset.addPoint([xval + Number.EPSILON, point_payoff], true, false);
-
-                dataset = this.strategyGraph_obj.series[0];
+                dataset = this.strategy_graph_obj.series[0];
                 len = dataset.data.length;
                 dataset.data[len - 1].remove();
                 dataset.addPoint([xval, this.my_decision], false, false);
                 dataset.addPoint([xval, this.my_decision], true, false);
 
-                dataset = this.strategyGraph_obj.series[1];
+                dataset = this.strategy_graph_obj.series[1];
                 len = dataset.data.length;
                 dataset.data[len - 1].remove();
                 dataset.addPoint([xval, this.other_decision], false, false);
                 dataset.addPoint([xval, this.other_decision], true, false);
+
+                // add point for my payoff
+                var dataset = this.payoff_graph_obj.series[0];
+                var len = dataset.data.length;
+                dataset.data[len - 1].remove();
+                dataset.addPoint([xval, my_point_payoff], false, false);
+                dataset.addPoint([xval, my_point_payoff], true, false);
+
+                // add point for other payoff
+                dataset = this.payoff_graph_obj.series[1];
+                len = dataset.data.length;
+                dataset.data[len - 1].remove();
+                dataset.addPoint([xval, other_point_payoff], false, false);
+                dataset.addPoint([xval, other_point_payoff], true, false);
             }
         });
     </script>
