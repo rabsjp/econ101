@@ -91,8 +91,13 @@ input[type=range] {
     height: 90%;
 }
 
-#graph {
+#payoffGraph {
     width: 600px;
     height: 100%;
     float: right;
+}
+
+#strategyGraph {
+    width: 600px;
+    height: 400px;
 }
