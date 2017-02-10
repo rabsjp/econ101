@@ -91,7 +91,6 @@ var color_stops = {
 // where percent = 1.0 gets the last color in color_stops and percent = 0.0 gets the first color in color_stops
 function get_gradient_color(percent, color_scheme) {
     color = color_stops[color_scheme];
-    console.log(color, color_scheme);
     percent *= (color.length - 1);
     var low_color = Math.floor(percent);
     var high_color = Math.ceil(percent);
