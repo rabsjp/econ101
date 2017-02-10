@@ -100,9 +100,8 @@ Example:
             </div>
             <!--
             other heatmap is exactly the same as this player's, just smaller
-            container is hidden by default, but is unhidden in js if opponent heatmap option is chosen
             -->
-            <div id="other-bimatrix-container" style="display: none">
+            <div id="other-bimatrix-container">
                 <div id="other-heatmap">
                     <canvas width="120" height="120" id="other-canvas"></canvas>
                     <span class="payoff_labels" style="top: -25px; left: 10px;">[[_payoff(payoffMatrix.*, 0, otherPayoffIndex)]]</span>
@@ -133,8 +132,6 @@ Example:
                 payoffMatrix: Array,
                 // index describing which entry in payoff matrix is to be used by this player
                 payoffIndex: Number,
-                // boolean to choose whether or not to show opponent's heatmap
-                opponentHeatmap: String,
                 // associative array relating participant code to current decision
                 // holds this player's decision and the opponent's decision
                 decisions: {
@@ -176,15 +173,12 @@ Example:
                 // make this player's heatmap
                 make_heatmap("my-canvas", this.my_payoffs, "rainbow");
 
-                // if opponentHeatmap is true, take inverse of other player's payoffs and display their heatmap
-                if (this.opponentHeatmap == "true") {
-                    this.$["other-bimatrix-container"].style.display = "";
-                    var other_payoffs = this.other_payoffs.slice();
-                    var tmp = other_payoffs[1];
-                    other_payoffs[1] = other_payoffs[2];
-                    other_payoffs[2] = tmp;
-                    make_heatmap("other-canvas", other_payoffs, "mono");
-                }
+                // take inverse of other player's payoffs and display their heatmap
+                var other_payoffs_transpose = this.other_payoffs.slice();
+                var tmp = other_payoffs_transpose[1];
+                other_payoffs_transpose[1] = other_payoffs_transpose[2];
+                other_payoffs_transpose[2] = tmp;
+                make_heatmap("other-canvas", other_payoffs_transpose, "mono");
 
                 // initialize thermometer
                 make_thermometer("thermometer", "rainbow");
