@@ -1,7 +1,7 @@
 // function to generate a heatmap for continuous bimatrix
 // takes the id of a canvas element and an array of payoffs as arguments
 
-function make_heatmap(canvas_id, payoffs) {
+function make_heatmap(canvas_id, payoffs, color_scheme) {
     var canvas = document.getElementById(canvas_id);
     var w = canvas.width;
     var h = canvas.height;
@@ -31,7 +31,7 @@ function make_heatmap(canvas_id, payoffs) {
 
             // divide the payoff by the max payoff to get an color intensity percentage
             // use get_gradient_color to get the appropriate color in the gradient for that percentage
-            point_color = get_gradient_color(point_payoff / max_payoff);
+            point_color = get_gradient_color(point_payoff / max_payoff, color_scheme);
 
             // set imageData for this pixel to the calculated color
             data[(row * w * 4) + (col * 4)] = point_color[0];
@@ -45,7 +45,7 @@ function make_heatmap(canvas_id, payoffs) {
     ctx.putImageData(imageData, 0, 0);
 }
 
-function make_thermometer(canvas_id) {
+function make_thermometer(canvas_id, color_scheme) {
     var canvas = document.getElementById(canvas_id);
     var w = canvas.width;
     var h = canvas.height;
@@ -56,7 +56,7 @@ function make_thermometer(canvas_id) {
     var data = imageData.data;
 
     for (var row = 0; row < h; row++) {
-        point_color = get_gradient_color(1 - (row / h));
+        point_color = get_gradient_color(1 - (row / h), color_scheme);
         for (var col = 0; col < w; col++) {
             data[(row * w * 4) + (col * 4)] = point_color[0];
             data[(row * w * 4) + (col * 4) + 1] = point_color[1];
@@ -69,43 +69,35 @@ function make_thermometer(canvas_id) {
     ctx.putImageData(imageData, 0, 0);
 }
 
-// weathermap
-// var color_stops = [
-// 	[255, 0, 0],
-// 	[255, 255, 0],
-// 	[0, 255, 0],
-// 	[0, 255, 255],
-// 	[0, 0, 255]
-// ];
-
-// rainbow
-var color_stops = [
-    [148, 0, 211],
-    [75, 0, 130],
-    [0, 0, 255],
-    [0, 255, 255],
-    [0, 255, 0],
-    [255, 255, 0],
-    [255, 127, 0],
-    [255, 0, 0]
-];
-
-// monochrome
-// var color_stops = [
-// 	[255, 255, 255],
-// 	[255, 0, 0]
-// ];
+var color_stops = {
+    "mono": [
+        [255, 255, 255],
+        [255, 0, 0]
+    ],
+    "rainbow": [
+        [148, 0, 211],
+        [75, 0, 130],
+        [0, 0, 255],
+        [0, 255, 255],
+        [0, 255, 0],
+        [255, 255, 0],
+        [255, 127, 0],
+        [255, 0, 0]
+    ]
+};
 
 // gets colors from the gradient defined by the color stops above
 // 0.0 <= percent <= 1.0
 // where percent = 1.0 gets the last color in color_stops and percent = 0.0 gets the first color in color_stops
-function get_gradient_color(percent) {
-    percent *= (color_stops.length - 1);
+function get_gradient_color(percent, color_scheme) {
+    color = color_stops[color_scheme];
+    console.log(color, color_scheme);
+    percent *= (color.length - 1);
     var low_color = Math.floor(percent);
     var high_color = Math.ceil(percent);
     percent -= low_color;
-    var r = percent * color_stops[high_color][0] + (1 - percent) * color_stops[low_color][0];
-    var g = percent * color_stops[high_color][1] + (1 - percent) * color_stops[low_color][1];
-    var b = percent * color_stops[high_color][2] + (1 - percent) * color_stops[low_color][2];
+    var r = percent * color[high_color][0] + (1 - percent) * color[low_color][0];
+    var g = percent * color[high_color][1] + (1 - percent) * color[low_color][1];
+    var b = percent * color[high_color][2] + (1 - percent) * color[low_color][2];
     return [r, g, b];
 }

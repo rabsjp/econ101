@@ -174,7 +174,7 @@ Example:
                 }, this);
 
                 // make this player's heatmap
-                make_heatmap("my-canvas", this.my_payoffs);
+                make_heatmap("my-canvas", this.my_payoffs, "rainbow");
 
                 // if opponentHeatmap is true, take inverse of other player's payoffs and display their heatmap
                 if (this.opponentHeatmap == "true") {
@@ -183,11 +183,11 @@ Example:
                     var tmp = other_payoffs[1];
                     other_payoffs[1] = other_payoffs[2];
                     other_payoffs[2] = tmp;
-                    make_heatmap("other-canvas", other_payoffs);
+                    make_heatmap("other-canvas", other_payoffs, "mono");
                 }
 
                 // initialize thermometer
-                make_thermometer("thermometer");
+                make_thermometer("thermometer", "rainbow");
             },
             attached() {
                 this._setupPayoffGraph();
