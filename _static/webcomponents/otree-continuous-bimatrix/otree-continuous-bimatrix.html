@@ -40,7 +40,6 @@ Example:
                 "{{ Constants.defect_amount }}",
                 "{{ Constants.defect_amount }}"
             ]
-            payoff-index='{{ player.id_in_group|add:"-1" }}'
         ]'>
     </otree-bimatrix>
 -->
@@ -126,12 +125,8 @@ Example:
         Polymer({
             is: 'otree-continuous-bimatrix',
             properties: {
-                // labels for strategies. not currently being used
-                rowLabels: Array,
                 // 2x2 array of payoffs for each player. see block comment at top for details
                 payoffMatrix: Array,
-                // index describing which entry in payoff matrix is to be used by this player
-                payoffIndex: Number,
                 // associative array relating participant code to current decision
                 // holds this player's decision and the opponent's decision
                 decisions: {
@@ -156,10 +151,13 @@ Example:
                 '/page/' + this.$.vars.page +
                 '/component/otree-bimatrix' +
                 '/decisions');
+
+                this.payoffIndex = this.$.vars.idInGroup - 1;
+                this.otherPayoffIndex = this.payoffIndex === 0 ? 1 : 0;
+
                 // variables for this player's decision and the opponent's decision
                 this.my_decision = .5;
                 this.other_decision = .5;
-                this.otherPayoffIndex = this.payoffIndex == 0 ? 1 : 0;
 
                 // separate each player's payoffs into two separate arrays
                 this.my_payoffs = this.payoffMatrix.map(function (current_val) {
