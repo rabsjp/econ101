@@ -66,7 +66,9 @@ class DecisionWaitPage(WaitPage):
                 d.page = "Decision"
                 d.app = "continuous_bimatrix"
                 d.participant = player.participant
-                d.decision = -1
+                d.decision = {
+                    d.participant.code: -1
+                }
 
             start_decision.timestamp = start_time
             end_decision.timestamp = end_time
