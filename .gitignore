@@ -9,3 +9,5 @@ _coverage_results
 _static_root
 _static/bower_components/
 migrations/
+
+node_modules/

@@ -59,14 +59,16 @@ class DecisionWaitPage(WaitPage):
 
             for d in start_decision, end_decision:
                 d.component = "otree-server"
-                d.session = self.session.code
+                d.session = self.session
                 d.subsession = self.subsession.name()
                 d.round = self.round_number
                 d.group = self.group.id_in_subsession
                 d.page = "Decision"
                 d.app = "continuous_bimatrix"
                 d.participant = player.participant
-                d.decision = -1
+                d.decision = {
+                    d.participant.code: -1
+                }
 
             start_decision.timestamp = start_time
             end_decision.timestamp = end_time
