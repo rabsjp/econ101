@@ -15,12 +15,12 @@
     <script type="text/javascript" src="{% static 'global/custom.js' %}"></script>
 
     <script
-    	src="{% static 'bower_components/webcomponentsjs/webcomponents-lite.min.js' %}">
+    	src="/static/bower_components/webcomponentsjs/webcomponents-lite.min.js">
     </script>
 
     <link
         rel="import"
-        href="{% static 'bower_components/polymerfire/firebase-app.html' %}" />
+        href="/static/bower_components/polymerfire/firebase-app.html" />
     <firebase-app
         api-key="AIzaSyDhaihpJ2W7mR_bScBsc6brBQyFG2N8tJo"
         auth-domain="otree.firebaseapp.com"
@@ -29,7 +29,7 @@
 
     <link
         rel="import"
-        href="{% static 'webcomponents/otree-vars/otree-vars.html' %}" />
+        href="/static/webcomponents/otree-vars/otree-vars.html" />
 
     <!-- Initialize otree variables and Firebase -->
     <otree-vars
@@ -43,19 +43,19 @@
         id-in-group="{{ player.id_in_group }}"
         page="tmp"> <!-- TODO: fill with actual page name-->
     </otree-vars>
-    
+
     <link
         rel="import"
-        href="{% static 'webcomponents/otree-chat/otree-chat.html' %}" />
+        href="/static/webcomponents/otree-chat/otree-chat.html" />
     <link
         rel="import"
-        href="{% static 'webcomponents/otree-bimatrix/otree-bimatrix.html' %}" />
+        href="/static/webcomponents/otree-bimatrix/otree-bimatrix.html" />
     <link
         rel="import"
-        href="{% static 'webcomponents/otree-continuous-bimatrix/otree-continuous-bimatrix.html' %}" />
+        href="/static/webcomponents/otree-continuous-bimatrix/otree-continuous-bimatrix.html" />
     <link
         rel="import"
-        href="{% static 'webcomponents/otree-subperiods/otree-subperiods.html' %}" />
+        href="/static/webcomponents/otree-subperiods/otree-subperiods.html" />
 
 
 {% endblock %}
