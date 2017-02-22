@@ -59,7 +59,7 @@ class DecisionWaitPage(WaitPage):
 
             for d in start_decision, end_decision:
                 d.component = "otree-server"
-                d.session = self.session.code
+                d.session = self.session
                 d.subsession = self.subsession.name()
                 d.round = self.round_number
                 d.group = self.group.id_in_subsession
