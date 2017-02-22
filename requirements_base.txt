@@ -1,1 +1,1 @@
--e git+https://github.com/Leeps-Lab/otree-core.git
+-e git+https://github.com/Leeps-Lab/otree-core.git#egg=otree-core
