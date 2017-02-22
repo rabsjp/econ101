@@ -18,8 +18,9 @@
 		var group = undefined;
 		var role = undefined;
 		var participantCode = undefined;
-    var appName = undefined;
-    var page = undefined;
+		var appName = undefined;
+		var page = undefined;
+		var idInGroup = undefined;
 
 		Polymer({
 			is: 'otree-vars',
@@ -36,10 +37,12 @@
 				role: String,
 				/** Participant's unique subject code, e.g. {{ player.participant.code }} */
 				participantCode: String,
-        /** Current app name, e.g. {{ subsession.app_name }} */
-        appName: String,
-        /** Current page name. TODO: fill with actual page value */
-        page: String
+				/** Current app name, e.g. {{ subsession.app_name }} */
+				appName: String,
+				/** Current page name. TODO: fill with actual page value */
+				page: String,
+				/** Player's index in group. e.g. {{ player.id_in_group }} */
+				idInGroup: String
 			},
 			ready: function() {
 				if (session === undefined) {
@@ -81,6 +84,11 @@
 					page = this.page;
 				} else {
 					this.page = page;
+				}
+				if (idInGroup === undefined) {
+					idInGroup = this.idInGroup;
+				} else {
+					this.idInGroup = idInGroup;
 				}
 			}
 		});
