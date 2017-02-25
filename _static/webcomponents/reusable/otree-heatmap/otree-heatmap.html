@@ -1,0 +1,61 @@
+<link rel="import" href="/static/bower_components/polymer/polymer.html"/>
+<link rel="import" href="/static/bower_components/polymerfire/firebase-document.html"/>
+<link rel="import" href="/static/webcomponents/otree-vars/otree-vars.html"/>
+<link rel="import" href="/static/webcomponents/otree-log/otree-log.html"/>
+<script src="/static/general/color.js"></script>
+<script src="heatmap.js"></script>
+
+<dom-module id="otree-heatmap">
+    <template>
+        <link rel="stylesheet" type="text/css" href="styles.css">
+        <otree-vars id="vars"></otree-vars>
+        <otree-log id="log"></otree-log>
+        
+        <div id="my-heatmap">
+            <canvas width="[[width]]" height="[[height]]" id="my-canvas"></canvas>
+
+            <span class="payoff_labels" style="top: -25px; left: 10px">[[_arrayItem(payoffs.*, 0)]]</span>
+            <span class="payoff_labels" style="top: -25px; right: 10px">[[_arrayItem(payoffs.*, 1)]]</span>
+            <span class="payoff_labels" style="bottom: -25px; left: 10px">[[_arrayItem(payoffs.*, 2)]]</span>
+            <span class="payoff_labels" style="bottom: -25px; right: 10px">[[_arrayItem(payoffs.*, 3)]]</span>
+
+            <div id="my-val" style$="height: [[_calcPercent(myDecision)]]"></div>
+            <div id="other-val" style$="width: [[_calcPercent(otherDecision)]]"></div>
+        </div>
+
+    </template>
+    <script>
+        Polymer({
+            is: 'otree-heatmap',
+            properties: {
+                width: Number,
+                height: Number,
+                myDecision: {
+                    type: Number,
+                    notify: true
+                },
+                otherDecision: Number,
+                payoffs: Array,
+                color: String,
+            },
+            listeners: {
+                keyup: '_setMyDecision'
+            },
+            ready() {
+                make_heatmap('my-canvas', this.payoffs, this.color)
+            },
+            _calcPercent(decision) {
+                return decision * 100 + "%"
+            },
+            _arrayItem(change, index) {
+				return change.base[index];
+			},
+            _setMyDecision(event) {
+                if (event.key == 'ArrowDown' || event.key == 'ArrowUp') {
+                    const d = parseFloat(event.target.value)
+                    this.myDecision = d
+                }
+            },
+        })
+    </script>
+</dom-module>
