@@ -1,7 +1,4 @@
 <link rel="import" href="/static/bower_components/polymer/polymer.html"/>
-<link rel="import" href="/static/bower_components/polymerfire/firebase-document.html"/>
-<link rel="import" href="/static/webcomponents/otree-vars/otree-vars.html"/>
-<link rel="import" href="/static/webcomponents/otree-log/otree-log.html"/>
 <script src="/static/general/color.js"></script>
 
 <dom-module id="otree-heatmap">
@@ -42,8 +39,6 @@
             }
 
         </style>
-        <otree-vars id="vars"></otree-vars>
-        <otree-log id="log"></otree-log>
 
         <div id="heatmap-container" style="width: [[width]]px; height: [[width]]px">
             <canvas width="[[width]]" height="[[height]]"></canvas>
@@ -65,22 +60,30 @@
                 width: Number,
                 height: Number,
                 myIdentifier: String,
-                myDecision: {
-                    type: Number,
-                    notify: true
-                },
+                myDecision: Number,
                 otherDecision: Number,
-                payoffs: Array,
-                color: String,
+                payoffs: {
+                    type: Array,
+                    observer: 'make_heatmap',
+                },
+                color: {
+                    type: String,
+                    observer: 'make_heatmap',
+                },
             },
-            listeners: {
-                keyup: '_setMyDecision'
+            // format a decision as a CSS percent value
+            _calcPercent(decision) {
+                return decision * 100 + "%"
             },
-            ready() {
-                // generate heatmap
+            _arrayItem(change, index) {
+				return change.base[index]
+			},
+            make_heatmap() {
+                if (!this.color || !this.payoffs)
+                    return
                 const canvas = this.$$('canvas')
-                const w = this.width
-                const h = this.height
+                const w = canvas.width
+                const h = canvas.height
                 const ctx = canvas.getContext('2d')
                 
                 const max_payoff = Math.max(... this.payoffs)
@@ -121,15 +124,6 @@
                 }
 
                 ctx.putImageData(imageData, 0, 0)
-            },
-            _calcPercent(decision) {
-                return decision * 100 + "%"
-            },
-            _arrayItem(change, index) {
-				return change.base[index];
-			},
-            _setMyDecision(event) {
-                this.myDecision = parseFloat(event.target.value)
             },
         })
     </script>
