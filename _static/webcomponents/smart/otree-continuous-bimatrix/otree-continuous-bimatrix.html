@@ -2,6 +2,9 @@
 <link rel="import" href="/static/bower_components/polymerfire/firebase-document.html"/>
 <link rel="import" href="/static/webcomponents/otree-vars/otree-vars.html"/>
 <link rel="import" href="/static/webcomponents/otree-log/otree-log.html"/>
+<link rel="import" href="/static/webcomponents/reusable/otree-heatmap/otree-heatmap.html"/>
+<script src="/static/general/color.js"></script>
+
 <script src="heatmap.js"></script>
 
 <dom-module id="otree-continuous-bimatrix">
@@ -21,29 +24,27 @@
                 <input id="slider" type="range" min="0" max="1" step=".01" defaultValue=".5" on-up="_setMyDecision"/>
 
                 <div id="my-heatmap">
-                    <canvas width="300" height="300" id="my-canvas"></canvas>
-
-                    <span class="payoff_labels" style="top: -25px; left: 10px;">[[_payoff(payoffMatrix.*, 0, payoffIndex)]]</span>
-                    <span class="payoff_labels" style="top: -25px; right: 10px;">[[_payoff(payoffMatrix.*, 1, payoffIndex)]]</span>
-                    <span class="payoff_labels" style="bottom: -25px; left: 10px;">[[_payoff(payoffMatrix.*, 2, payoffIndex)]]</span>
-                    <span class="payoff_labels" style="bottom: -25px; right: 10px;">[[_payoff(payoffMatrix.*, 3, payoffIndex)]]</span>
-
-                    <div id="my-val" style$="height: [[_calcPercent(my_decision)]];"></div>
-                    <div id="other-val" style$="width: [[_calcPercent(other_decision)]];"></div>
+                    <otree-heatmap
+                        width='300'
+                        height='300'
+                        my-decision='[[my_decision]]'
+                        other-decision='[[other_decision]]'
+                        payoffs='[[my_payoffs]]'
+                        color='rainbow'
+                    ></otree-heatmap>
                 </div>
             </div>
 
             <div id="other-bimatrix-container">
                 <div id="other-heatmap">
-                    <canvas width="120" height="120" id="other-canvas"></canvas>
-                    
-                    <span class="payoff_labels" style="top: -25px; left: 10px;">[[_payoff(payoffMatrix.*, 0, otherPayoffIndex)]]</span>
-                    <span class="payoff_labels" style="top: -25px; right: 10px;">[[_payoff(payoffMatrix.*, 2, otherPayoffIndex)]]</span>
-                    <span class="payoff_labels" style="bottom: -25px; left: 10px;">[[_payoff(payoffMatrix.*, 1, otherPayoffIndex)]]</span>
-                    <span class="payoff_labels" style="bottom: -25px; right: 10px;">[[_payoff(payoffMatrix.*, 3, otherPayoffIndex)]]</span>
-
-                    <div id="my-val" style$="height: [[_calcPercent(my_decision)]];"></div>
-                    <div id="other-val" style$="width: [[_calcPercent(other_decision)]];"></div>
+                    <otree-heatmap
+                        width='120'
+                        height='120'
+                        my-decision='[[other_decision]]'
+                        other-decision='[[my_decision]]'
+                        payoffs='[400, 800, 0, 200]'
+                        color='mono'
+                    ></otree-heatmap>
                 </div>
             </div>
 
@@ -96,17 +97,19 @@
                 this.other_payoffs = this.payoffMatrix.map(val => parseInt(val[this.otherPayoffIndex]))
 
                 // make this player's heatmap
-                make_heatmap("my-canvas", this.my_payoffs, "rainbow");
+                // make_heatmap("my-canvas", this.my_payoffs, "rainbow");
 
                 // take inverse of other player's payoffs and display their heatmap
                 var other_payoffs_transpose = this.other_payoffs.slice();
                 var tmp = other_payoffs_transpose[1];
                 other_payoffs_transpose[1] = other_payoffs_transpose[2];
                 other_payoffs_transpose[2] = tmp;
-                make_heatmap("other-canvas", other_payoffs_transpose, "mono");
 
                 // initialize thermometer
                 make_thermometer("thermometer", "rainbow");
+            },
+            _getColor() {
+                return 'rainbow'
             },
             attached() {
                 this._setupPayoffGraph();
@@ -114,6 +117,12 @@
                 this.start_time = performance.now();
                 // start update function
                 window.requestAnimationFrame(this._updateGraph.bind(this));
+            },
+            _getPayoffs(index) {
+                // return this.payoffMatrix.map(val =>
+                //     parseInt(val[index])
+                // )
+                return [400, 800, 0, 200]
             },
             // compare two decisions
             _equals(d, decision) {

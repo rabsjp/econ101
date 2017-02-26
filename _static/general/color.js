@@ -1,4 +1,4 @@
-const color_stops = {
+var color_stops = {
     'mono': [
         [255, 255, 255],
         [255, 0, 0]
@@ -18,7 +18,7 @@ const color_stops = {
 // gets colors from the gradient defined by the color stops above
 // 0.0 <= percent <= 1.0
 // where percent = 1.0 gets the last color in color_stops and percent = 0.0 gets the first color in color_stops
-const get_gradient_color = function(percent, color_scheme) {
+function get_gradient_color(percent, color_scheme) {
     const color = color_stops[color_scheme]
     percent *= (color.length - 1)
     const low_color = Math.floor(percent)
