@@ -51,11 +51,10 @@
 
             <div class="graph-container">
                 <div id="strategy_graph"></div>
-                <otree-thermometer
-                    color='rainbow'
-                ></otree-thermometer>
+                <otree-thermometer color='rainbow'></otree-thermometer>
                 <div id="payoff_graph"></div>
             </div>
+            
         </div>
 
     </template>
@@ -86,8 +85,8 @@
                 '/component/otree-bimatrix' +
                 '/decisions')
 
-                // this.payoffIndex = this.$.vars.idInGroup - 1 // USE IN REAL THING
-                this.payoffIndex = 0 // USE IN DEMO.HTML
+                this.payoffIndex = this.$.vars.idInGroup - 1 // USE IN GAME
+                // this.payoffIndex = 0 // USE IN DEMO.HTML
 
                 this.otherPayoffIndex = this.payoffIndex === 0 ? 1 : 0
 
@@ -123,18 +122,19 @@
             },
             // set my current decision. triggered by the player releasing the slider
             _setMyDecision(event) {
-                if (event.key == 'ArrowDown' || event.key == 'ArrowUp') {
-                    const d = parseFloat(event.target.value)
-                    // if decisions hasn't been created yet, create it
-                    this.decisions = this.decisions || {}
-                    // pcode is this player's participant code
-                    const pcode = this.$.vars.participantCode
-                    // use polymer this.set to change decisions. I don't really know why I have to do this but it doesn't work if I don't
-                    this.set('decisions.' + pcode, d)
-                    this.my_decision = d
+                if (event.type === 'keyup' && !(event.key === 'ArrowDown') && !(event.key === 'ArrowUp'))
+                    return
 
-                    this._graphUpdatePayoffs()
-                }
+                const d = parseFloat(event.target.value)
+                // if decisions hasn't been created yet, create it
+                this.decisions = this.decisions || {}
+                // pcode is this player's participant code
+                const pcode = this.$.vars.participantCode
+                // use polymer this.set to change decisions. I don't really know why I have to do this but it doesn't work if I don't
+                this.set('decisions.' + pcode, d)
+                this.my_decision = d
+
+                this._graphUpdatePayoffs()
             },
             // listener on firebase decisions array. reacts to the opponent changing their strategy
             _decisionsChanged() {

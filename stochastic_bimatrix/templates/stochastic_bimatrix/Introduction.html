@@ -2,16 +2,17 @@
 {% load staticfiles otree_tags %}
 
 {% block title %}
-    Your Choice
+    Introduction
 {% endblock %}
 
 {% block content %}
 
-    <otree-continuous-bimatrix
-        payoff-matrix='{{ Constants.payoff_grid }}'
-        period-length='{{ Constants.period_length }}'
-    ></otree-continuous-bimatrix>
-
     {% include 'continuous_bimatrix/Instructions.html' %}
+
+    <p>
+       On the next page, you will have to answer one question to make sure you understand the instructions correctly.
+    </p>
+
+    {% next_button %}
 
 {% endblock %}

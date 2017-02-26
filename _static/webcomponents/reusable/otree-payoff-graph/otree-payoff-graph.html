@@ -1,0 +1,33 @@
+<link rel="import" href="/static/bower_components/polymer/polymer.html"/>
+
+<dom-module id="otree-payoff-graph">
+    <template>
+        <style>
+
+            div {
+                border: 2px orange solid;
+                position: absolute;
+                width: 510px;
+                height: 270px;
+                right: 0;
+                bottom: 0;
+            }
+
+        </style>
+
+        <div></div>
+
+    </template>
+    <script>
+        Polymer({
+            is: 'otree-payoff-graph',
+            properties: {
+                myPayoffs: Array,
+                otherPayoffs: Array,
+            },
+            _arrayItem(change, index) {
+				return change.base[index]
+			},
+        })
+    </script>
+</dom-module>
