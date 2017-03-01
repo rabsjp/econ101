@@ -19,21 +19,28 @@ payoffs.
 
 
 class Constants(BaseConstants):
-    name_in_url = 'bimatrix_with_chat'
+    name_in_url = 'discrete_bimatrix'
     players_per_group = 2
-    num_rounds = 1
+    num_rounds = 10
 
-    #  Points made if player defects and the other cooperates""",
-    defect_cooperate_amount = c(300)
+    # p1 payoffs
+    p1_A_p2_A_amount = 800
+    p1_A_p2_B_amount = 0
+    p1_B_p2_A_amount = 0
+    p1_B_p2_B_amount = 200
 
-    # Points made if both players cooperate
-    cooperate_amount = c(200)
-    cooperate_defect_amount = c(0)
-    defect_amount = c(100)
-    base_points = c(50)
+    # p2 payoffs
+    p2_A_p1_A_amount = 0
+    p2_A_p1_B_amount = 200
+    p2_B_p1_A_amount = 200
+    p2_B_p1_B_amount = 0
+
+    base_points = 0
 
     # Amount of time the game stays on the decision page in seconds
-    period_length = 120
+    period_length = 600
+    # Number of discrete time subperiods in a single period.
+    num_subperiods = 30
 
     training_1_choices = [
         'Alice gets 300 points, Bob gets 0 points',
@@ -46,20 +53,14 @@ class Constants(BaseConstants):
 
 
 class Subsession(BaseSubsession):
-
-    pass
+    def before_session_starts(self):
+        self.group_randomly()
 
 
 class Group(BaseGroup):
     pass
 
 class Player(BasePlayer):
-
-    training_question_1 = models.CharField(
-        choices=Constants.training_1_choices,
-        widget=widgets.RadioSelect(),
-        #timeout_default=Constants.training_1_choices[1]
-    )
 
     def is_training_question_1_correct(self):
         return self.training_question_1 == Constants.training_1_correct
@@ -78,6 +79,18 @@ class Player(BasePlayer):
         payoff = 0
         my_state = None
         other_state = None
+
+        if (self.id_in_group == 1):
+            A_A_payoff = Constants.p1_A_p2_A_amount
+            A_B_payoff = Constants.p1_A_p2_B_amount
+            B_A_payoff = Constants.p1_B_p2_A_amount
+            B_B_payoff = Constants.p1_B_p2_B_amount
+        else:
+            A_A_payoff = Constants.p2_A_p1_A_amount
+            A_B_payoff = Constants.p2_A_p1_B_amount
+            B_A_payoff = Constants.p2_B_p1_A_amount
+            B_B_payoff = Constants.p2_B_p1_B_amount
+
         for i, change in enumerate(self.decisions_over_time):
             if change.participant == self.participant:
                 my_state = change.decision
@@ -87,17 +100,17 @@ class Player(BasePlayer):
             if my_state != None and other_state != None:
                 if my_state == 0:
                     if other_state == 0:
-                        cur_payoff = float(Constants.cooperate_amount) / Constants.period_length
+                        cur_payoff = A_A_payoff / Constants.period_length
                     else:
-                        cur_payoff = float(Constants.cooperate_defect_amount) / Constants.period_length
+                        cur_payoff = A_B_payoff / Constants.period_length
                 else:
                     if other_state == 0:
-                        cur_payoff = float(Constants.defect_cooperate_amount) / Constants.period_length
+                        cur_payoff = B_A_payoff / Constants.period_length
                     else:
-                        cur_payoff = float(Constants.defect_amount) / Constants.period_length
+                        cur_payoff = B_B_payoff / Constants.period_length
 
                 if i == len(self.decisions_over_time) - 1:
-                    next_change_time = self.session.vars['end_time']
+                    next_change_time = self.session.vars['end_time_{}'.format(self.group.id_in_subsession)]
                 else:
                     next_change_time = self.decisions_over_time[i + 1].timestamp
 
