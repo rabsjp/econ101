@@ -159,6 +159,12 @@ SESSION_CONFIGS = [
         'app_sequence': ['continuous_bimatrix', 'payment_info'],
     },
     {
+        'name': 'stochastic_bimatrix',
+        'display_name': "Stochastic Bimatrix Game",
+        'num_demo_participants': 2,
+        'app_sequence': ['stochastic_bimatrix', 'payment_info'],
+    },
+    {
         'name': 'bimatrix_with_chat',
         'display_name': "Bimatrix Game with Chat",
         'num_demo_participants': 2,

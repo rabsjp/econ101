@@ -9,13 +9,6 @@
     height: 570px;
 }
 
-.payoff_labels {
-    position: absolute;
-    padding: 0;
-    font-size: 9pt;
-    font-weight: bold;
-}
-
 input[type=range] {
     writing-mode: bt-lr; /* IE */
     -webkit-appearance: slider-vertical; /* WebKit */
@@ -28,7 +21,6 @@ input[type=range] {
 }
 
 #my-bimatrix-container {
-    position: absolute;
     width: 370px;
     height: 360px;
     bottom: 10px;
@@ -36,7 +28,6 @@ input[type=range] {
 }
 
 #other-bimatrix-container {
-    position: absolute;
     width: 150px;
     height: 180px;
     top: 10px;
@@ -44,47 +35,18 @@ input[type=range] {
 }
 
 #my-bimatrix-container, #other-bimatrix-container {
+    position: absolute;
     display: inline-block;
     border: solid 2px orange;
 }
 
 #my-heatmap {
-    width: 300px;
-    height: 300px;
-    margin-right: 15px;
+    padding-right: 15px;
     float: right;
 }
 
 #other-heatmap {
-    width: 120px;
-    height: 120px;
-    margin: auto;
-}
-
-#my-heatmap, #other-heatmap {
-    position: relative;
-    margin-top: 30px;
-}
-
-#my-canvas, #other-canvas {
-    position: absolute;
-    display: block;
-}
-
-#my-val {
-    position: absolute;
-    bottom: 0;
-    left: -2%;
-    width: 104%;
-    border-top: 2px solid black;
-}
-
-#other-val {
-    position: absolute;
-    height: 104%;
-    right: 0;
-    top: -2%;
-    border-left: 2px solid black;
+    padding-left: 15px;
 }
 
 .graph-container {
@@ -93,16 +55,6 @@ input[type=range] {
     height: 550px;
     right: 10px;
     top: 10px;
-}
-
-#thermometer {
-    position: absolute;
-    border: 1px black solid;
-    margin-top: 8px;
-    width: 20px;
-    height: 235px;
-    left: 0;
-    bottom: 25px;
 }
 
 #payoff_graph {

@@ -12,30 +12,38 @@ import random
 # </standard imports>
 
 doc = """
-This is a one-shot "Prisoner's Dilemma". Two players are asked separately
-whether they want to cooperate or defect. Their choices directly determine the
-payoffs.
+Two-by-two game with stochastic transitions between payoff matrices.
 """
 
 
 class Constants(BaseConstants):
-    name_in_url = 'continuous_bimatrix'
+    name_in_url = 'stochastic_bimatrix'
     players_per_group = 2
     num_rounds = 10
 
     #payoff grid
-    payoff_grid = [
-        [ 800, 0   ], [ 0,   200 ],
-        [ 0,   200 ], [ 200, 0   ],
+    payoff_grid_array = [
+        [
+            [ 100, 100 ], [ 0,   800 ],
+            [ 800, 0   ], [ 300, 300 ]
+        ],
+        [
+            [ 800, 0   ], [ 0,   200 ],
+            [ 0,   200 ], [ 200, 0   ]
+        ],
+        [
+            [ 200, 400 ], [ 100, 100 ],
+            [ 0,   400 ], [ 500, 200 ]
+        ]
     ]
 
     base_points = 0
 
-    # Amount of time the game stays on the decision page in seconds.
     period_length = 120
 
 
 class Subsession(BaseSubsession):
+    
     def before_session_starts(self):
         self.group_randomly()
 
@@ -45,17 +53,18 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-
+    
     def other_player(self):
         return self.get_others_in_group()[0]
 
     def set_payoff(self):
         self.decisions_over_time = Decision.objects.filter(
-                component='otree-bimatrix',
-                session=self.session.code,
-                subsession=self.subsession.name(),
-                round=self.round_number,
-                group=self.group.id_in_subsession)
+            component='otree-bimatrix',
+            session=self.session.code,
+            subsession=self.subsession.name(),
+            round=self.round_number,
+            group=self.group.id_in_subsession
+        )
 
         payoff = 0
 
@@ -63,7 +72,7 @@ class Player(BasePlayer):
         my_state = .5
         other_state = .5
 
-        payoff_grid = Constants.payoff_grid
+        payoff_grid = Constants.payoff_grid[1]
         if (self.id_in_group == 1):
             A_A_payoff = payoff_grid[0][0]
             A_B_payoff = payoff_grid[1][0]
@@ -101,3 +110,4 @@ class Player(BasePlayer):
             payoff += (next_change_time - change.timestamp).total_seconds() * cur_payoff
 
         self.payoff = payoff
+
