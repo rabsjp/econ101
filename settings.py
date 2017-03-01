@@ -159,6 +159,12 @@ SESSION_CONFIGS = [
         'app_sequence': ['continuous_bimatrix', 'payment_info'],
     },
     {
+        'name': 'discrete_time_example',
+        'display_name': "Discrete Time Example Game",
+        'num_demo_participants': 2,
+        'app_sequence': ['discrete_time_example', 'payment_info'],
+    },
+    {
         'name': 'public_goods',
         'display_name': "Public Goods",
         'num_demo_participants': 3,
