@@ -52,7 +52,7 @@ class Player(BasePlayer):
     def set_payoff(self):
         self.decisions_over_time = Decision.objects.filter(
                 component='otree-bimatrix',
-                session=self.session.code,
+                session=self.session,
                 subsession=self.subsession.name(),
                 round=self.round_number,
                 group=self.group.id_in_subsession)
@@ -85,9 +85,9 @@ class Player(BasePlayer):
 
         for i, change in enumerate(self.decisions_over_time):
             if change.participant == self.participant:
-                my_state = change.decision[self.participant][0]
+                my_state = change.value
             else:
-                other_state = change.decision[self.other_player()][0]
+                other_state = change.value
 
             cur_payoff = ((A_A_payoff * my_state * other_state) +
                           (A_B_payoff * my_state * (1 - other_state)) +
