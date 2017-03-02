@@ -1,6 +1,6 @@
-# Decisions
+# Real-Time Data Distribution With Firebase
 
-## Real-Time Data Distribution With Firebase
+## Decisions
 
 Components can write to a decisions path in Firebase. The path has the form:
 `/session/<session>/app/<app>/subsession/<subsession>/round/<round>/group/<group>/component/<component>/decisions/<participant_code>`.
@@ -12,7 +12,7 @@ the entire group to view other group members decisions - their decision will be 
 ```
 /session/pxru0609/app/continuous_bimatrix/subsession/1/round/1/group/1/component/otree-bimatrix/decisions
 {
-  "kghjoic3": 0.52
+  "kghjoic3": 0.52,
   "wev5qi5u": 0.38
 }
 ```
@@ -85,3 +85,36 @@ decisions_over_time[0].value == -1
 decisions_over_time[-1].timestamp = end_time
 decisions_over_time[-1].participant.code == <some participant>
 decisions_over_time[-1].value == -1
+```
+
+## Discrete-Time Subperiods (In Progress)
+
+Subperiods split the round into discrete intervals of time. The oTree server writes to a Firebase path of the form
+`/session/<session>/app/<app>/subsession/<subsession>/round/<round>/group/<group>/subperiods`. Components can listen
+to this path to get updates on the decisions a subject "locked-in" at the end of the sub-period. The subperiods object
+is an array, with each value being the last decision seen by the server at the end of the sub-period.
+
+For example:
+```
+/session/pxru0609/app/continuous_bimatrix/subsession/1/round/1/group/1/subperiods
+[
+  {
+    "timestamp": 1488489557696,
+    "components": {
+      "otree-bimatrix": {
+        "kghjoic3": 0.75,
+        "wev5qi5u": 0.1 
+      }
+    }
+  }
+  ...
+]
+```
+
+Note that the subperiod has a namespace for the component, so multiple components can be used on the same page. It is up
+to the component to track writing to the `decisions` path and watching the `subperiods` path for the locked-in decision.
+
+## Server-Sent Variables (Rough Draft)
+
+* Server can watch Firebase decisions.
+* Server can publish changes to variables on a path that clients can watch.
