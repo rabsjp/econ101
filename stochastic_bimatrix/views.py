@@ -12,7 +12,7 @@ import logging
 
 
 def vars_for_all_templates(self):
-    payoff_grid = Constants.payoff_grid
+    payoff_grid = Constants.payoff_grid_array[1]
     if (self.player.id_in_group == 1):
         return {
             "my_A_A_payoff": payoff_grid[0][0],
@@ -84,7 +84,7 @@ class Decision(Page):
 
 
 class Results(Page):
-
+    
     def vars_for_template(self):
         self.player.set_payoff()
 
@@ -92,7 +92,6 @@ class Results(Page):
             'decisions_over_time': self.player.decisions_over_time,
             'total_plus_base': self.player.payoff + Constants.base_points
         }
-
 
 
 page_sequence = [
