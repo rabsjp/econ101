@@ -4,7 +4,6 @@ from . import models
 from ._builtin import Page, WaitPage
 from otree.common import Currency as c, currency_range
 from .models import Constants
-from .models import Decision as DecisionModel
 
 from django.utils import timezone
 from datetime import timedelta
@@ -48,32 +47,13 @@ class DecisionWaitPage(WaitPage):
         start_time = timezone.now()
         end_time = start_time + timedelta(seconds=Constants.period_length)
 
-        self.session.vars['start_time_{}'.format(self.group.id_in_subsession)] = start_time
-        self.session.vars['end_time_{}'.format(self.group.id_in_subsession)] = end_time
+        self.session.vars[
+            'start_time_{}'.format(self.group.id_in_subsession)] = start_time
+        self.session.vars[
+            'end_time_{}'.format(self.group.id_in_subsession)] = end_time
 
-        # insert dummy decisions into database
-        # put a decision of -1 for each player at the start and end of the period
-        for player in self.group.get_players():
-            start_decision, end_decision = DecisionModel(), DecisionModel()
-
-            for d in start_decision, end_decision:
-                d.component = "otree-server"
-                d.session = self.session.code
-                d.subsession = self.subsession.name()
-                d.round = self.round_number
-                d.group = self.group.id_in_subsession
-                d.page = "Decision"
-                d.app = "bimatrix"
-                d.participant = player.participant
-                d.decision = {
-                    d.participant.code: -1
-                }
-
-            start_decision.timestamp = start_time
-            end_decision.timestamp = end_time
-
-            start_decision.save()
-            end_decision.save()
+        self.log_decision_bookends(
+            start_time, end_time, 'discrete_bimatrix', -1)
 
 
 class Decision(Page):

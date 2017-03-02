@@ -64,6 +64,7 @@ class Player(BasePlayer):
         other_state = .5
 
         payoff_grid = Constants.payoff_grid
+        
         if (self.id_in_group == 1):
             A_A_payoff = payoff_grid[0][0]
             A_B_payoff = payoff_grid[1][0]
@@ -84,9 +85,9 @@ class Player(BasePlayer):
 
         for i, change in enumerate(self.decisions_over_time):
             if change.participant == self.participant:
-                my_state = change.decision
+                my_state = change.decision[self.participant][0]
             else:
-                other_state = change.decision
+                other_state = change.decision[self.other_player()][0]
 
             cur_payoff = ((A_A_payoff * my_state * other_state) +
                           (A_B_payoff * my_state * (1 - other_state)) +

@@ -75,8 +75,10 @@ class Player(BasePlayer):
                 group=self.group.id_in_subsession)
 
         payoff = 0
-        my_state = None
-        other_state = None
+
+        # default state when no decisions have been made
+        my_state = .5
+        other_state = .5
 
         if (self.id_in_group == 1):
             A_A_payoff = Constants.p1_A_p2_A_amount
@@ -91,9 +93,9 @@ class Player(BasePlayer):
 
         for i, change in enumerate(self.decisions_over_time):
             if change.participant == self.participant:
-                my_state = change.decision
+                my_state = change.decision[self.participant][0]
             else:
-                other_state = change.decision
+                other_state = change.decision[self.other_player()][0]
 
             if my_state != None and other_state != None:
                 if my_state == 0:
