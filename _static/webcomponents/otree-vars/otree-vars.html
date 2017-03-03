@@ -19,7 +19,6 @@
 		var role = undefined;
 		var participantCode = undefined;
 		var appName = undefined;
-		var page = undefined;
 		var idInGroup = undefined;
 
 		Polymer({
@@ -39,8 +38,6 @@
 				participantCode: String,
 				/** Current app name, e.g. {{ subsession.app_name }} */
 				appName: String,
-				/** Current page name. TODO: fill with actual page value */
-				page: String,
 				/** Player's index in group. e.g. {{ player.id_in_group }} */
 				idInGroup: String
 			},
@@ -79,11 +76,6 @@
 					appName = this.appName;
 				} else {
 					this.appName = appName;
-				}
-				if (page === undefined) {
-					page = this.page;
-				} else {
-					this.page = page;
 				}
 				if (idInGroup === undefined) {
 					idInGroup = this.idInGroup;

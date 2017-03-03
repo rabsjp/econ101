@@ -17,8 +17,6 @@
 
 {% block content %}
     
-    <otree-subperiods></otree-subperiods>
-
     <otree-bimatrix
         row-labels='["A", "B"]'
         payoff-matrix=
@@ -43,6 +41,6 @@
         payoff-index='{{ player.id_in_group|add:"-1" }}'>
     </otree-bimatrix>
     
-    {% include 'bimatrix/Instructions.html' %}
+    {% include 'discrete_bimatrix/Instructions.html' %}
 
 {% endblock %}

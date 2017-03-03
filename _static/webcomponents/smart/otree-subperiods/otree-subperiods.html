@@ -28,13 +28,11 @@
         Polymer({
             is: 'otree-subperiods',
             properties: {
-                subperiods: {
-                    type: Array,
-                    notify: true
+                periodLength: {
+                    type: Number
                 },
-                lastSubperiod: {
-                    type: Object,
-                    notify: true
+                subperiods: {
+                    type: Number
                 },
                 path_: String
             },
@@ -48,7 +46,6 @@
                     '/subsession/' + this.$.vars.subsession +
                     '/round/' + this.$.vars.round +
                     '/group/' + this.$.vars.group +
-                    '/page/' + this.$.vars.page +
                     '/subperiods');
             },
             _subperiodsChanged: function() {
