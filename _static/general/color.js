@@ -1,3 +1,6 @@
+// color.js
+// contains color definitions for 'mono' and 'rainbow' color schemes
+
 var color_stops = {
     'mono': [
         [255, 255, 255],

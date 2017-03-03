@@ -85,8 +85,12 @@
                 '/component/otree-bimatrix' +
                 '/decisions')
 
-                this.payoffIndex = this.$.vars.idInGroup - 1 // USE IN GAME
-                // this.payoffIndex = 0 // USE IN DEMO.HTML
+                if (this.$.vars.idInGroup == undefined) {
+                    console.log('Not in game, manually setting payoffIndex')
+                    this.payoffIndex = 0
+                } else {
+                    this.payoffIndex = this.$.vars.idInGroup - 1
+                }
 
                 this.otherPayoffIndex = this.payoffIndex === 0 ? 1 : 0
 
@@ -283,6 +287,7 @@
             _updateGraph(timestamp) {
                 // calculate x value for current time
                 const xval = (timestamp - this.start_time) / (this.periodLength * 1000)
+                console.log(xval)
 
                 let dataset
                 dataset = this.payoff_graph_obj.series[0]
