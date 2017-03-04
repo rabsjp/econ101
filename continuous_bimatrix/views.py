@@ -76,7 +76,7 @@ class Results(Page):
 
 page_sequence = [
     Introduction,
-    # DecisionWaitPage,
+    DecisionWaitPage,
     Decision,
     Results
 ]
