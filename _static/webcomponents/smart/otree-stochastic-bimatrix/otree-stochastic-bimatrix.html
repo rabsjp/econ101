@@ -5,27 +5,50 @@
 
 <link rel="import" href="/static/webcomponents/reusable/otree-heatmap/otree-heatmap.html"/>
 <link rel="import" href="/static/webcomponents/reusable/otree-thermometer/otree-thermometer.html"/>
+<link rel="import" href="/static/webcomponents/reusable/otree-payoff-graph/otree-payoff-graph.html"/>
+<link rel="import" href="/static/webcomponents/reusable/otree-strategy-graph/otree-strategy-graph.html"/>
 
 <script src="/static/general/color.js"></script>
 
 <dom-module id="otree-stochastic-bimatrix">
     <template>
-        <link rel="stylesheet" type="text/css" href="styles.css">
-        <firebase-document
-                id="fbdoc"
-                path="[[path_]]"
-                data="{{ decisions }}">
-        </firebase-document>
+        <style>
+            :host { margin: 10px; }
+
+            #slider {
+                writing-mode: bt-lr; /* IE */
+                -webkit-appearance: slider-vertical; /* WebKit */
+                width: 8px;
+                height: 310px;
+                margin: 25px 0 0 -30px;
+            }
+        </style>
+
         <otree-vars id="vars"></otree-vars>
         <otree-log id="log"></otree-log>
+        <firebase-document
+            id="fbdoc"
+            path="[[path_]]"
+            data="{{ decisions }}">
+        </firebase-document>
 
-        <div id="experiment-container">
+        <div style="height: 570px">
             
-            <div id="my-bimatrix-container">
-                <input id="slider" type="range" min="0" max="1" step=".01" defaultValue=".5" on-up="_setMyDecision"/>
-
-                <div id="my-heatmap">
+            <div style="float:left; padding-left: 40px">
+                <otree-heatmap
+                    width='120'
+                    height='120'
+                    my-decision='[[other_decision]]'
+                    other-decision='[[my_decision]]'
+                    payoffs='[[other_payoffs_transpose]]'
+                    color='[[other_color]]'
+                ></otree-heatmap>
+                <div style="float:left">
+                    <input id="slider" type="range" min="0" max="1" step=".01" value="[[my_decision]]" on-up="_setMyDecision" />
+                </div>
+                <div style="float:right">
                     <otree-heatmap
+                        class="heatmap"
                         width='300'
                         height='300'
                         my-decision='[[my_decision]]'
@@ -36,21 +59,26 @@
                 </div>
             </div>
 
-            <div id="other-bimatrix-container">
-                <div id="other-heatmap">
-                    <otree-heatmap
-                        width='120'
-                        height='120'
-                        my-decision='[[other_decision]]'
-                        other-decision='[[my_decision]]'
-                        payoffs='[[other_payoffs_transpose]]'
-                        color='[[other_color]]'
-                    ></otree-heatmap>
+            <div style="float:right">
+                <otree-strategy-graph
+                    my-decision='[[my_decision]]'
+                    other-decision='[[other_decision]]'
+                    period-length='120'
+                ></otree-strategy-graph>
+                <div style="float:left">
+                    <!--<otree-thermometer color='rainbow'></otree-thermometer>-->
+                </div>
+                <div style="float: right">
+                    <otree-payoff-graph
+                        my-decision='[[my_decision]]'
+                        other-decision='[[other_decision]]'
+                        my-payoffs='[[my_payoffs]]'
+                        other-payoffs='[[other_payoffs]]'
+                        period-length='120'
+                    ></otree-payoff-graph>
                 </div>
             </div>
-
         </div>
-
     </template>
 
     <script>
@@ -70,22 +98,23 @@
             },
             ready() {
                 this.path_ = (
-                '/session/' + this.$.vars.session +
-                '/app/' + this.$.vars.appName +
-                '/subsession/' + this.$.vars.subsession +
-                '/round/' + this.$.vars.round +
-                '/group/' + this.$.vars.group +
-                '/component/otree-bimatrix' +
-                '/decisions')
+                    '/session/' + this.$.vars.session +
+                    '/app/' + this.$.vars.appName +
+                    '/subsession/' + this.$.vars.subsession +
+                    '/round/' + this.$.vars.round +
+                    '/group/' + this.$.vars.group +
+                    '/component/otree-bimatrix' +
+                    '/decisions'
+                )
 
+                // set payoff indices
                 if (this.$.vars.idInGroup == undefined) {
                     console.log('Not in game, manually setting payoffIndex')
                     this.payoffIndex = 0
                 } else {
                     this.payoffIndex = this.$.vars.idInGroup - 1
                 }
-
-                this.otherPayoffIndex = this.payoffIndex === 0 ? 1 : 0
+                this.otherPayoffIndex = 1 - this.payoffIndex
 
                 // variables for this player's decision and the opponent's decision
                 this.my_decision = .5
@@ -96,9 +125,6 @@
                 this.other_color = 'mono'
 
                 this._calcPayoffs()
-            },
-            attached() {
-                this.start_time = performance.now()
             },
             _calcPayoffs() {
                 // some function of decisions determines which payoff matrix will be used
@@ -139,10 +165,8 @@
 
                 const pcode = this.$.vars.participantCode
                 // if I haven't set a decision yet, use my decision from firebase. here in case someone refreshes the page
-                if (this.decisions[pcode]) {
+                if (this.decisions[pcode])
                     this.my_decision = this.decisions[pcode]
-                    this.$.slider.value = this.my_decision
-                }
 
                 // get other player's decision by picking the key that isn't yours
                 // there's probably a better way of doing this
@@ -153,8 +177,7 @@
                     }
                 }
                 this._calcPayoffs()
-            },
+            }
         })
     </script>
-
 </dom-module>
