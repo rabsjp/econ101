@@ -1,22 +1,23 @@
 <link rel="import" href="/static/bower_components/polymer/polymer.html"/>
 
-<dom-module id="otree-payoff-graph">
+<dom-module id="otree-strategy-graph">
     <template>
         <style>
 
             div {
                 width: 510px;
                 height: 255px;
+                padding-bottom: 30px;
             }
 
         </style>
 
-        <div id="payoff_graph"></div>
+        <div id="strategy_graph"></div>
 
     </template>
     <script>
         Polymer({
-            is: 'otree-payoff-graph',
+            is: 'otree-strategy-graph',
             properties: {
                 myDecision: {
                     type: Number,
@@ -26,12 +27,10 @@
                     type: Number,
                     observer: '_graphUpdatePayoffs'
                 },
-                myPayoffs: Array,
-                otherPayoffs: Array,
                 periodLength: Number,
             },
             attached() {
-                this._setupPayoffGraph()
+                this._setupStrategyGraph()
                 this.start_time = performance.now()
                 // start update function
                 window.requestAnimationFrame(this._updateGraph.bind(this))
@@ -44,20 +43,13 @@
                 return arr[arr.length - 1]
             },
             // sets up payoff over time graph
-            _setupPayoffGraph() {
-                // readability is overrated
-                // just sums each set of payoffs and divides by 4
-                const myInitialPayoff = this.myPayoffs.reduce((a, b) => a + b, 0) / 4
-                const otherInitialPayoff = this.otherPayoffs.reduce((a, b) => a + b, 0) / 4
-                // finds max of all payoffs
-                const maxPayoff = Math.max(... this.myPayoffs.concat(this.otherPayoffs))
-
+            _setupStrategyGraph() {
                 // call highcharts setup function
                 this.graph_obj = Highcharts.chart({
                     chart: {
                         animation: false,
-                        renderTo: 'payoff_graph',
-                        enabled: false,
+                        renderTo: 'strategy_graph',
+                        type: 'line',
                     },
                     title: { text: null },
                     exporting: { enabled: false },
@@ -72,20 +64,17 @@
                     yAxis: {
                         title: { text: undefined },
                         min: 0,
-                        max: maxPayoff,
-                        endOnTick: false,
-                        tickInterval: maxPayoff / 4
+                        max: 1
                     },
                     plotOptions: {
                         line: {marker: {enabled: false}},
-                        area: {marker: {enabled: false}},
                         series: {
                             states: {
                                 hover: {
                                     enabled: false,
                                 }
                             }
-                       }
+                        }
                     },
                     line: {
                         marker: {
@@ -96,18 +85,14 @@
                             }
                         }
                     },
-                    series: [
-                        {
-                            type: "area",
-                            data: [[0, myInitialPayoff], [0, myInitialPayoff]],
-                            step: "left"
-                        },
-                        {
-                            type: "line",
-                            data: [[0, otherInitialPayoff], [0, otherInitialPayoff]],
-                            step: "left"
-                        }
-                    ]
+                    series: [{
+                        data: [ [0, .5], [0, .5] ],
+                        step: "left"
+                    },
+                    {
+                        data: [ [0, .5], [0, .5] ],
+                        step: "left"
+                    }]
                 })
             },
             // updates current payoff value every 50 ms
@@ -120,7 +105,6 @@
                 this._lastElem(dataset.data).update({x: xval})
 
                 dataset = this.graph_obj.series[1]
-                len = dataset.data.length
                 this._lastElem(dataset.data).update({x: xval})
 
                 // recursively call update
@@ -131,34 +115,21 @@
                 // if graph hasn't been initialized, don't do anything
                 if (!this.graph_obj) return
 
-                // calculate the payoff with current decision values
-                const my_point_payoff =
-                    (this.myDecision * this.otherDecision * this.myPayoffs[0]) +
-                    (this.myDecision * (1 - this.otherDecision) * this.myPayoffs[1]) +
-                    ((1 - this.myDecision) * this.otherDecision * this.myPayoffs[2]) +
-                    ((1 - this.myDecision) * (1 - this.otherDecision) * this.myPayoffs[3])
-
-                const other_point_payoff =
-                    (this.otherDecision * this.myDecision * this.otherPayoffs[0]) +
-                    (this.otherDecision * (1 - this.myDecision) * this.otherPayoffs[1]) +
-                    ((1 - this.otherDecision) * this.myDecision * this.otherPayoffs[2]) +
-                    ((1 - this.otherDecision) * (1 - this.myDecision) * this.otherPayoffs[3])
-
                 // calculate new decision's timestamp as a value between 0 and 1
                 const xval = (performance.now() - this.start_time) / (this.periodLength * 1000)
 
                 let dataset
-                // add point for my payoff
+                // add point for my new decision
                 dataset = this.graph_obj.series[0]
                 this._lastElem(dataset.data).remove()
-                dataset.addPoint([xval, my_point_payoff], false, false)
-                dataset.addPoint([xval, my_point_payoff], true, false)
+                dataset.addPoint([xval, this.myDecision], false, false)
+                dataset.addPoint([xval, this.myDecision], true, false)
 
-                // add point for other payoff
+                // add point for others' new decision
                 dataset = this.graph_obj.series[1]
                 this._lastElem(dataset.data).remove()
-                dataset.addPoint([xval, other_point_payoff], false, false)
-                dataset.addPoint([xval, other_point_payoff], true, false)
+                dataset.addPoint([xval, this.otherDecision], false, false)
+                dataset.addPoint([xval, this.otherDecision], true, false)
             }
         })
     </script>

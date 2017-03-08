@@ -5,27 +5,50 @@
 
 <link rel="import" href="/static/webcomponents/reusable/otree-heatmap/otree-heatmap.html"/>
 <link rel="import" href="/static/webcomponents/reusable/otree-thermometer/otree-thermometer.html"/>
+<link rel="import" href="/static/webcomponents/reusable/otree-payoff-graph/otree-payoff-graph.html"/>
+<link rel="import" href="/static/webcomponents/reusable/otree-strategy-graph/otree-strategy-graph.html"/>
 
 <script src="/static/general/color.js"></script>
 
 <dom-module id="otree-continuous-bimatrix">
     <template>
-        <link rel="stylesheet" type="text/css" href="styles.css">
-        <firebase-document
-                id="fbdoc"
-                path="[[path_]]"
-                data="{{ decisions }}">
-        </firebase-document>
+        <style>
+            :host { margin: 10px; }
+
+            #slider {
+                writing-mode: bt-lr; /* IE */
+                -webkit-appearance: slider-vertical; /* WebKit */
+                width: 8px;
+                height: 310px;
+                margin: 25px 0 0 -30px;
+            }
+        </style>
+
         <otree-vars id="vars"></otree-vars>
         <otree-log id="log"></otree-log>
+        <firebase-document
+            id="fbdoc"
+            path="[[path_]]"
+            data="{{ decisions }}">
+        </firebase-document>
 
-        <div id="experiment-container">
+        <div style="height: 570px">
             
-            <div id="my-bimatrix-container">
-                <input id="slider" type="range" min="0" max="1" step=".01" defaultValue=".5" on-up="_setMyDecision"/>
-
-                <div id="my-heatmap">
+            <div style="float:left; padding-left: 40px">
+                <otree-heatmap
+                    width='120'
+                    height='120'
+                    my-decision='[[other_decision]]'
+                    other-decision='[[my_decision]]'
+                    payoffs='[[other_payoffs_transpose]]'
+                    color='[[other_color]]'
+                ></otree-heatmap>
+                <div style="float:left">
+                    <input id="slider" type="range" min="0" max="1" step=".01" value="[[my_decision]]" on-up="_setMyDecision" />
+                </div>
+                <div style="float:right">
                     <otree-heatmap
+                        class="heatmap"
                         width='300'
                         height='300'
                         my-decision='[[my_decision]]'
@@ -36,27 +59,26 @@
                 </div>
             </div>
 
-            <div id="other-bimatrix-container">
-                <div id="other-heatmap">
-                    <otree-heatmap
-                        width='120'
-                        height='120'
-                        my-decision='[[other_decision]]'
-                        other-decision='[[my_decision]]'
-                        payoffs='[[other_payoffs_transpose]]'
-                        color='[[other_color]]'
-                    ></otree-heatmap>
+            <div style="float:right">
+                <otree-strategy-graph
+                    my-decision='[[my_decision]]'
+                    other-decision='[[other_decision]]'
+                    period-length='120'
+                ></otree-strategy-graph>
+                <div style="float:left">
+                    <!--<otree-thermometer color='rainbow'></otree-thermometer>-->
+                </div>
+                <div style="float: right">
+                    <otree-payoff-graph
+                        my-decision='[[my_decision]]'
+                        other-decision='[[other_decision]]'
+                        my-payoffs='[[my_payoffs]]'
+                        other-payoffs='[[other_payoffs]]'
+                        period-length='120'
+                    ></otree-payoff-graph>
                 </div>
             </div>
-
-            <div class="graph-container">
-                <div id="strategy_graph"></div>
-                <otree-thermometer color='rainbow'></otree-thermometer>
-                <div id="payoff_graph"></div>
-            </div>
-            
         </div>
-
     </template>
 
     <script>
@@ -76,18 +98,23 @@
             },
             ready() {
                 this.path_ = (
-                '/session/' + this.$.vars.session +
-                '/app/' + this.$.vars.appName +
-                '/subsession/' + this.$.vars.subsession +
-                '/round/' + this.$.vars.round +
-                '/group/' + this.$.vars.group +
-                '/component/otree-bimatrix' +
-                '/decisions')
+                    '/session/' + this.$.vars.session +
+                    '/app/' + this.$.vars.appName +
+                    '/subsession/' + this.$.vars.subsession +
+                    '/round/' + this.$.vars.round +
+                    '/group/' + this.$.vars.group +
+                    '/component/otree-bimatrix' +
+                    '/decisions'
+                )
 
-                this.payoffIndex = this.$.vars.idInGroup - 1 // USE IN GAME
-                // this.payoffIndex = 0 // USE IN DEMO.HTML
-
-                this.otherPayoffIndex = this.payoffIndex === 0 ? 1 : 0
+                // set payoff indices
+                if (this.$.vars.idInGroup == undefined) {
+                    console.log('Not in game, manually setting payoffIndex')
+                    this.payoffIndex = 0
+                } else {
+                    this.payoffIndex = this.$.vars.idInGroup - 1
+                }
+                this.otherPayoffIndex = 1 - this.payoffIndex
 
                 // variables for this player's decision and the opponent's decision
                 this.my_decision = .5
@@ -108,17 +135,6 @@
                 other_payoffs_transpose[2] = tmp
                 this.other_payoffs_transpose = other_payoffs_transpose
             },
-            attached() {
-                this._setupPayoffGraph()
-                this._setupStrategyGraph()
-                this.start_time = performance.now()
-                // start update function
-                window.requestAnimationFrame(this._updateGraph.bind(this))
-            },
-            // helper method to return last element of array
-            _lastElem(arr) {
-                return arr[arr.length - 1]
-            },
             // set my current decision. triggered by the player releasing the slider
             _setMyDecision(event) {
                 if (event.type === 'keyup' && !(event.key === 'ArrowDown') && !(event.key === 'ArrowUp'))
@@ -132,8 +148,6 @@
                 // use polymer this.set to change decisions. I don't really know why I have to do this but it doesn't work if I don't
                 this.set('decisions.' + pcode, d)
                 this.my_decision = d
-
-                this._graphUpdatePayoffs()
             },
             // listener on firebase decisions array. reacts to the opponent changing their strategy
             _decisionsChanged() {
@@ -142,211 +156,18 @@
 
                 const pcode = this.$.vars.participantCode
                 // if I haven't set a decision yet, use my decision from firebase. here in case someone refreshes the page
-                if (this.decisions[pcode]) {
+                if (this.decisions[pcode])
                     this.my_decision = this.decisions[pcode]
-                    this.$.slider.value = this.my_decision
-                }
 
                 // get other player's decision by picking the key that isn't yours
                 // there's probably a better way of doing this
                 for (let key in this.decisions) {
                     if (key != pcode) {
                         this.other_decision = this.decisions[key]
-
-                        this._graphUpdatePayoffs()
                         break
                     }
                 }
-            },
-            // sets up payoff over time graph
-            _setupPayoffGraph() {
-                // readability is overrated
-                // just sums each set of payoffs and divides by 4
-                const myInitialPayoff = this.my_payoffs.reduce((a, b) => a + b, 0) / 4
-                const otherInitialPayoff = this.other_payoffs.reduce((a, b) => a + b, 0) / 4
-                // finds max of all payoffs
-                const maxPayoff = Math.max.apply(null, this.my_payoffs.concat(this.other_payoffs))
-
-                // call highcharts setup function
-                this.payoff_graph_obj = Highcharts.chart({
-                    chart: {
-                        animation: false,
-                        renderTo: 'payoff_graph',
-                        enabled: false,
-                    },
-                    title: { text: null },
-                    exporting: { enabled: false },
-                    tooltip: { enabled: false },
-                    legend: { enabled: false },
-                    credits: { enabled: false },
-                    xAxis: {
-                        min: 0,
-                        max: 1,
-                        labels: { enabled: false }
-                    },
-                    yAxis: {
-                        title: { text: undefined },
-                        min: 0,
-                        max: maxPayoff,
-                        endOnTick: false,
-                        tickInterval: maxPayoff / 4
-                    },
-                    plotOptions: {
-                        line: {marker: {enabled: false}},
-                        area: {marker: {enabled: false}},
-                        series: {
-                            states: {
-                                hover: {
-                                    enabled: false,
-                                }
-                            }
-                       }
-                    },
-                    line: {
-                        marker: {
-                            enabled: false,
-                            states: {
-                                hover: { enabled: false },
-                                select: { enabled: false }
-                            }
-                        }
-                    },
-                    series: [
-                        {
-                            type: "area",
-                            data: [[0, myInitialPayoff], [0, myInitialPayoff]],
-                            step: "left"
-                        },
-                        {
-                            type: "line",
-                            data: [[0, otherInitialPayoff], [0, otherInitialPayoff]],
-                            step: "left"
-                        }
-                    ]
-                })
-            },
-            // sets up strategy over time graph
-            _setupStrategyGraph() {
-                // call highcharts setup function
-                this.strategy_graph_obj = Highcharts.chart({
-                    chart: {
-                        animation: false,
-                        renderTo: 'strategy_graph',
-                        type: 'line',
-                    },
-                    title: { text: null },
-                    exporting: { enabled: false },
-                    tooltip: { enabled: false },
-                    legend: { enabled: false },
-                    credits: { enabled: false },
-                    xAxis: {
-                        min: 0,
-                        max: 1,
-                        labels: { enabled: false }
-                    },
-                    yAxis: {
-                        title: { text: undefined },
-                        min: 0,
-                        max: 1
-                    },
-                    plotOptions: {
-                        line: {marker: {enabled: false}},
-                        series: {
-                            states: {
-                                hover: {
-                                    enabled: false,
-                                }
-                            }
-                        }
-                    },
-                    line: {
-                        marker: {
-                            enabled: false,
-                            states: {
-                                hover: { enabled: false },
-                                select: { enabled: false }
-                            }
-                        }
-                    },
-                    series: [{
-                        data: [ [0, .5], [0, .5] ],
-                        step: "left"
-                    },
-                    {
-                        data: [ [0, .5], [0, .5] ],
-                        step: "left"
-                    }]
-                })
-            },
-            // updates current payoff value every 50 ms
-            _updateGraph(timestamp) {
-                // calculate x value for current time
-                const xval = (timestamp - this.start_time) / (this.periodLength * 1000)
-
-                let dataset
-                dataset = this.payoff_graph_obj.series[0]
-                this._lastElem(dataset.data).update({x: xval})
-
-                dataset = this.payoff_graph_obj.series[1]
-                len = dataset.data.length
-                this._lastElem(dataset.data).update({x: xval})
-
-                dataset = this.strategy_graph_obj.series[0]
-                this._lastElem(dataset.data).update({x: xval})
-
-                dataset = this.strategy_graph_obj.series[1]
-                this._lastElem(dataset.data).update({x: xval})
-
-                // recursively call update
-                window.requestAnimationFrame(this._updateGraph.bind(this))
-            },
-            // is called everytime someone's decision changes and update payoff graph
-            _graphUpdatePayoffs() {
-                // if graph hasn't been initialized, don't do anything
-                if (!this.payoff_graph_obj) return
-
-                // calculate the payoff with current decision values
-                const my_point_payoff =
-                    (this.my_decision * this.other_decision * this.my_payoffs[0]) +
-                    (this.my_decision * (1 - this.other_decision) * this.my_payoffs[1]) +
-                    ((1 - this.my_decision) * this.other_decision * this.my_payoffs[2]) +
-                    ((1 - this.my_decision) * (1 - this.other_decision) * this.my_payoffs[3])
-
-                const other_point_payoff =
-                    (this.other_decision * this.my_decision * this.other_payoffs[0]) +
-                    (this.other_decision * (1 - this.my_decision) * this.other_payoffs[1]) +
-                    ((1 - this.other_decision) * this.my_decision * this.other_payoffs[2]) +
-                    ((1 - this.other_decision) * (1 - this.my_decision) * this.other_payoffs[3])
-
-                // calculate new decision's timestamp as a value between 0 and 1
-                const xval = (performance.now() - this.start_time) / (this.periodLength * 1000)
-
-                let dataset
-                // add point for my new decision
-                dataset = this.strategy_graph_obj.series[0]
-                this._lastElem(dataset.data).remove()
-                dataset.addPoint([xval, this.my_decision], false, false)
-                dataset.addPoint([xval, this.my_decision], true, false)
-
-                // add point for others' new decision
-                dataset = this.strategy_graph_obj.series[1]
-                this._lastElem(dataset.data).remove()
-                dataset.addPoint([xval, this.other_decision], false, false)
-                dataset.addPoint([xval, this.other_decision], true, false)
-
-                // add point for my payoff
-                dataset = this.payoff_graph_obj.series[0]
-                this._lastElem(dataset.data).remove()
-                dataset.addPoint([xval, my_point_payoff], false, false)
-                dataset.addPoint([xval, my_point_payoff], true, false)
-
-                // add point for other payoff
-                dataset = this.payoff_graph_obj.series[1]
-                this._lastElem(dataset.data).remove()
-                dataset.addPoint([xval, other_point_payoff], false, false)
-                dataset.addPoint([xval, other_point_payoff], true, false)
             }
         })
     </script>
-
 </dom-module>
