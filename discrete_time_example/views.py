@@ -51,8 +51,7 @@ class DecisionWaitPage(WaitPage):
         self.session.vars['start_time_{}'.format(self.group.id_in_subsession)] = start_time
         self.session.vars['end_time_{}'.format(self.group.id_in_subsession)] = end_time
 
-        self.log_decision_bookends(
-            start_time, end_time, Constants.name_in_url, 'TODO', -1)
+        self.log_decision_bookends(start_time, end_time, 'discrete_time_example')
 
 
 class Decision(Page):

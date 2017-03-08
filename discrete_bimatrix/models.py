@@ -93,9 +93,9 @@ class Player(BasePlayer):
 
         for i, change in enumerate(self.decisions_over_time):
             if change.participant == self.participant:
-                my_state = change.value
+                my_state = change.decision[self.participant][0]
             else:
-                other_state = change.value
+                other_state = change.decision[self.other_player()][0]
 
             if my_state != None and other_state != None:
                 if my_state == 0:

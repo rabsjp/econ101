@@ -10,31 +10,29 @@ from django.utils import timezone
 from datetime import timedelta
 import logging
 
-
 def vars_for_all_templates(self):
-    payoff_grid = Constants.payoff_grid
     if (self.player.id_in_group == 1):
         return {
-            "my_A_A_payoff": payoff_grid[0][0],
-            "my_A_B_payoff": payoff_grid[1][0],
-            "my_B_A_payoff": payoff_grid[2][0],
-            "my_B_B_payoff": payoff_grid[3][0],
-            "other_A_A_payoff": payoff_grid[0][1],
-            "other_A_B_payoff": payoff_grid[1][1],
-            "other_B_A_payoff": payoff_grid[2][1],
-            "other_B_B_payoff": payoff_grid[3][1],
+            "my_A_A_payoff": Constants.p1_A_p2_A_amount,
+            "my_A_B_payoff": Constants.p1_A_p2_B_amount,
+            "my_B_A_payoff": Constants.p1_B_p2_A_amount,
+            "my_B_B_payoff": Constants.p1_B_p2_B_amount,
+            "other_A_A_payoff": Constants.p2_A_p1_A_amount,
+            "other_A_B_payoff": Constants.p2_A_p1_B_amount,
+            "other_B_A_payoff": Constants.p2_B_p1_A_amount,
+            "other_B_B_payoff": Constants.p2_B_p1_B_amount,
             "total_q": 1
         }
     else:
         return {
-            "my_A_A_payoff": payoff_grid[0][1],
-            "my_A_B_payoff": payoff_grid[1][1],
-            "my_B_A_payoff": payoff_grid[2][1],
-            "my_B_B_payoff": payoff_grid[3][1],
-            "other_A_A_payoff": payoff_grid[0][0],
-            "other_A_B_payoff": payoff_grid[1][0],
-            "other_B_A_payoff": payoff_grid[2][0],
-            "other_B_B_payoff": payoff_grid[3][0],
+            "my_A_A_payoff": Constants.p2_A_p1_A_amount,
+            "my_A_B_payoff": Constants.p2_A_p1_B_amount,
+            "my_B_A_payoff": Constants.p2_B_p1_A_amount,
+            "my_B_B_payoff": Constants.p2_B_p1_B_amount,
+            "other_A_A_payoff": Constants.p1_A_p2_A_amount,
+            "other_A_B_payoff": Constants.p1_A_p2_B_amount,
+            "other_B_A_payoff": Constants.p1_B_p2_A_amount,
+            "other_B_B_payoff": Constants.p1_B_p2_B_amount,
             "total_q": 1
         }
 
@@ -54,8 +52,7 @@ class DecisionWaitPage(WaitPage):
         self.session.vars['start_time_{}'.format(self.group.id_in_subsession)] = start_time
         self.session.vars['end_time_{}'.format(self.group.id_in_subsession)] = end_time
 
-        self.log_decision_bookends(
-            start_time, end_time, Constants.name_in_url, 'otree-bimatrix', -1)
+        self.log_decision_bookends(start_time, end_time, 'continuous_bimatrix')
 
 
 class Decision(Page):
@@ -75,8 +72,8 @@ class Results(Page):
 
 
 page_sequence = [
-    Introduction,
-    DecisionWaitPage,
-    Decision,
-    Results
-]
+        Introduction,
+        DecisionWaitPage,
+        Decision,
+        Results
+    ]

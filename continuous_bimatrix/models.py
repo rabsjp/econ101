@@ -23,11 +23,17 @@ class Constants(BaseConstants):
     players_per_group = 2
     num_rounds = 10
 
-    #payoff grid
-    payoff_grid = [
-        [ 800, 0   ], [ 0,   200 ],
-        [ 0,   200 ], [ 200, 0   ],
-    ]
+    #p1 payoffs
+    p1_A_p2_A_amount = 800
+    p1_A_p2_B_amount = 0
+    p1_B_p2_A_amount = 0
+    p1_B_p2_B_amount = 200
+
+    #p2 payoffs
+    p2_A_p1_A_amount = 0
+    p2_A_p1_B_amount = 200
+    p2_B_p1_A_amount = 200
+    p2_B_p1_B_amount = 0
 
     base_points = 0
 
@@ -63,18 +69,16 @@ class Player(BasePlayer):
         my_state = .5
         other_state = .5
 
-        payoff_grid = Constants.payoff_grid
-        
         if (self.id_in_group == 1):
-            A_A_payoff = payoff_grid[0][0]
-            A_B_payoff = payoff_grid[1][0]
-            B_A_payoff = payoff_grid[2][0]
-            B_B_payoff = payoff_grid[3][0]
+            A_A_payoff = Constants.p1_A_p2_A_amount
+            A_B_payoff = Constants.p1_A_p2_B_amount
+            B_A_payoff = Constants.p1_B_p2_A_amount
+            B_B_payoff = Constants.p1_B_p2_B_amount
         else:
-            A_A_payoff = payoff_grid[0][1]
-            A_B_payoff = payoff_grid[1][1]
-            B_A_payoff = payoff_grid[2][1]
-            B_B_payoff = payoff_grid[3][1]
+            A_A_payoff = Constants.p2_A_p1_A_amount
+            A_B_payoff = Constants.p2_A_p1_B_amount
+            B_A_payoff = Constants.p2_B_p1_A_amount
+            B_B_payoff = Constants.p2_B_p1_B_amount
 
         cur_payoff = (A_A_payoff + A_B_payoff + B_A_payoff + B_B_payoff) * .25 / Constants.period_length
         if (len(self.decisions_over_time) > 0):
@@ -85,9 +89,9 @@ class Player(BasePlayer):
 
         for i, change in enumerate(self.decisions_over_time):
             if change.participant == self.participant:
-                my_state = change.value
+                my_state = change.decision[self.participant][0]
             else:
-                other_state = change.value
+                other_state = change.decision[self.other_player()][0]
 
             cur_payoff = ((A_A_payoff * my_state * other_state) +
                           (A_B_payoff * my_state * (1 - other_state)) +
