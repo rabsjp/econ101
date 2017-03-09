@@ -1,4 +1,4 @@
-{% extends "global/Base.html" %}
+{% extends "global/FirebaseAppBase.html" %}
 {% load staticfiles otree_tags %}
 
 {% block title %}
@@ -14,6 +14,15 @@
     </style>
 
 {% endblock %}
+
+{% block local_scripts %}
+  <link
+      rel="import"
+      href="/static/webcomponents/smart/otree-subperiods/otree-subperiods.html">
+  <link
+      rel="import"
+      href="/static/webcomponents/smart/otree-bimatrix/otree-bimatrix.html">
+ {% endblock %}
 
 {% block content %}
 

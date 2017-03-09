@@ -58,7 +58,7 @@
 					}
 				},
 				/** Group number, e.g. {{ player.group.id_in_subsession }} */
-				group: 
+				group: {
 					type: Number,
 					notify: true,
 					readonly: true,
@@ -97,7 +97,7 @@
 				},
 				/** Player's index in group. e.g. {{ player.id_in_group }} */
 				idInGroup: {
-					type: String
+					type: String,
 					notify: true,
 					readonly: true,
 					value: () => {

@@ -1,136 +1,142 @@
 <link rel="import" href="/static/bower_components/polymer/polymer.html"/>
 
 <dom-module id="otree-strategy-graph">
-    <template>
-        <style>
+	<template>
+		<style>
 
-            div {
-                width: 510px;
-                height: 255px;
-                padding-bottom: 30px;
-            }
+			div {
+				width: 510px;
+				height: 255px;
+				padding-bottom: 30px;
+			}
 
-        </style>
+		</style>
 
-        <div id="strategy_graph"></div>
+		<div id="strategy_graph"></div>
 
-    </template>
-    <script>
-        Polymer({
-            is: 'otree-strategy-graph',
-            properties: {
-                myDecision: {
-                    type: Number,
-                    observer: '_graphUpdatePayoffs'
-                },
-                otherDecision: {
-                    type: Number,
-                    observer: '_graphUpdatePayoffs'
-                },
-                periodLength: Number,
-            },
-            attached() {
-                this._setupStrategyGraph()
-                this.start_time = performance.now()
-                // start update function
-                window.requestAnimationFrame(this._updateGraph.bind(this))
-            },
-            _arrayItem(change, index) {
+	</template>
+
+	<!-- Highcharts does not like being included more than once,
+	so this is commented out as a reminder of the dependency.
+	<script src="//code.highcharts.com/highcharts.js"></script>
+	-->
+	
+	<script>
+		Polymer({
+			is: 'otree-strategy-graph',
+			properties: {
+				myDecision: {
+					type: Number,
+					observer: '_graphUpdatePayoffs'
+				},
+				otherDecision: {
+					type: Number,
+					observer: '_graphUpdatePayoffs'
+				},
+				periodLength: Number,
+			},
+			attached() {
+				this._setupStrategyGraph()
+				this.start_time = performance.now()
+				// start update function
+				window.requestAnimationFrame(this._updateGraph.bind(this))
+			},
+			_arrayItem(change, index) {
 				return change.base[index]
 			},
-            // helper method to return last element of array
-            _lastElem(arr) {
-                return arr[arr.length - 1]
-            },
-            // sets up payoff over time graph
-            _setupStrategyGraph() {
-                // call highcharts setup function
-                this.graph_obj = Highcharts.chart({
-                    chart: {
-                        animation: false,
-                        renderTo: 'strategy_graph',
-                        type: 'line',
-                    },
-                    title: { text: null },
-                    exporting: { enabled: false },
-                    tooltip: { enabled: false },
-                    legend: { enabled: false },
-                    credits: { enabled: false },
-                    xAxis: {
-                        min: 0,
-                        max: 1,
-                        labels: { enabled: false }
-                    },
-                    yAxis: {
-                        title: { text: undefined },
-                        min: 0,
-                        max: 1
-                    },
-                    plotOptions: {
-                        line: {marker: {enabled: false}},
-                        series: {
-                            states: {
-                                hover: {
-                                    enabled: false,
-                                }
-                            }
-                        }
-                    },
-                    line: {
-                        marker: {
-                            enabled: false,
-                            states: {
-                                hover: { enabled: false },
-                                select: { enabled: false }
-                            }
-                        }
-                    },
-                    series: [{
-                        data: [ [0, .5], [0, .5] ],
-                        step: "left"
-                    },
-                    {
-                        data: [ [0, .5], [0, .5] ],
-                        step: "left"
-                    }]
-                })
-            },
-            // updates current payoff value every 50 ms
-            _updateGraph(timestamp) {
-                // calculate x value for current time
-                const xval = (timestamp - this.start_time) / (this.periodLength * 1000)
+			// helper method to return last element of array
+			_lastElem(arr) {
+				return arr[arr.length - 1]
+			},
+			// sets up payoff over time graph
+			_setupStrategyGraph() {
+				// call highcharts setup function
+				this.graph_obj = Highcharts.chart({
+					chart: {
+						animation: false,
+						renderTo: 'strategy_graph',
+						type: 'line',
+					},
+					title: { text: null },
+					exporting: { enabled: false },
+					tooltip: { enabled: false },
+					legend: { enabled: false },
+					credits: { enabled: false },
+					xAxis: {
+						min: 0,
+						max: 1,
+						labels: { enabled: false }
+					},
+					yAxis: {
+						title: { text: undefined },
+						min: 0,
+						max: 1
+					},
+					plotOptions: {
+						line: {marker: {enabled: false}},
+						series: {
+							states: {
+								hover: {
+									enabled: false,
+								}
+							}
+						}
+					},
+					line: {
+						marker: {
+							enabled: false,
+							states: {
+								hover: { enabled: false },
+								select: { enabled: false }
+							}
+						}
+					},
+					series: [{
+						data: [ [0, .5], [0, .5] ],
+						step: "left"
+					},
+					{
+						data: [ [0, .5], [0, .5] ],
+						step: "left"
+					}]
+				})
+			},
+			// updates current payoff value every 50 ms
+			_updateGraph(timestamp) {
+				// calculate x value for current time
+				const xval = (timestamp - this.start_time) / (this.periodLength * 1000)
 
-                let dataset
-                dataset = this.graph_obj.series[0]
-                this._lastElem(dataset.data).update({x: xval})
+				let dataset
+				dataset = this.graph_obj.series[0]
+				this._lastElem(dataset.data).update({x: xval})
 
-                dataset = this.graph_obj.series[1]
-                this._lastElem(dataset.data).update({x: xval})
+				dataset = this.graph_obj.series[1]
+				this._lastElem(dataset.data).update({x: xval})
 
-                // recursively call update
-                window.requestAnimationFrame(this._updateGraph.bind(this))
-            },
-            // is called everytime someone's decision changes and update payoff graph
-            _graphUpdatePayoffs() {
-                // if graph hasn't been initialized, don't do anything
-                if (!this.graph_obj) return
+				// recursively call update
+				window.requestAnimationFrame(this._updateGraph.bind(this))
+			},
+			// is called everytime someone's decision changes and update payoff graph
+			_graphUpdatePayoffs() {
+				// if graph hasn't been initialized, don't do anything
+				if (!this.graph_obj) return
 
-                // calculate new decision's timestamp as a value between 0 and 1
-                const xval = (performance.now() - this.start_time) / (this.periodLength * 1000)
+				// calculate new decision's timestamp as a value between 0 and 1
+				const xval = (performance.now() - this.start_time) / (this.periodLength * 1000)
 
-                let dataset
-                // add point for my new decision
-                dataset = this.graph_obj.series[0]
-                this._lastElem(dataset.data).remove()
-                dataset.addPoint([xval, this.myDecision], false, false)
-                dataset.addPoint([xval, this.myDecision], true, false)
+				let dataset
+				// add point for my new decision
+				dataset = this.graph_obj.series[0]
+				this._lastElem(dataset.data).remove()
+				dataset.addPoint([xval, this.myDecision], false, false)
+				dataset.addPoint([xval, this.myDecision], true, false)
 
-                // add point for others' new decision
-                dataset = this.graph_obj.series[1]
-                this._lastElem(dataset.data).remove()
-                dataset.addPoint([xval, this.otherDecision], false, false)
-                dataset.addPoint([xval, this.otherDecision], true, false)
-            }
-        })
-    </script>
+				// add point for others' new decision
+				dataset = this.graph_obj.series[1]
+				this._lastElem(dataset.data).remove()
+				dataset.addPoint([xval, this.otherDecision], false, false)
+				dataset.addPoint([xval, this.otherDecision], true, false)
+			}
+		})
+	</script>
 </dom-module>

@@ -52,7 +52,8 @@ class DecisionWaitPage(WaitPage):
         self.session.vars[
             'end_time_{}'.format(self.group.id_in_subsession)] = end_time
 
-        self.log_decision_bookends(start_time, end_time, 'discrete_bimatrix')
+        self.log_decision_bookends(
+            start_time, end_time, Constants.name_in_url, 'otree-bimatrix', -1)
 
 
 class Decision(Page):

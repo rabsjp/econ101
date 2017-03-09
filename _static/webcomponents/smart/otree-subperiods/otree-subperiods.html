@@ -6,7 +6,7 @@
         href="/static/bower_components/polymerfire/firebase-query.html" />
 <link
         rel="import"
-        href="/static/webcomponents/otree-vars/otree-vars.html" />
+        href="/static/webcomponents/otree-constants/otree-constants.html" />
 
 <!--
 `<otree-subperiods>` ...
@@ -20,7 +20,7 @@
             data="{{subperiods}}">
         </firebase-query>
 
-        <otree-vars id="vars"></otree-vars>
+        <otree-constants id="constants"></otree-constants>
 
     </template>
 
@@ -41,11 +41,11 @@
             ],
             ready: function() {
                 this.path_ = (
-                    '/session/' + this.$.vars.session +
-                    '/app/' + this.$.vars.appName +
-                    '/subsession/' + this.$.vars.subsession +
-                    '/round/' + this.$.vars.round +
-                    '/group/' + this.$.vars.group +
+                    '/session/' + this.$.constants.session +
+                    '/app/' + this.$.constants.appName +
+                    '/subsession/' + this.$.constants.subsession +
+                    '/round/' + this.$.constants.round +
+                    '/group/' + this.$.constants.group +
                     '/subperiods');
             },
             _subperiodsChanged: function() {

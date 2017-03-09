@@ -8,33 +8,37 @@ from .models import Decision as DecisionModel
 
 from django.utils import timezone
 from datetime import timedelta
+import json
 import logging
 
 def vars_for_all_templates(self):
+    payoff_grid = None
+    payoff_grid = [
+        [None, None], [None, None],
+        [None, None], [None, None]
+    ]
     if (self.player.id_in_group == 1):
-        return {
-            "my_A_A_payoff": Constants.p1_A_p2_A_amount,
-            "my_A_B_payoff": Constants.p1_A_p2_B_amount,
-            "my_B_A_payoff": Constants.p1_B_p2_A_amount,
-            "my_B_B_payoff": Constants.p1_B_p2_B_amount,
-            "other_A_A_payoff": Constants.p2_A_p1_A_amount,
-            "other_A_B_payoff": Constants.p2_A_p1_B_amount,
-            "other_B_A_payoff": Constants.p2_B_p1_A_amount,
-            "other_B_B_payoff": Constants.p2_B_p1_B_amount,
-            "total_q": 1
-        }
+        payoff_grid[0][0] = Constants.p1_A_p2_A_amount
+        payoff_grid[0][0] = Constants.p1_A_p2_B_amount
+        payoff_grid[1][0] = Constants.p1_B_p2_A_amount
+        payoff_grid[1][0] = Constants.p1_B_p2_B_amount
+        payoff_grid[0][1] = Constants.p2_A_p1_A_amount
+        payoff_grid[0][1] = Constants.p2_A_p1_B_amount
+        payoff_grid[1][1] = Constants.p2_B_p1_A_amount
+        payoff_grid[1][1] = Constants.p2_B_p1_B_amount
     else:
-        return {
-            "my_A_A_payoff": Constants.p2_A_p1_A_amount,
-            "my_A_B_payoff": Constants.p2_A_p1_B_amount,
-            "my_B_A_payoff": Constants.p2_B_p1_A_amount,
-            "my_B_B_payoff": Constants.p2_B_p1_B_amount,
-            "other_A_A_payoff": Constants.p1_A_p2_A_amount,
-            "other_A_B_payoff": Constants.p1_A_p2_B_amount,
-            "other_B_A_payoff": Constants.p1_B_p2_A_amount,
-            "other_B_B_payoff": Constants.p1_B_p2_B_amount,
-            "total_q": 1
-        }
+        payoff_grid[0][0] = Constants.p2_A_p1_A_amount,
+        payoff_grid[0][0] = Constants.p2_A_p1_B_amount,
+        payoff_grid[1][0] = Constants.p2_B_p1_A_amount,
+        payoff_grid[1][0] = Constants.p2_B_p1_B_amount,
+        payoff_grid[0][1] = Constants.p1_A_p2_A_amount,
+        payoff_grid[0][1] = Constants.p1_A_p2_B_amount,
+        payoff_grid[1][1] = Constants.p1_B_p2_A_amount,
+        payoff_grid[1][1] = Constants.p1_B_p2_B_amount,
+    return {
+        'payoff_grid': json.dumps(payoff_grid),
+        'total_q': 1
+    }
 
 
 class Introduction(Page):
@@ -52,7 +56,8 @@ class DecisionWaitPage(WaitPage):
         self.session.vars['start_time_{}'.format(self.group.id_in_subsession)] = start_time
         self.session.vars['end_time_{}'.format(self.group.id_in_subsession)] = end_time
 
-        self.log_decision_bookends(start_time, end_time, 'continuous_bimatrix')
+        self.log_decision_bookends(
+            start_time, end_time, Constants.name_in_url, 'otree-bimatrix', -1)
 
 
 class Decision(Page):
