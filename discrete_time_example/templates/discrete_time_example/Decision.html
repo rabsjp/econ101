@@ -21,7 +21,7 @@
       href="/static/webcomponents/smart/otree-subperiods/otree-subperiods.html">
   <link
       rel="import"
-      href="/static/webcomponents/smart/otree-bimatrix/otree-bimatrix.html">
+      href="/static/webcomponents/smart/otree-continuous-bimatrix/otree-continuous-bimatrix.html">
  {% endblock %}
 
 {% block content %}
@@ -31,29 +31,10 @@
         subperiods="{{ Constants.num_subperiods }}">
     </otree-subperiods>
     
-    <otree-bimatrix
-        row-labels='["A", "B"]'
-        payoff-matrix=
-        '[
-            [
-                "{{ Constants.p1_A_p2_A_amount }}",
-                "{{ Constants.p2_A_p1_A_amount }}"
-            ],
-            [
-                "{{ Constants.p1_A_p2_B_amount }}",
-                "{{ Constants.p2_A_p1_B_amount }}"
-            ],
-            [
-                "{{ Constants.p1_B_p2_A_amount }}",
-                "{{ Constants.p2_B_p1_A_amount }}"
-            ],
-            [
-                "{{ Constants.p1_B_p2_B_amount }}",
-                "{{ Constants.p2_B_p1_B_amount }}"
-            ]
-        ]'
-        payoff-index='{{ player.id_in_group|add:"-1" }}'>
-    </otree-bimatrix>
+    <otree-continuous-bimatrix
+        payoff-matrix='{{ Constants.payoff_grid }}'
+        period-length='{{ Constants.period_length }}'>
+    </otree-continuous-bimatrix>
     
     {% include 'discrete_bimatrix/Instructions.html' %}
 

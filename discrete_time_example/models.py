@@ -23,17 +23,11 @@ class Constants(BaseConstants):
     players_per_group = 2
     num_rounds = 10
 
-    # p1 payoffs
-    p1_A_p2_A_amount = 800
-    p1_A_p2_B_amount = 0
-    p1_B_p2_A_amount = 0
-    p1_B_p2_B_amount = 200
-
-    # p2 payoffs
-    p2_A_p1_A_amount = 0
-    p2_A_p1_B_amount = 200
-    p2_B_p1_A_amount = 200
-    p2_B_p1_B_amount = 0
+    #payoff grid
+    payoff_grid = [
+        [ 800, 0   ], [ 0,   200 ],
+        [ 0,   200 ], [ 200, 0   ],
+    ]
 
     base_points = 0
 
