@@ -55,7 +55,7 @@ class Player(BasePlayer):
                 session=self.session,
                 subsession=self.subsession.name(),
                 round=self.round_number,
-                group=self.group.id_in_subsession)
+                group=self.group.id_in_subsession).order_by("timestamp")
 
         payoff = 0
 
@@ -76,15 +76,15 @@ class Player(BasePlayer):
             B_A_payoff = payoff_grid[2][1]
             B_B_payoff = payoff_grid[3][1]
 
-        cur_payoff = (A_A_payoff + A_B_payoff + B_A_payoff + B_B_payoff) * .25 / Constants.period_length
-        if (len(self.decisions_over_time) > 0):
-            next_change_time = self.decisions_over_time[0].timestamp
-        else:
-            next_change_time = self.session.vars['end_time_{}'.format(self.group.id_in_subsession)]
-        payoff += (next_change_time - self.session.vars['start_time_{}'.format(self.group.id_in_subsession)]).total_seconds() * cur_payoff
-
         for i, change in enumerate(self.decisions_over_time):
-            if change.participant == self.participant:
+            # skip end dummy decisions
+            if change.value is None:
+                break
+
+            if change.value == -1:
+                # don't change state for front dummy decisions
+                pass
+            elif change.participant == self.participant:
                 my_state = change.value
             else:
                 other_state = change.value
@@ -94,11 +94,7 @@ class Player(BasePlayer):
                           (B_A_payoff * (1 - my_state) * other_state) +
                           (B_B_payoff * (1 - my_state) * (1 - other_state))) / Constants.period_length
 
-            if i == len(self.decisions_over_time) - 1:
-                next_change_time = self.session.vars['end_time_{}'.format(self.group.id_in_subsession)]
-            else:
-                next_change_time = self.decisions_over_time[i + 1].timestamp
-
+            next_change_time = self.decisions_over_time[i + 1].timestamp
             payoff += (next_change_time - change.timestamp).total_seconds() * cur_payoff
 
         self.payoff = payoff
