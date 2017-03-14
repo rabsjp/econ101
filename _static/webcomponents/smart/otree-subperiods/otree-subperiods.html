@@ -22,11 +22,13 @@
 
         <otree-constants id="constants"></otree-constants>
 
-        <div style="border: 2px solid orange; margin: auto; width: 400px">
+        <div style="border: 2px solid orange; margin: auto; width: 400px; text-align: center;">
             <progress id="progress" value="0" max="1"></progress>
-            <template is="dom-repeat" items="{{decisions}}">
-                <span style="display: block">{{formatDecision(item)}}</span>
+            <ol>
+                <template is="dom-repeat" items="{{decisions}}">
+                <li>{{_formatDecision(item)}}</li>
             </template>
+            </ol>
         </div>
 
     </template>
@@ -56,24 +58,23 @@
                     '/subperiods');
                 this.subp_length = this.periodLength / this.subperiods;
                 this.subp_start_time = performance.now();
-                this.timer_id = window.requestAnimationFrame(this.updateProgress.bind(this));
+                this.timer_id = window.requestAnimationFrame(this._updateProgress.bind(this));
             },
             _decisionsChanged: function() {
                 this.last_decision = this.decisions[this.decisions.length - 1];
-                console.log(this.decisions);
                 if (this.timer_id) window.cancelAnimationFrame(this.timer_id);
                 this.subp_start_time = performance.now();
-                this.timer_id = window.requestAnimationFrame(this.updateProgress.bind(this));
+                this.timer_id = window.requestAnimationFrame(this._updateProgress.bind(this));
             },
-            updateProgress: function(cur_time) {
+            _updateProgress: function(cur_time) {
                 if(cur_time > this.subp_start_time + this.subp_length * 1000) {
-                    this.timer_id = undefined;
+                    this.timer_id = null;
                     return;
                 }
                 this.$.progress.value = (cur_time - this.subp_start_time) / (this.subp_length * 1000);
-                this.timer_id = window.requestAnimationFrame(this.updateProgress.bind(this));
+                this.timer_id = window.requestAnimationFrame(this._updateProgress.bind(this));
             },
-            formatDecision: function (event) {
+            _formatDecision: function (event) {
                 retval = "";
                 for(key in event.decisions) {
                     retval += (key + ": " + event.decisions[key] + " ");
