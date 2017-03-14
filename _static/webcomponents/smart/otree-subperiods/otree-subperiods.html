@@ -17,10 +17,17 @@
 
         <firebase-query
             path="[[path_]]"
-            data="{{subperiods}}">
+            data="{{decisions}}">
         </firebase-query>
 
         <otree-constants id="constants"></otree-constants>
+
+        <div style="border: 2px solid orange; margin: auto; width: 400px">
+            <progress id="progress" value="0" max="1"></progress>
+            <template is="dom-repeat" items="{{decisions}}">
+                <span style="display: block">{{formatDecision(item)}}</span>
+            </template>
+        </div>
 
     </template>
 
@@ -37,7 +44,7 @@
                 path_: String
             },
             observers: [
-                "_subperiodsChanged(subperiods.splices)",
+                "_decisionsChanged(decisions.splices)",
             ],
             ready: function() {
                 this.path_ = (
@@ -47,9 +54,31 @@
                     '/round/' + this.$.constants.round +
                     '/group/' + this.$.constants.group +
                     '/subperiods');
+                this.subp_length = this.periodLength / this.subperiods;
+                this.subp_start_time = performance.now();
+                this.timer_id = window.requestAnimationFrame(this.updateProgress.bind(this));
             },
-            _subperiodsChanged: function() {
-                this.lastSubperiod = this.subperiods[this.subperiods.length-1];
+            _decisionsChanged: function() {
+                this.last_decision = this.decisions[this.decisions.length - 1];
+                console.log(this.decisions);
+                if (this.timer_id) window.cancelAnimationFrame(this.timer_id);
+                this.subp_start_time = performance.now();
+                this.timer_id = window.requestAnimationFrame(this.updateProgress.bind(this));
+            },
+            updateProgress: function(cur_time) {
+                if(cur_time > this.subp_start_time + this.subp_length * 1000) {
+                    this.timer_id = undefined;
+                    return;
+                }
+                this.$.progress.value = (cur_time - this.subp_start_time) / (this.subp_length * 1000);
+                this.timer_id = window.requestAnimationFrame(this.updateProgress.bind(this));
+            },
+            formatDecision: function (event) {
+                retval = "";
+                for(key in event.decisions) {
+                    retval += (key + ": " + event.decisions[key] + " ");
+                }
+                return retval;
             }
         });
     </script>

@@ -50,9 +50,6 @@ class DecisionWaitPage(WaitPage):
         start_time = timezone.now()
         end_time = start_time + timedelta(seconds=Constants.period_length)
 
-        self.session.vars['start_time_{}'.format(self.group.id_in_subsession)] = start_time
-        self.session.vars['end_time_{}'.format(self.group.id_in_subsession)] = end_time
-
         self.log_decision_bookends(
             start_time, end_time, Constants.name_in_url, 'otree-bimatrix', -1)
 
@@ -69,7 +66,6 @@ class Results(Page):
         self.player.set_payoff()
 
         return {
-            'decisions_over_time': self.player.decisions_over_time,
             'total_plus_base': self.player.payoff + Constants.base_points
         }
 
