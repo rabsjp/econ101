@@ -15,22 +15,7 @@ from . import views
 class PlayerBot(Bot):
 
     def play_round(self):
-
-        self.submit(views.Introduction)
-
-        self.submit(
-            views.Question,
-            {'training_question_1': 'Alice gets 300 points, Bob gets 0 points'}
-        )
-
-        self.submit(views.Feedback1)
-
-        self.submit(
-            views.Decision,
-            {"decision": random.choice(['Cooperate', 'Defect'])}
-        )
-
-        self.submit(views.Results)
+        pass
 
     def validate_play(self):
         pass

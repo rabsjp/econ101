@@ -3,7 +3,9 @@ from __future__ import division
 
 import random
 
+from django.test import TestCase
 from otree.common import Currency as c, currency_range
+from otree.models import Decision
 
 from ._builtin import Bot
 from .models import Constants
@@ -13,22 +15,13 @@ from . import views
 class PlayerBot(Bot):
 
     def play_round(self):
-
-        self.submit(views.Introduction)
-
-        self.submit(
-            views.Question,
-            {'training_question_1': 'Alice gets 300 points, Bob gets 0 points'}
-        )
-
-        self.submit(views.Feedback1)
-
-        self.submit(
-            views.Decision,
-            {"decision": random.choice(['Cooperate', 'Defect'])}
-        )
-
-        self.submit(views.Results)
+        pass
 
     def validate_play(self):
         pass
+
+
+class PayoffFunctionTestCase(TestCase):
+
+    def test_payoff_function(self):
+        self.assertEqual(True, False)
