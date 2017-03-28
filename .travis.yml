@@ -1,10 +1,13 @@
 language: python
-python: 2.7
+python: 3.5
 install:
   - pip install -r requirements.txt
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
 script:
-  - otree test
+  - tox -r
 env:
   - DATABASE_URL=postgres://postgres@localhost/travis_ci_test
+env:
+  - TOXENV=py27
+  - TOXENV=py35
