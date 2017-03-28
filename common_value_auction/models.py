@@ -1,14 +1,8 @@
-# -*- coding: utf-8 -*-
-# <standard imports>
-from __future__ import division
-from otree.db import models
-from otree.constants import BaseConstants
-from otree.models import BaseSubsession, BaseGroup, BasePlayer
-
-from otree import widgets
-from otree.common import Currency as c, currency_range
+from otree.api import (
+    models, widgets, BaseConstants, BaseSubsession, BaseGroup, BasePlayer,
+    Currency as c, currency_range
+)
 import random
-# </standard imports>
 
 doc = """
 In a common value auction game, players simultaneously bid on the item being
@@ -25,31 +19,37 @@ class Constants(BaseConstants):
     players_per_group = None
     num_rounds = 1
 
+    instructions_template = 'common_value_auction/Instructions.html'
+
     min_allowable_bid = c(0)
     max_allowable_bid = c(10)
 
     # Error margin for the value estimates shown to the players
     estimate_error_margin = 1
 
+
 class Subsession(BaseSubsession):
-    pass
+    def before_session_starts(self):
+        for g in self.get_groups():
+            g.item_value = round(random.uniform(Constants.min_allowable_bid,
+                                                Constants.max_allowable_bid),
+                                 1)
 
 
 class Group(BaseGroup):
-
     def highest_bid(self):
         return max([p.bid_amount for p in self.get_players()])
 
     def set_winner(self):
-        players_with_highest_bid = [p for p in self.get_players() if p.bid_amount == self.highest_bid()]
-        winner = random.choice(players_with_highest_bid)    # if tie, winner is chosen at random
+        players_with_highest_bid = [p for p in self.get_players() if
+                                    p.bid_amount == self.highest_bid()]
+        winner = random.choice(
+            players_with_highest_bid)  # if tie, winner is chosen at random
         winner.is_winner = True
 
     item_value = models.CurrencyField(
-        initial=lambda: round(random.uniform(Constants.min_allowable_bid, Constants.max_allowable_bid), 1),
         doc="""Common value of the item to be auctioned, random for treatment"""
     )
-
 
     def generate_value_estimate(self):
         minimum = self.item_value - Constants.estimate_error_margin
@@ -66,7 +66,6 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-
     item_value_estimate = models.CurrencyField(
         doc="""Estimate of the common value, may be different for each player"""
     )

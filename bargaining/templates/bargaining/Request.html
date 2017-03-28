@@ -1,4 +1,4 @@
-{% extends "global/Base.html" %}
+{% extends "global/Page.html" %}
 {% load staticfiles otree_tags %}
 
 {% block title %}
@@ -12,6 +12,7 @@
     {% formfield player.request_amount with label="Please enter a number from 0 to 100" %}
 
     <p>{% next_button %}</p>
-    {% include instructions %}
+
+    {% include Constants.instructions_template %}
     
 {% endblock %}

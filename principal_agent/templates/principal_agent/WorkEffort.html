@@ -1,4 +1,4 @@
-{% extends "global/Base.html" %}
+{% extends "global/Page.html" %}
 {% load staticfiles otree_tags %}
 
 {% block title %}
@@ -14,6 +14,6 @@
     {% formfield player.agent_work_effort with label='Effort level' %}
     {% next_button %}
 
-    {% include 'principal_agent/Rules.html' %}
+    {% include Constants.instructions_template %}
 
 {% endblock %}

@@ -1,4 +1,4 @@
-{% extends "global/Base.html" %}
+{% extends "global/Page.html" %}
 {% load staticfiles otree_tags %}
 
 {% block title %}
@@ -6,7 +6,6 @@
 {% endblock %}
 
 {% block content %}
-
 
 
     <p>
@@ -46,6 +45,6 @@
 
     {% next_button %}
 
-    {% include 'vickrey_auction/Instructions.html' %}
+    {% include Constants.instructions_template %}
 
 {% endblock %}

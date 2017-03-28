@@ -1,4 +1,4 @@
-{% extends "global/Base.html" %}
+{% extends "global/Page.html" %}
 {% load staticfiles otree_tags %}
 
 {% block title %}
@@ -15,6 +15,6 @@
     {% formfield player.decision with label='Please make a choice:' %}
     {% next_button %}
 
-    {% include 'battle_of_the_sexes/Instructions.html' %}
+    {% include Constants.instructions_template %}
 
 {% endblock %}

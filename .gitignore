@@ -3,12 +3,8 @@ venv
 staticfiles
 ./db.sqlite3
 .idea
-.vscode
 *~
 *.sqlite3
 _coverage_results
 _static_root
-_static/bower_components/
-migrations/
-
-node_modules/
+_bots*s

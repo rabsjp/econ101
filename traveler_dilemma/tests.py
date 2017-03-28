@@ -1,29 +1,33 @@
-# -*- coding: utf-8 -*-
-from __future__ import division
-
-import random
-
-from otree.common import Currency as c, currency_range
-
+from otree.api import Currency as c, currency_range
 from . import views
 from ._builtin import Bot
 from .models import Constants
 
-
 class PlayerBot(Bot):
+    cases = [
+        'both_min',
+        'both_max',
+        'p1_lower'
+    ]
 
     def play_round(self):
+        case = self.case
 
         # start game
-        self.submit(views.Introduction)
-        self.submit(views.Question1, {
-            'training_answer_mine': 1, 'training_answer_others':2})
-        self.submit(views.Feedback)
+        yield (views.Introduction)
 
-        claim = random.randrange(Constants.min_amount, Constants.max_amount)
-        self.submit(views.Claim, {"claim": claim})
+        if case == 'both_min':
+            yield (views.Claim, {"claim": Constants.min_amount})
+            assert self.player.payoff == Constants.min_amount
+        elif case == 'both_max':
+            yield (views.Claim, {"claim": Constants.max_amount})
+            assert self.player.payoff == Constants.max_amount
+        else:
+            if self.player.id_in_group == 1:
+                yield (views.Claim, {"claim": Constants.min_amount})
+                assert self.player.payoff == Constants.min_amount + 2
+            else:
+                yield (views.Claim, {"claim": Constants.min_amount + 1})
+                assert self.player.payoff == Constants.min_amount - 2
 
-        self.submit(views.Results)
-
-    def validate_play(self):
-        pass
+        yield (views.Results)

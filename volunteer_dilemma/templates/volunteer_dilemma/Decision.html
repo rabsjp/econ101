@@ -1,4 +1,4 @@
-{% extends "global/Base.html" %}
+{% extends "global/Page.html" %}
 {% load otree_tags %}
 
 {% block title %}
@@ -10,7 +10,7 @@ Your Choice
     {% formfield player.volunteer with label='Do you wish to volunteer?' %}
  <p>  {% next_button %}</p> 
 
-    {% include instructions %}
+    {% include Constants.instructions_template %}
 
 {% endblock %}
 
