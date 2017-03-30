@@ -1,16 +1,14 @@
 <link rel="import" href="/static/bower_components/polymer/polymer.html">
 
-<link rel="import" href="/static/bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision/otree-continuous-decision.html">
 
-<link rel="import" href="/static/webcomponents/otree-constants/otree-constants.html">
-<link rel="import" href="/static/webcomponents/otree-log/otree-log.html">
-
-<link rel="import" href="/static/webcomponents/reusable/otree-heatmap/otree-heatmap.html">
+<link rel="import" href="/static/webcomponents/reusable/bimatrix-heatmap/bimatrix-heatmap.html">
 <link rel="import" href="/static/webcomponents/reusable/otree-thermometer/otree-thermometer.html">
-<link rel="import" href="/static/webcomponents/reusable/otree-payoff-graph/otree-payoff-graph.html">
-<link rel="import" href="/static/webcomponents/reusable/otree-strategy-graph/otree-strategy-graph.html">
+<link rel="import" href="/static/webcomponents/reusable/payoff-graph/payoff-graph.html">
+<link rel="import" href="/static/webcomponents/reusable/strategy-graph/strategy-graph.html">
 
-<dom-module id="otree-continuous-bimatrix">
+<dom-module id="stochastic-bimatrix">
     <template>
         <style>
             :host { margin: 10px; }
@@ -25,29 +23,27 @@
         </style>
 
         <otree-constants id="constants"></otree-constants>
-        <otree-log id="log"></otree-log>
-        <firebase-document
-            id="fbdoc"
-            path="[[path_]]"
-            data="{{ decisions }}">
-        </firebase-document>
+        <otree-continuous-decision
+            component="stochastic-bimatrix"
+            group-decisions="{{ decisions }}">
+        </otree-continuous-decision>
 
         <div style="height: 570px">
             
             <div style="float:left; padding-left: 40px">
-                <otree-heatmap
+                <bimatrix-heatmap
                     width='120'
                     height='120'
                     my-decision='[[other_decision]]'
                     other-decision='[[my_decision]]'
                     payoffs='[[other_payoffs_transpose]]'
                     color='[[other_color]]'
-                ></otree-heatmap>
+                ></bimatrix-heatmap>
                 <div style="float:left">
                     <input id="slider" type="range" min="0" max="1" step=".01" value="[[my_decision]]" on-up="_setMyDecision" />
                 </div>
                 <div style="float:right">
-                    <otree-heatmap
+                    <bimatrix-heatmap
                         class="heatmap"
                         width='300'
                         height='300'
@@ -55,60 +51,49 @@
                         other-decision='[[other_decision]]'
                         payoffs='[[my_payoffs]]'
                         color='[[my_color]]'
-                    ></otree-heatmap>
+                    ></bimatrix-heatmap>
                 </div>
             </div>
 
             <div style="float:right">
-                <otree-strategy-graph
+                <strategy-graph
                     my-decision='[[my_decision]]'
                     other-decision='[[other_decision]]'
                     period-length='120'
-                ></otree-strategy-graph>
+                ></strategy-graph>
                 <div style="float:left">
                     <!--<otree-thermometer color='rainbow'></otree-thermometer>-->
                 </div>
                 <div style="float: right">
-                    <otree-payoff-graph
+                    <payoff-graph
                         my-decision='[[my_decision]]'
                         other-decision='[[other_decision]]'
                         my-payoffs='[[my_payoffs]]'
                         other-payoffs='[[other_payoffs]]'
                         period-length='120'
-                    ></otree-payoff-graph>
+                    ></payoff-graph>
                 </div>
             </div>
         </div>
     </template>
-    
+
     <script src="/static/general/color.js"></script>
 
     <script>
         Polymer({
-            is: 'otree-continuous-bimatrix',
+            is: 'stochastic-bimatrix',
             properties: {
-                payoffMatrix: Array,
+                payoffMatrices: Array,
                 decisions: {
                     type: Object,
                     observer: '_decisionsChanged'
                 },
-                path_: String,
                 periodLength: Number
             },
             listeners: {
                 keyup: '_setMyDecision'
             },
             ready() {
-                this.path_ = (
-                    '/session/' + this.$.constants.session +
-                    '/app/' + this.$.constants.appName +
-                    '/subsession/' + this.$.constants.subsession +
-                    '/round/' + this.$.constants.round +
-                    '/group/' + this.$.constants.group +
-                    '/component/otree-bimatrix' +
-                    '/decisions'
-                )
-
                 // set payoff indices
                 if (this.$.constants.idInGroup == undefined) {
                     console.log('Not in game, manually setting payoffIndex')
@@ -126,9 +111,18 @@
                 this.my_color = 'rainbow'
                 this.other_color = 'mono'
 
+                this._calcPayoffs()
+            },
+            _calcPayoffs() {
+                // some function of decisions determines which payoff matrix will be used
+                if (this.my_decision == undefined)
+                    return
+                const matrix_index = Math.floor(this.my_decision * 3)
+                const payoffMatrix = this.payoffMatrices[matrix_index]
+
                 // separate each player's payoffs into two separate arrays
-                this.my_payoffs = this.payoffMatrix.map(val => parseInt(val[this.payoffIndex]))
-                this.other_payoffs = this.payoffMatrix.map(val => parseInt(val[this.otherPayoffIndex]))
+                this.my_payoffs = payoffMatrix.map(val => parseInt(val[this.payoffIndex]))
+                this.other_payoffs = payoffMatrix.map(val => parseInt(val[this.otherPayoffIndex]))
 
                 // take inverse of other player's payoffs
                 const other_payoffs_transpose = this.other_payoffs.slice()
@@ -169,6 +163,7 @@
                         break
                     }
                 }
+                this._calcPayoffs()
             }
         })
     </script>

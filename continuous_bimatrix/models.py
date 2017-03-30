@@ -3,7 +3,8 @@
 from __future__ import division
 from otree.db import models
 from otree.constants import BaseConstants
-from otree.models import BaseSubsession, BaseGroup, BasePlayer, Decision
+from otree.models import BaseSubsession, BaseGroup, BasePlayer
+from otree_redwood.models import Decision
 
 from otree import widgets
 from otree.common import Currency as c, currency_range
@@ -12,9 +13,13 @@ import random
 # </standard imports>
 
 doc = """
-This is a one-shot "Prisoner's Dilemma". Two players are asked separately
-whether they want to cooperate or defect. Their choices directly determine the
-payoffs.
+This is a continuous time/continuous space bimatrix game.
+Two players can simultaneously choose a mixed strategy for the bimatrix game
+defined by the "payoff_grid" variable below. They can change their choice at
+any time and that change will be reflected on their counterpart's page. Payoff
+is determined by the integrating the instantaneous flow payoffs over time (i.e
+the longer you are at a payoff spot, the more it contributes to your final
+payoff).
 """
 
 

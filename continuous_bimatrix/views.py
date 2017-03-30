@@ -4,12 +4,14 @@ from . import models
 from ._builtin import Page, WaitPage
 from otree.common import Currency as c, currency_range
 from .models import Constants
-from .models import Decision as DecisionModel
+import otree_redwood as redwood
+from otree_redwood.models import Decision as DecisionModel
 
 from django.utils import timezone
 from datetime import timedelta
 import json
 import logging
+
 
 def vars_for_all_templates(self):
     payoff_grid = Constants.payoff_grid
@@ -51,7 +53,7 @@ class DecisionWaitPage(WaitPage):
         start_time = timezone.now()
         end_time = start_time + timedelta(seconds=Constants.period_length)
 
-        self.log_decision_bookends(
+        redwood.log_decision_bookends(
             start_time, end_time, Constants.name_in_url, 'otree-bimatrix', -1)
 
 
