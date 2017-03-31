@@ -4,8 +4,8 @@ from . import models
 from ._builtin import Page, WaitPage
 from otree.common import Currency as c, currency_range
 from .models import Constants
-from .models import Decision as DecisionModel
 import otree_redwood.abstract_views as redwood_views
+from otree_redwood.models import Decision as DecisionModel
 
 from django.utils import timezone
 from datetime import timedelta
@@ -43,7 +43,7 @@ class Introduction(Page):
     timeout_seconds = 100
 
 
-class DecisionWaitPage(WaitPage, redwood_views.WaitPage):
+class DecisionWaitPage(WaitPage, redwood_views.WaitPageMixin):
     body_text = 'Waiting for all players to be ready'
 
     def after_all_players_arrive(self):

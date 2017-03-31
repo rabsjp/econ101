@@ -5,7 +5,7 @@ import random
 
 from django.test import TestCase
 from otree.common import Currency as c, currency_range
-from otree.models import Decision
+from otree_redwood.models import Decision
 
 from ._builtin import Bot
 from .models import Constants
