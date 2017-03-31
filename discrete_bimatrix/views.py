@@ -4,6 +4,7 @@ from . import models
 from ._builtin import Page, WaitPage
 from otree.common import Currency as c, currency_range
 from .models import Constants
+import otree_redwood.abstract_views as redwood_views
 
 from django.utils import timezone
 from datetime import timedelta
