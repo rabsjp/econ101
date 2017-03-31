@@ -3,7 +3,6 @@ from __future__ import division
 from . import models
 from ._builtin import Page, WaitPage
 from otree.common import Currency as c, currency_range
-from otree import firebase
 from .models import Constants
 from .models import Decision as DecisionModel
 
@@ -50,6 +49,7 @@ class DecisionWaitPage(WaitPage):
         start_time = timezone.now()
         end_time = start_time + timedelta(seconds=Constants.period_length)
 
+        # TODO: Replace with otree_redwood
         self.log_decision_bookends(
             start_time, end_time, Constants.name_in_url, 'otree-bimatrix', -1)
 

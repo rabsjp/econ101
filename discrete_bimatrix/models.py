@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
-# <standard imports>
 from __future__ import division
-from otree.db import models
-from otree.constants import BaseConstants
-from otree.models import BaseSubsession, BaseGroup, BasePlayer, Decision
-
 from otree import widgets
+from otree.db import models
 from otree.common import Currency as c, currency_range
+from otree.constants import BaseConstants
+from otree.models import BaseSubsession, BaseGroup, BasePlayer
+
+from otree_redwood.models import Decision
 
 import random
-# </standard imports>
 
 doc = """
 This is a one-shot "Prisoner's Dilemma". Two players are asked separately
