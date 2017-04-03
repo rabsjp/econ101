@@ -7,6 +7,7 @@
 
 <link rel="import" href="/static/webcomponents/reusable/otree-heatmap/otree-heatmap.html">
 <link rel="import" href="/static/webcomponents/reusable/otree-thermometer/otree-thermometer.html">
+<link rel="import" href="/static/webcomponents/reusable/otree-hazard-bar/otree-hazard-bar.html">
 <link rel="import" href="/static/webcomponents/reusable/otree-payoff-graph/otree-payoff-graph.html">
 <link rel="import" href="/static/webcomponents/reusable/otree-strategy-graph/otree-strategy-graph.html">
 
@@ -20,7 +21,6 @@
                 -webkit-appearance: slider-vertical; /* WebKit */
                 width: 8px;
                 height: 310px;
-                margin: 25px 0 0 -30px;
             }
         </style>
 
@@ -32,64 +32,94 @@
             data="{{ decisions }}">
         </firebase-document>
 
-        <div style="padding-left: 40px; padding-right: 40px;">
-            <div style="height:50px;text-align:center;">
-                <span style="float:left">Your Payoffs</span>
-                <span>Payoff over time graph</span>
-                <span style="float:right">Opponent's Payoffs</span>
-            </div>
-            <div style="height: 250px">
-                <otree-heatmap
-                    style="float:left"
-                    width='150'
-                    height='150'
-                    my-decision='[[my_decision]]'
-                    other-decision='[[other_decision]]'
-                    payoffs='[[my_payoffs_B]]'
-                    color='gray'
-                ></otree-heatmap>
-                <otree-payoff-graph
-                    style="position:absolute;left:calc(50% - 275px);"
-                    my-decision='[[my_decision]]'
-                    other-decision='[[other_decision]]'
-                    my-payoffs='[[my_payoffs_A]]'
-                    other-payoffs='[[other_payoffs_A]]'
-                    period-length='120'
-                ></otree-payoff-graph>
-                <otree-heatmap
-                    style="float:right"
-                    width='150'
-                    height='150'
-                    my-decision='[[my_decision]]'
-                    other-decision='[[other_decision]]'
-                    payoffs='[[other_payoffs_B]]'
-                    color='gray'
-                ></otree-heatmap>
+        <div>
+            <div style="height: 250px; margin-bottom:30px">
+                <div style="float:left">
+                    <div style="height:50px;text-align:center;padding-top:25px;font-size:20px">
+                        Switch
+                    </div>
+                    <div style="display:inline-block;margin-right:20px">
+                        <otree-heatmap
+                            id="heatmap-P1-B"
+                            width='150'
+                            height='150'
+                            my-decision='[[my_decision]]'
+                            other-decision='[[other_decision]]'
+                            payoffs='[[my_payoffs_B]]'
+                            color='gray'
+                        ></otree-heatmap>
+                    </div>
+                    <div style="display:inline-block">
+                        <otree-hazard-bar hazard=".9"></otree-hazard-bar>
+                    </div>
+                    <div style="display:inline-block;margin-left:20px">
+                        <otree-heatmap
+                            id="heatmap-P2-B"
+                            width='150'
+                            height='150'
+                            my-decision='[[my_decision]]'
+                            other-decision='[[other_decision]]'
+                            payoffs='[[other_payoffs_B]]'
+                            color='gray'
+                        ></otree-heatmap>
+                    </div>
+                </div>
+                <div style="float:right">
+                    <div style="display:inline-block">
+                        <div style="position:relative;bottom:23px">
+                            <otree-thermometer color="rainbow"></otree-thermometer>
+                        </div>
+                    </div>
+                    <div style="display:inline-block">
+                        <otree-payoff-graph
+                            id="heatmap-P1-A"
+                            my-decision='[[my_decision]]'
+                            other-decision='[[other_decision]]'
+                            my-payoffs='[[my_payoffs_A]]'
+                            other-payoffs='[[other_payoffs_A]]'
+                            period-length='120'
+                        ></otree-payoff-graph>
+                    </div>
+                </div>
             </div>
             <div style="height: 400px">
-                <input id="slider" style="float:left" type="range" min="0" max="1" step=".01" value="[[my_decision]]" on-up="_setMyDecision" />
-                <otree-heatmap
-                    style="float:left"
-                    width='300'
-                    height='300'
-                    my-decision='[[my_decision]]'
-                    other-decision='[[other_decision]]'
-                    payoffs='[[my_payoffs_A]]'
-                    color='[[my_color]]'
-                ></otree-heatmap>
-                <button
-                    style="position:relative;left:calc(50% - 300px - 80px);top:50px"
-                    on-click="_switchMatrix"
-                >Switch Payoff Matrices</button>
-                <otree-heatmap
-                    style="float:right"
-                    width='300'
-                    height='300'
-                    my-decision='[[my_decision]]'
-                    other-decision='[[other_decision]]'
-                    payoffs='[[other_payoffs_A]]'
-                    color='[[other_color]]'
-                ></otree-heatmap>
+                <div style="float:left">
+                    <div style="display:inline-block">
+                        <otree-heatmap
+                            id="heatmap-P2-A"
+                            width='300'
+                            height='300'
+                            my-decision='[[my_decision]]'
+                            other-decision='[[other_decision]]'
+                            payoffs='[[my_payoffs_A]]'
+                            color='[[my_color]]'
+                        ></otree-heatmap>
+                        <div style="margin-top:10px; text-align:center">Your Payoff</div>
+                    </div>
+                    <div style="display:inline-block; margin-left:20px; margin-right:20px">
+                        <div style="position:relative; bottom:20px">
+                            <input id="slider" type="range" min="0" max="1" step=".01" value="[[my_decision]]" on-up="_setMyDecision" />
+                        </div>
+                    </div>
+                    <div style="display:inline-block">
+                        <otree-heatmap
+                            width='300'
+                            height='300'
+                            my-decision='[[my_decision]]'
+                            other-decision='[[other_decision]]'
+                            payoffs='[[other_payoffs_A]]'
+                            color='[[other_color]]'
+                        ></otree-heatmap>
+                        <div style="margin-top:10px; text-align:center">Other Player</div>
+                    </div>
+                </div>
+                <div style="float:right">
+                    <div style="width: 250px">
+                        <h3>Text Instructions</h3>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</p>
+                    </div>
+                    <button on-click="_switchMatrix">Switch Payoff Matrices</button>
+                </div>
             </div>
         </div>
     </template>
@@ -194,8 +224,19 @@
             // handle switch-matrix button pressed
             _switchMatrix(event) {
                 event.preventDefault()
-                this.matrix_index = 1 - this.matrix_index
-                this._calcPayoffs()
+
+                // get heatmaps
+                const
+                    P1A = $('#heatmap-P1-A'),
+                    P2A = $('#heatmap-P2-A'),
+                    P1B = $('#heatmap-P1-B'),
+                    P2B = $('#heatmap-P2-B')
+                // do animation
+                P1A.animate({ left: P1B.offset().left, top: P1B.offset().top })
+
+                // change payoff functions
+                // this.matrix_index = 1 - this.matrix_index
+                // this._calcPayoffs()
             }
         })
     </script>
