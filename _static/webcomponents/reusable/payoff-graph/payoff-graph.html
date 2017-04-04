@@ -15,11 +15,6 @@
 
 	</template>
 
-	<!-- Highcharts does not like being included more than once,
-	so this is commented out as a reminder of the dependency.
-	<script src="//code.highcharts.com/highcharts.js"></script>
-	-->
-	
 	<script>
 		Polymer({
 			is: 'payoff-graph',
@@ -32,11 +27,17 @@
 					type: Number,
 					observer: '_graphUpdatePayoffs'
 				},
-				myPayoffs: Array,
-				otherPayoffs: Array,
+				myPayoffs: {
+                    type: Array,
+                    value: () => []
+                },
+				otherPayoffs: {
+				    type: Array,
+                    value: () => []
+                },
 				periodLength: Number,
 			},
-			attached() {
+			ready() {
 				this._setupPayoffGraph()
 				this.start_time = performance.now()
 				// start update function
@@ -62,7 +63,7 @@
 				this.graph_obj = Highcharts.chart({
 					chart: {
 						animation: false,
-						renderTo: 'payoff_graph',
+						renderTo: this.$.payoff_graph,
 						enabled: false,
 					},
 					title: { text: null },
