@@ -1,14 +1,8 @@
-# -*- coding: utf-8 -*-
-# <standard imports>
-from __future__ import division
-from otree.db import models
-from otree.constants import BaseConstants
-from otree.models import BaseSubsession, BaseGroup, BasePlayer
-
-from otree import widgets
-from otree.common import Currency as c, currency_range
+from otree.api import (
+    models, widgets, BaseConstants, BaseSubsession, BaseGroup, BasePlayer,
+    Currency as c, currency_range
+)
 import random
-# </standard imports>
 
 doc = """
 This is a one-shot "Prisoner's Dilemma". Two players are asked separately
@@ -22,44 +16,26 @@ class Constants(BaseConstants):
     players_per_group = 2
     num_rounds = 1
 
-    #  Points made if player defects and the other cooperates""",
-    defect_cooperate_amount = c(300)
+    instructions_template = 'prisoner/Instructions.html'
 
-    # Points made if both players cooperate
-    cooperate_amount = c(200)
-    cooperate_defect_amount = c(0)
-    defect_amount = c(100)
-    base_points = c(50)
+    # payoff if 1 player defects and the other cooperates""",
+    betray_payoff = c(300)
+    betrayed_payoff = c(0)
 
-    training_1_choices = [
-        'Alice gets 300 points, Bob gets 0 points',
-        'Alice gets 200 points, Bob gets 200 points',
-        'Alice gets 0 points, Bob gets 300 points',
-        'Alice gets 100 points, Bob gets 100 points'
-    ]
+    # payoff if both players cooperate or both defect
+    both_cooperate_payoff = c(200)
+    both_defect_payoff = c(100)
 
-
-    training_1_correct = training_1_choices[0]
 
 class Subsession(BaseSubsession):
-
     pass
 
 
 class Group(BaseGroup):
     pass
 
+
 class Player(BasePlayer):
-
-    training_question_1 = models.CharField(
-        choices=Constants.training_1_choices,
-        widget=widgets.RadioSelect(),
-        #timeout_default=Constants.training_1_choices[1]
-    )
-
-    def is_training_question_1_correct(self):
-        return self.training_question_1 == Constants.training_1_correct
-
     decision = models.CharField(
         choices=['Cooperate', 'Defect'],
         doc="""This player's decision""",
@@ -70,11 +46,19 @@ class Player(BasePlayer):
         return self.get_others_in_group()[0]
 
     def set_payoff(self):
-        points_matrix = {'Cooperate': {'Cooperate': Constants.cooperate_amount,
-                                       'Defect': Constants.cooperate_defect_amount},
-                         'Defect':   {'Cooperate': Constants.defect_cooperate_amount,
-                                      'Defect': Constants.defect_amount}}
+
+        points_matrix = {
+            'Cooperate':
+                {
+                    'Cooperate': Constants.both_cooperate_payoff,
+                    'Defect': Constants.betrayed_payoff
+                },
+            'Defect':
+                {
+                    'Cooperate': Constants.betray_payoff,
+                    'Defect': Constants.both_defect_payoff
+                }
+        }
 
         self.payoff = (points_matrix[self.decision]
-                                           [self.other_player().decision])
-
+                       [self.other_player().decision])

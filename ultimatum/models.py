@@ -1,27 +1,23 @@
-# -*- coding: utf-8 -*-
-# <standard imports>
-from __future__ import division
-from otree.db import models
-from otree.constants import BaseConstants
-from otree.models import BaseSubsession, BaseGroup, BasePlayer
-
-from otree import widgets
-from otree.common import Currency as c, currency_range
+from otree.api import (
+    models, widgets, BaseConstants, BaseSubsession, BaseGroup, BasePlayer,
+    Currency as c, currency_range
+)
 import random
-# </standard imports>
 
-doc="""
+doc = """
 Ultimatum game with two treatments: direct response and strategy method.
 In the former, one player makes an offer and the other either accepts or rejects.
 It comes in two flavors, with and without hypothetical questions about the second player's response to offers other than the one that is made.
 In the latter treatment, the second player is given a list of all possible offers, and is asked which ones to accept or reject.
 """
 
-class Constants(BaseConstants):
 
+class Constants(BaseConstants):
     name_in_url = 'ultimatum'
     players_per_group = 2
     num_rounds = 1
+
+    instructions_template = 'ultimatum/Instructions.html'
 
     endowment = c(100)
     payoff_if_rejected = c(0)
@@ -36,7 +32,6 @@ class Constants(BaseConstants):
 
 
 class Subsession(BaseSubsession):
-
     def before_session_starts(self):
         # randomize to treatments
         for g in self.get_groups():
@@ -46,8 +41,11 @@ class Subsession(BaseSubsession):
                 g.strategy = random.choice([True, False])
 
 
-class Group(BaseGroup):
+def question(amount):
+    return 'Would you accept an offer of {}?'.format(c(amount))
 
+
+class Group(BaseGroup):
     strategy = models.BooleanField(
         doc="""Whether this group uses strategy method"""
     )
@@ -58,25 +56,37 @@ class Group(BaseGroup):
         doc="if offered amount is accepted (direct response method)"
     )
 
-
-    response_0 = models.BooleanField(widget=widgets.RadioSelectHorizontal())
-    response_10 = models.BooleanField(widget=widgets.RadioSelectHorizontal())
-    response_20 = models.BooleanField(widget=widgets.RadioSelectHorizontal())
-    response_30 = models.BooleanField(widget=widgets.RadioSelectHorizontal())
-    response_40 = models.BooleanField(widget=widgets.RadioSelectHorizontal())
-    response_50 = models.BooleanField(widget=widgets.RadioSelectHorizontal())
-    response_60 = models.BooleanField(widget=widgets.RadioSelectHorizontal())
-    response_70 = models.BooleanField(widget=widgets.RadioSelectHorizontal())
-    response_80 = models.BooleanField(widget=widgets.RadioSelectHorizontal())
-    response_90 = models.BooleanField(widget=widgets.RadioSelectHorizontal())
-    response_100 = models.BooleanField(widget=widgets.RadioSelectHorizontal())
+    # for strategy method
+    response_0 = models.BooleanField(
+        widget=widgets.RadioSelectHorizontal(), verbose_name=question(0))
+    response_10 = models.BooleanField(
+        widget=widgets.RadioSelectHorizontal(), verbose_name=question(10))
+    response_20 = models.BooleanField(
+        widget=widgets.RadioSelectHorizontal(), verbose_name=question(20))
+    response_30 = models.BooleanField(
+        widget=widgets.RadioSelectHorizontal(), verbose_name=question(30))
+    response_40 = models.BooleanField(
+        widget=widgets.RadioSelectHorizontal(), verbose_name=question(40))
+    response_50 = models.BooleanField(
+        widget=widgets.RadioSelectHorizontal(), verbose_name=question(50))
+    response_60 = models.BooleanField(
+        widget=widgets.RadioSelectHorizontal(), verbose_name=question(60))
+    response_70 = models.BooleanField(
+        widget=widgets.RadioSelectHorizontal(), verbose_name=question(70))
+    response_80 = models.BooleanField(
+        widget=widgets.RadioSelectHorizontal(), verbose_name=question(80))
+    response_90 = models.BooleanField(
+        widget=widgets.RadioSelectHorizontal(), verbose_name=question(90))
+    response_100 = models.BooleanField(
+        widget=widgets.RadioSelectHorizontal(), verbose_name=question(100))
 
 
     def set_payoffs(self):
         p1, p2 = self.get_players()
 
         if self.strategy:
-            self.offer_accepted = getattr(self, 'response_{}'.format(int(self.amount_offered)))
+            self.offer_accepted = getattr(self, 'response_{}'.format(
+                int(self.amount_offered)))
 
         if self.offer_accepted:
             p1.payoff = Constants.endowment - self.amount_offered
@@ -87,6 +97,4 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-
     pass
-

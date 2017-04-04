@@ -1,22 +1,21 @@
-{% extends "global/FirebaseAppBase.html" %}
+{% extends "global/Page.html" %}
 {% load staticfiles otree_tags %}
 
 {% block title %}
     Your Choice
 {% endblock %}
 
-{% block local_scripts %}
+{% block scripts %}
     <link
     		rel="import"
-    		href="/static/webcomponents/smart/otree-continuous-bimatrix/otree-continuous-bimatrix.html">
+    		href="{% static "webcomponents/app/continuous-bimatrix/continuous-bimatrix.html" %}">
 {% endblock %}
 
 {% block content %}
-
-    <otree-continuous-bimatrix
+    <continuous-bimatrix
         payoff-matrix='{{ Constants.payoff_grid }}'
         period-length='{{ Constants.period_length }}'>
-    </otree-continuous-bimatrix>
+    </continuous-bimatrix>
 
     {% include 'continuous_bimatrix/Instructions.html' %}
 

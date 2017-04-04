@@ -1,35 +1,42 @@
-# -*- coding: utf-8 -*-
-from __future__ import division
-
-import random
-
-from otree.common import Currency as c, currency_range
-
+from otree.api import Currency as c, currency_range, SubmissionMustFail
 from . import views
 from ._builtin import Bot
 from .models import Constants
 
 
 class PlayerBot(Bot):
+    cases = ['p1_wins', 'all_0', 'all_max']
 
     def play_round(self):
+        case = self.case
 
-        self.submit(views.Introduction)
+        # Introduction
+        yield (views.Introduction)
 
-        payoff = random.randint(
-            Constants.min_allowable_bid, Constants.max_allowable_bid
-        )
-        self.submit(views.Question, {"training_question_1_my_payoff": payoff})
-        self.submit(views.Feedback1)
+        if case == 'p1_wins':
+            if self.player.id_in_group == 1:
+                bid_amount = 2
+            else:
+                bid_amount = 1
+        elif case == 'all_0':
+            bid_amount = 0
+        else:  # case == 'all_max':
+            bid_amount = Constants.endowment
+        yield (views.Bid, {"bid_amount": bid_amount})
 
-        payoff = random.randint(
-            Constants.min_allowable_bid, Constants.max_allowable_bid
-        )
-        self.submit(views.Bid, {"bid_amount": payoff})
+        assert self.player.payoff >= 0
 
-        self.submit(views.Results)
+        if case == 'p1_wins':
+            if self.player.id_in_group == 1:
+                assert 'You won the auction' in self.html
+            else:
+                assert 'You did not win' in self.html
 
-    def validate_play(self):
-        pass
+        # group-level assertions
+        if self.player.id_in_group == 1:
+            assert self.group.highest_bid >= self.group.second_highest_bid
+            num_winners = sum(
+                [1 for p in self.group.get_players() if p.is_winner])
+            assert num_winners == 1
 
-
+        yield (views.Results)

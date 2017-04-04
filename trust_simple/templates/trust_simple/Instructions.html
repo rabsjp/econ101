@@ -1,6 +1,10 @@
-{% extends "global/Instructions.html" %}
+{% load otree_tags staticfiles %}
 
-{% block instructions %}
+<div class="instructions well well-lg">
+
+    <h3 class="panel-sub-heading">
+        Instructions
+    </h3>
 <p>
     This is a trust game with 2 players.
 </p>
@@ -11,4 +15,4 @@
     Before B receives these points they will be tripled.
     Once B receives the tripled points he can decide to send some or all of his points to A.
 </p>
-{% endblock %}
+</div>

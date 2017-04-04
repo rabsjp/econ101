@@ -1,4 +1,4 @@
-{% extends "global/Base.html" %}
+{% extends "global/Page.html" %}
 {% load staticfiles otree_tags %}
 
 {% block title %}
@@ -10,6 +10,6 @@
     {% formfield player.claim %}
     {% next_button %}
     
-    {% include instructions %}
+    {% include Constants.instructions_template %}
 
 {% endblock %}

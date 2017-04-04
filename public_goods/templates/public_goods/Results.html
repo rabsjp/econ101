@@ -1,4 +1,4 @@
-{% extends "global/Base.html" %}
+{% extends "global/Page.html" %}
 {% load staticfiles otree_tags %}
 
 {% block title %}
@@ -24,18 +24,15 @@
 
         <tr><td colspan="2"><hr/></td></tr>
 
-        <tr><td>Thus in total you earned:</td><td>{{ individual_earnings }}</td></tr>
-        <tr><td>In addition you get a participation fee of:</td><td>{{ Constants.base_points }}</td></tr>
+        <tr><td>Thus in total you earned:</td><td>{{ player.payoff }}</td></tr>
 
-        <tr><td colspan="2"><hr/></td></tr>
-
-        <tr><td>So in sum you will get:</td><td>{{ player.payoff }}</td></tr>
     </table>
     <p></p>
 
     {% next_button %}
-    
-    {% include 'public_goods/Instructions.html' %}
+
+
+    {% include Constants.instructions_template %}
 
 
 {% endblock %}

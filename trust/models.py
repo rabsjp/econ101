@@ -1,14 +1,8 @@
-# -*- coding: utf-8 -*-
-# <standard imports>
-from __future__ import division
-from otree.db import models
-from otree.constants import BaseConstants
-from otree.models import BaseSubsession, BaseGroup, BasePlayer
-
-from otree import widgets
-from otree.common import Currency as c, currency_range
+from otree.api import (
+    models, widgets, BaseConstants, BaseSubsession, BaseGroup, BasePlayer,
+    Currency as c, currency_range
+)
 import random
-# </standard imports>
 
 
 doc = """
@@ -25,23 +19,18 @@ class Constants(BaseConstants):
     players_per_group = 2
     num_rounds = 1
 
-    #Initial amount allocated to each player
+    instructions_template = 'trust/Instructions.html'
+
+    # Initial amount allocated to each player
     amount_allocated = c(100)
     multiplication_factor = 3
-    bonus = c(10)
 
-    training_answer_x_correct = c(130)
-    training_answer_y_correct = c(10)
 
 class Subsession(BaseSubsession):
-
     pass
 
 
-
 class Group(BaseGroup):
-
-
     sent_amount = models.CurrencyField(
         min=0, max=Constants.amount_allocated,
         doc="""Amount sent by P1""",
@@ -55,14 +44,11 @@ class Group(BaseGroup):
     def set_payoffs(self):
         p1 = self.get_player_by_id(1)
         p2 = self.get_player_by_id(2)
-        p1.payoff = Constants.bonus + Constants.amount_allocated - self.sent_amount + self.sent_back_amount
-        p2.payoff = Constants.bonus + self.sent_amount * Constants.multiplication_factor - self.sent_back_amount
+        p1.payoff = Constants.amount_allocated - self.sent_amount + self.sent_back_amount
+        p2.payoff = self.sent_amount * Constants.multiplication_factor - self.sent_back_amount
 
 
 class Player(BasePlayer):
-
-    training_answer_x = models.CurrencyField(verbose_name='Participant A would have')
-    training_answer_y = models.CurrencyField(verbose_name='Participant B would have')
 
     def role(self):
         return {1: 'A', 2: 'B'}[self.id_in_group]

@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
-# <standard imports>
-from __future__ import division
-from otree.db import models
-from otree.constants import BaseConstants
-from otree.models import BaseSubsession, BaseGroup, BasePlayer
-
-from otree import widgets
-from otree.common import Currency as c, currency_range
-# </standard imports>
+from otree.api import (
+    models, widgets, BaseConstants, BaseSubsession, BaseGroup, BasePlayer,
+    Currency as c, currency_range, safe_json
+)
+import random
 
 
 doc = """
@@ -21,73 +16,94 @@ based on
 </a>.
 """
 
+
 class Constants(BaseConstants):
     name_in_url = 'lemon_market'
     players_per_group = 3
     num_rounds = 3
-    participation_fee = c(10)
-    INITIAL = c(50)
+
+    instructions_template = 'lemon_market/Instructions.html'
+
+    initial_endowment = c(50)
 
 
 class Subsession(BaseSubsession):
 
-    final = models.BooleanField(initial=False)
+    def vars_for_admin_report(self):
+        group = self.get_groups()[0]
+
+        series = []
+
+        transaction_prices = [g.sale_price for g in group.in_all_rounds()]
+        series.append({
+            'name': 'Transaction Price',
+            'data': transaction_prices})
+
+        for player in group.get_players():
+            payoffs = [p.payoff for p in player.in_all_rounds()]
+            series.append(
+                {'name': 'Earnings for %s' % player.role().capitalize(),
+                 'data': payoffs})
+        highcharts_series = safe_json(series)
+
+        round_numbers = safe_json(list(range(1, Constants.num_rounds + 1)))
+
+        return {
+            'highcharts_series': highcharts_series,
+            'round_numbers': round_numbers
+        }
+
 
 
 class Group(BaseGroup):
+    sale_price = models.CurrencyField()
 
-    buyer_choice = models.PositiveIntegerField()
+    seller_id = models.PositiveIntegerField(
+        choices=[(i, 'Buy from seller %i' % i) for i in
+                 range(1, Constants.players_per_group)] + [
+                    (0, 'Buy nothing')],
+        widget=widgets.RadioSelect(),
+        doc="""0 means no purchase made"""
+    )  # seller index
 
     def set_payoff(self):
         for p in self.get_players():
-            p.payoff = Constants.INITIAL
-        buyer = self.get_player_by_id(1)
+            p.payoff = Constants.initial_endowment
 
-        if buyer.choice:
-            seller = self.get_player_by_id(buyer.choice + 1)
-            buyer.payoff += seller.quality + 5 - seller.price
-            seller.payoff += seller.price - seller.quality
+        if self.seller_id is not 0:
+            seller = self.get_seller()
+            self.sale_price = seller.seller_proposed_price
 
-    def seller(self):
-        choice = self.get_player_by_role('buyer').choice
-        if choice:
-            return self.get_player_by_id(choice + 1)
+            buyer = self.get_player_by_role('buyer')
+            buyer.payoff += seller.seller_proposed_quality + 5 - seller.seller_proposed_price
+            seller.payoff += seller.seller_proposed_price - seller.seller_proposed_quality
+
+    def get_seller(self):
+        for p in self.get_players():
+            if 'seller' in p.role() and p.seller_id() == self.seller_id:
+                return p
 
 
 class Player(BasePlayer):
-
-    # training
-    training_buyer_earnings = models.CurrencyField(
-        verbose_name="Buyer's period payoff would be")
-
-    training_seller1_earnings = models.CurrencyField(
-        verbose_name="Seller 1's period payoff would be")
-
-    training_seller2_earnings = models.CurrencyField(
-        verbose_name="Seller 2's period payoff would be")
-
     # seller
-    price = models.CurrencyField(
-        min=0, max=Constants.INITIAL,
+    seller_proposed_price = models.CurrencyField(
+        min=0, max=Constants.initial_endowment,
         verbose_name='Please indicate a price (from 0 to %i) you want to sell'
-        % Constants.INITIAL)
+                     % Constants.initial_endowment)
 
-    quality = models.CurrencyField(choices=[
-        (30, 'High'),
-        (20, 'Medium'),
-        (10, 'Low')],
+    seller_proposed_quality = models.CurrencyField(
+        choices=[
+            (30, 'High'),
+            (20, 'Medium'),
+            (10, 'Low')],
         verbose_name='Please select a quality grade you want to produce',
         widget=widgets.RadioSelectHorizontal())
 
-    # buyer
-    choice = models.PositiveIntegerField(
-        choices=[(i, 'Buy from seller %i' % i) for i in
-                 range(1, Constants.players_per_group)] + [(0, 'Buy nothing')],
-        blank=True,
-        widget=widgets.RadioSelect(),
-        verbose_name='And you will')  # seller index
+    def seller_id(self):
+        # player 1 is the buyer, so seller 1 is actually player 2
+        return (self.id_in_group - 1)
 
     def role(self):
         if self.id_in_group == 1:
             return 'buyer'
-        return 'seller %i' % (self.id_in_group - 1)
+        return 'seller {}'.format(self.seller_id())

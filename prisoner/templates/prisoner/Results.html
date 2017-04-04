@@ -1,4 +1,4 @@
-{% extends "global/Base.html" %}
+{% extends "global/Page.html" %}
 {% load staticfiles otree_tags %}
 
 {% block title %}
@@ -6,8 +6,6 @@
 {% endblock %}
 
 {% block content %}
-
-
 
     <p>
         {% if same_choice %}
@@ -17,24 +15,12 @@
         {% endif %}
     </p>
 
-    <table class="table" style="width:400px; margin-top:20px; margin-bottom:10px">
-        <tr>
-            <td>As a result, you earned</td>
-            <td>{{ player.payoff }}</td>
-
-        </tr>
-        <tr>
-            <td>In addition, you get a participation fee of</td>
-            <td>{{ Constants.base_points }}</td>
-        </tr>
-        <tr>
-            <td>In total, you receive</td>
-            <td>{{ total_plus_base }}</td>
-        </tr>
-    </table>
+    <p>
+        As a result, you earned {{ player.payoff }}.
+    </p>
 
     {% next_button %}
 
-    {% include 'prisoner/Instructions.html' %}
+    {% include Constants.instructions_template %}
 
 {% endblock %}

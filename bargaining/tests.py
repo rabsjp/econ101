@@ -1,10 +1,4 @@
-# -*- coding: utf-8 -*-
-from __future__ import division
-
-import random
-
-from otree.common import Currency as c, currency_range
-
+from otree.api import Currency as c, currency_range
 from . import views
 from ._builtin import Bot
 from .models import Constants
@@ -12,22 +6,23 @@ from .models import Constants
 
 class PlayerBot(Bot):
 
+    cases = [
+        'success', # players agree on an amount under the threshold
+        'greedy', # players ask for too much so end up with nothing
+    ]
+
     def play_round(self):
 
         # start
-        self.submit(views.Introduction)
-        self.submit(
-            views.Question1,
-            {"training_amount_mine": 1, "training_amount_other": 2}
-        )
-        self.submit(views.Feedback)
+        yield (views.Introduction)
 
-        # request
-        amount = random.randrange(Constants.amount_shared)
-        self.submit(views.Request, {"request_amount": amount})
+        if self.case == 'success':
+            request_amount = c(10)
+            yield (views.Request, {"request_amount": request_amount})
+            yield (views.Results)
+            assert self.player.payoff == request_amount
 
-        # results
-        self.submit(views.Results)
-
-    def validate_play(self):
-        pass
+        if self.case == 'greedy':
+            yield (views.Request, {"request_amount": Constants.amount_shared})
+            yield (views.Results)
+            assert self.player.payoff == 0

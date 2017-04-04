@@ -1,1 +1,6 @@
--r requirements_heroku.txt
+# this is for Heroku and other servers.
+# Locally, you should install requirements_base.txt
+-r requirements_server.txt
+
+# Stress test
+selenium==2.53.2

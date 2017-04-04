@@ -1,4 +1,4 @@
-{% extends "global/Base.html" %}
+{% extends "global/Page.html" %}
 {% load staticfiles otree_tags %}
 
 {% block title %}
@@ -24,6 +24,6 @@
     Therefore, your total payoff is {{player.payoff}}.
     </p>
 
-    {% include 'trust_simple/Instructions.html' %}
+    {% include Constants.instructions_template %}
 
 {% endblock %}

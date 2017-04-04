@@ -1,4 +1,4 @@
-{% extends "global/Base.html" %}
+{% extends "global/Page.html" %}
 {% load staticfiles otree_tags %}
 
 {% block title %}
@@ -15,23 +15,19 @@
 
     You chose to go to <strong>{{player.decision}}</strong> and Wife chose to go to
     <strong>{{player.other_player.decision}}</strong>. As a result, your payoff is
-    <strong>{{player.payoff}}</strong>. In addition,
-    you received 10 points for participation. Thus, your total payoff is
-    <strong>{{total_payoff}}</strong>.
+    <strong>{{player.payoff}}</strong>
 
 {% else %}
 
     You chose to go to <strong>{{player.decision}}</strong> and Husband chose to go to
     <strong>{{player.other_player.decision}}</strong>. As a result, your payoff is
-    <strong>{{player.payoff}}</strong>. In addition,
-    you received 10 points for participation. Thus, your total payoff is
-    <strong>{{total_payoff}}</strong>.
+    <strong>{{player.payoff}}</strong>.
 
 {% endif %}
 </p>
 
     {% next_button %}
 
-    {% include 'battle_of_the_sexes/Instructions.html' %}
+    {% include Constants.instructions_template %}
 
 {% endblock %}

@@ -1,4 +1,4 @@
-{% extends "global/Base.html" %}
+{% extends "global/Page.html" %}
 {% load staticfiles otree_tags %}
 
 {% block title %}
@@ -12,6 +12,6 @@ You are Participant B. Participant A sent you {{group.sent_amount}} and you rece
 
     {% formfield group.sent_back_amount with label=prompt %}
     <p>{% next_button %}</p>
-    {% include instructions %}
+    {% include Constants.instructions_template %}
 
 {% endblock %}

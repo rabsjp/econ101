@@ -1,4 +1,4 @@
-{% extends "global/Base.html" %}
+{% extends "global/Page.html" %}
 {% load staticfiles otree_tags %}
 
 {% block title %}
@@ -6,8 +6,6 @@
 {% endblock %}
 
 {% block content %}
-
-
 
     <p>You are <strong>Player B</strong>. Player A has offered you a contract with the following details:</p>
 
@@ -20,12 +18,20 @@
     <div id=effort>
     {% formfield group.agent_work_effort with label='Please choose your level of effort' %}
     </div>
+
     <p id=calculate></p>
+
     <p>
     {% next_button %}
     </p>
-    {% include 'principal_agent/Rules.html' %}
-    <script>
+
+    {% include Constants.instructions_template %}
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
 $(function() {
         $('#effort').hide();
         $('input[type=radio]').change(function(){
@@ -43,7 +49,7 @@ $(function() {
                     $('p#calculate').text('');
                     return;
                 }
-                //  [B's Return Share in %] × [Total Return] + [B's Fixed Payment] – [B's Effort Cost] 
+                //  [B's Return Share in %] × [Total Return] + [B's Fixed Payment] – [B's Effort Cost]
                 payoff = {{return_share}} * {{EFFORT_TO_COST}}[effort] / 100 + {{fixed_pay_int}} - {{EFFORT_TO_COST}}[effort];
             } else {
                 effort = 'to reject';
@@ -51,6 +57,7 @@ $(function() {
             }
             $('p#calculate').text('You will receive '+payoff+' points if you choose '+effort+'.');
         });
-    </script>
+</script>
 
-    {% endblock %}
+
+{% endblock %}
