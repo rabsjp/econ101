@@ -56,8 +56,7 @@
             
             <div style="float:left; padding-left: 40px">
                 <bimatrix-heatmap
-                    width="120"
-                    height="120"
+                    size="120"
                     my-decision="[[ otherDecision ]]"
                     other-decision="[[ myDecision ]]"
                     payoffs="[[ otherPayoffsTranspose ]]"
@@ -75,8 +74,7 @@
                 <div style="float:right">
                     <bimatrix-heatmap
                         class="heatmap"
-                        width="300"
-                        height="300"
+                        size="300"
                         my-decision="[[ myDecision ]]"
                         other-decision="[[ otherDecision ]]"
                         payoffs="[[ myPayoffs ]]"
@@ -125,29 +123,29 @@
             ready() {
                 // set payoff indices
                 if (this.$.constants.idInGroup === undefined) {
-                    console.log('Not in game, manually setting payoffIndex')
-                    this.payoffIndex = 0
+                    console.log('Not in game, manually setting payoffIndex');
+                    this.payoffIndex = 0;
                 } else {
-                    this.payoffIndex = this.$.constants.idInGroup - 1
+                    this.payoffIndex = this.$.constants.idInGroup - 1;
                 }
-                this.otherPayoffIndex = 1 - this.payoffIndex
+                this.otherPayoffIndex = 1 - this.payoffIndex;
 
                 // color schemes for each player's heatmaps
-                this.myColor = 'rainbow'
-                this.otherColor = 'mono'
+                this.myColor = 'rainbow';
+                this.otherColor = 'mono';
 
                 // separate each player's payoffs into two separate arrays
                 this.myPayoffs = this.payoffMatrix.map(
-                    val => parseInt(val[this.payoffIndex]))
+                    val => parseInt(val[this.payoffIndex]));
                 this.otherPayoffs = this.payoffMatrix.map(
-                    val => parseInt(val[this.otherPayoffIndex]))
+                    val => parseInt(val[this.otherPayoffIndex]));
 
                 // take inverse of other player's payoffs
-                const otherPayoffsTranspose = this.otherPayoffs.slice()
-                const tmp = otherPayoffsTranspose[1]
-                otherPayoffsTranspose[1] = otherPayoffsTranspose[2]
-                otherPayoffsTranspose[2] = tmp
-                this.otherPayoffsTranspose = otherPayoffsTranspose
+                const otherPayoffsTranspose = this.otherPayoffs.slice();
+                const tmp = otherPayoffsTranspose[1];
+                otherPayoffsTranspose[1] = otherPayoffsTranspose[2];
+                otherPayoffsTranspose[2] = tmp;
+                this.otherPayoffsTranspose = otherPayoffsTranspose;
             }
         })
     </script>

@@ -25,7 +25,7 @@
                 },
             },
             make_hazard_bar() {
-                if (!this.hazard)
+                if (!this.hazard || !this.$$('canvas'))
                     return
                 
                 const canvas = this.$$('canvas')

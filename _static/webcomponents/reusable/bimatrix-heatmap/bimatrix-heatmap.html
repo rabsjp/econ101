@@ -44,8 +44,8 @@
 
 		</style>
 
-		<div id="heatmap-container" style="width: [[width]]px; height: [[width]]px">
-			<canvas width="[[width]]" height="[[height]]"></canvas>
+		<div id="heatmap-container" style="width: [[size]]px; height: [[size]]px">
+			<canvas width="[[size]]" height="[[size]]"></canvas>
 
 			<span class="payoff_labels" style="top: -25px; left: 10px">[[_arrayItem(payoffs.*, 0)]]</span>
 			<span class="payoff_labels" style="top: -25px; right: 10px">[[_arrayItem(payoffs.*, 1)]]</span>
@@ -64,8 +64,7 @@
 		Polymer({
 			is: 'bimatrix-heatmap',
 			properties: {
-				width: Number,
-				height: Number,
+				size: Number,
 				myDecision: Number,
 				otherDecision: Number,
 				payoffs: {
