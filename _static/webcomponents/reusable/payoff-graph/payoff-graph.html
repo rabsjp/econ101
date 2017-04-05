@@ -51,10 +51,13 @@
 
 				// readability is overrated
 				// just sums each set of payoffs and divides by 4
-				const myInitialPayoff = this.myPayoffs.reduce((a, b) => a + b, 0) / 4;
-				const otherInitialPayoff = this.otherPayoffs.reduce((a, b) => a + b, 0) / 4;
+				const myInitialPayoff = this.myPayoffs.reduce(
+					(a, b) => a + b, 0) / 4;
+				const otherInitialPayoff = this.otherPayoffs.reduce(
+					(a, b) => a + b, 0) / 4;
 				// finds max of all payoffs
-				const maxPayoff = Math.max(... this.myPayoffs.concat(this.otherPayoffs));
+				const maxPayoff = Math.max(
+					...this.myPayoffs.concat(this.otherPayoffs));
 
 				// call highcharts setup function
 				this.graph_obj = Highcharts.chart({
