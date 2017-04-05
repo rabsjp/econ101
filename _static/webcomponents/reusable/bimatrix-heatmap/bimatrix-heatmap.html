@@ -3,6 +3,10 @@
 <dom-module id="bimatrix-heatmap">
 	<template>
 		<style>
+		
+			:host {
+				display: block;
+			}
 
 			canvas {
 				position: absolute;
@@ -58,7 +62,7 @@
 	
 	<script>
 		Polymer({
-			is: 'otree-heatmap',
+			is: 'bimatrix-heatmap',
 			properties: {
 				width: Number,
 				height: Number,
