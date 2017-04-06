@@ -87,10 +87,10 @@
                 <strategy-graph
                     my-decision="[[ myDecision ]]"
                     other-decision="[[ otherDecision ]]"
-                    period-length="120"
+                    period-length="[[ periodLength ]]"
                 ></strategy-graph>
                 <div style="float:left">
-                    <!--<otree-thermometer color='rainbow'></otree-thermometer>-->
+                    <otree-thermometer color='rainbow'></otree-thermometer>
                 </div>
                 <div style="float: right">
                     <payoff-graph
@@ -98,7 +98,7 @@
                         other-decision="[[ otherDecision ]]"
                         my-payoffs="[[ myPayoffs ]]"
                         other-payoffs="[[ otherPayoffs ]]"
-                        period-length="120"
+                        period-length="[[ periodLength ]]"
                     ></payoff-graph>
                 </div>
             </div>
