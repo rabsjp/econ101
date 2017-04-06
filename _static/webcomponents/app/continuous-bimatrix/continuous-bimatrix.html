@@ -1,4 +1,7 @@
 <link rel="import" href="/static/bower_components/polymer/polymer.html">
+<link
+    rel="import"
+    href="/static/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 
 <link
     rel="import"
@@ -22,15 +25,33 @@
 
 <dom-module id="continuous-bimatrix">
     <template>
+        <style include="iron-flex iron-flex-alignment">
+        </style>
         <style>
-            :host { margin: 10px; }
+            :host {
+                display: block;
+                margin: 30px 0 40px 0;
+            }
 
-            #slider {
+            input {
                 writing-mode: bt-lr; /* IE */
                 -webkit-appearance: slider-vertical; /* WebKit */
-                width: 8px;
+                width: 40px;
                 height: 310px;
-                margin: 25px 0 0 -30px;
+                position: relative;
+                top: -11px;
+            }
+
+            #graphs-column {
+                margin-left: 20px;
+            }
+
+            #your-heatmap {
+                margin-top: 30px;
+            }
+
+            otree-thermometer {
+                margin-bottom: 20px;
             }
 
             strategy-graph {
@@ -52,28 +73,27 @@
             other-decision="{{ otherDecision }}">
         </otree-continuous-decision>
 
-        <div style="height: 570px">
+        <div id="app" class="layout horizontal">
             
-            <div style="float:left; padding-left: 40px">
-                <bimatrix-heatmap
-                    size="120"
-                    my-decision="[[ otherDecision ]]"
-                    other-decision="[[ myDecision ]]"
-                    payoffs="[[ otherPayoffsTranspose ]]"
-                    color="[[ otherColor ]]">
-                </bimatrix-heatmap>
-                <div style="float:left">
-                    <input
-                        id="slider"
-                        type="range"
-                        min="0"
-                        max="1"
-                        step=".01"
-                        value="{{ myDecision::input }}">
-                </div>
-                <div style="float:right">
+            <div id="heatmap-column" class="layout horizontal">
+                <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step=".01"
+                    value="{{ myDecision::input }}"
+                    class="self-end">
+                <div class="layout vertical start">
                     <bimatrix-heatmap
-                        class="heatmap"
+                        id="counterpart-heatmap"
+                        size="120"
+                        my-decision="[[ otherDecision ]]"
+                        other-decision="[[ myDecision ]]"
+                        payoffs="[[ otherPayoffsTranspose ]]"
+                        color="[[ otherColor ]]">
+                    </bimatrix-heatmap>
+                    <bimatrix-heatmap
+                        id="your-heatmap"
                         size="300"
                         my-decision="[[ myDecision ]]"
                         other-decision="[[ otherDecision ]]"
@@ -83,16 +103,17 @@
                 </div>
             </div>
 
-            <div style="float:right">
-                <strategy-graph
-                    my-decision="[[ myDecision ]]"
-                    other-decision="[[ otherDecision ]]"
-                    period-length="[[ periodLength ]]"
-                ></strategy-graph>
-                <div style="float:left">
-                    <otree-thermometer color='rainbow'></otree-thermometer>
-                </div>
-                <div style="float: right">
+            <div id="graphs-column" class="layout horizontal">
+                <otree-thermometer
+                    color="rainbow"
+                    class="self-end">
+                </otree-thermometer>
+                <div id="graphs">
+                    <strategy-graph
+                        my-decision="[[ myDecision ]]"
+                        other-decision="[[ otherDecision ]]"
+                        period-length="[[ periodLength ]]"
+                    ></strategy-graph>
                     <payoff-graph
                         my-decision="[[ myDecision ]]"
                         other-decision="[[ otherDecision ]]"
