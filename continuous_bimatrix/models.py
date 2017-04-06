@@ -35,7 +35,7 @@ class Constants(BaseConstants):
     base_points = 0
 
     # Amount of time the game stays on the decision page in seconds.
-    period_length = 1200
+    period_length = 120
 
 
 class Subsession(BaseSubsession):
@@ -54,7 +54,7 @@ class Player(BasePlayer):
 
     def set_payoff(self):
         self.decisions_over_time = Decision.objects.filter(
-                component='otree-bimatrix',
+                component='continuous-bimatrix',
                 session=self.session,
                 subsession=self.subsession.name(),
                 round=self.round_number,
