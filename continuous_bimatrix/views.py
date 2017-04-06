@@ -44,6 +44,9 @@ def vars_for_all_templates(self):
 class Introduction(Page):
     timeout_seconds = 100
 
+    def is_displayed(self):
+        return self.round_number == 1
+
 
 class DecisionWaitPage(WaitPage, redwood_views.WaitPageMixin):
     body_text = 'Waiting for all players to be ready'
@@ -54,7 +57,7 @@ class DecisionWaitPage(WaitPage, redwood_views.WaitPageMixin):
         end_time = start_time + timedelta(seconds=Constants.period_length)
 
         self.log_decision_bookends(
-            start_time, end_time, Constants.name_in_url, 'bimatrix', -1)
+            start_time, end_time, Constants.name_in_url, 'continuous-bimatrix', -1)
 
 
 class Decision(Page):
