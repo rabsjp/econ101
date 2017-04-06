@@ -48,6 +48,12 @@
 
 				this.start_time = performance.now();
 
+				// disable highcharts sorting requirement
+                // gets rid of annoying "highcharts error 15" messages
+                (function (H) {
+                    H.seriesTypes.line.prototype.requireSorting = false;
+                })(Highcharts);
+
 				// call highcharts setup function
 				this.graph_obj = Highcharts.chart({
 					chart: {
