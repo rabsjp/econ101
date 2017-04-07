@@ -49,7 +49,7 @@ class Constants(BaseConstants):
     base_points = 0
 
     # Amount of time the game stays on the decision page in seconds.
-    period_length = 30
+    period_length = 180
 
 
 class Subsession(BaseSubsession):
