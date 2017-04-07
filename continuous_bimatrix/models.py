@@ -59,8 +59,6 @@ class Subsession(BaseSubsession):
     def get_cur_payoffs(self):
         roundno = self.round_number
 
-        print(roundno)
-
         if roundno in [1, 2, 3]:
             return Constants.payoff_grids[0]
         elif roundno in [4, 5, 6]:
@@ -97,7 +95,7 @@ class Player(BasePlayer):
         other_state = .5
 
         payoff_grid = self.subsession.get_cur_payoffs()
-        
+
         if (self.id_in_group == 1):
             A_A_payoff = payoff_grid[0][0]
             A_B_payoff = payoff_grid[1][0]
