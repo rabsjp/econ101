@@ -48,20 +48,21 @@ class Introduction(Page):
         return self.round_number == 1
 
 
-class DecisionWaitPage(WaitPage, redwood_views.WaitPageMixin):
+class DecisionWaitPage(WaitPage):
     body_text = 'Waiting for all players to be ready'
 
-    def after_all_players_arrive(self):
+
+class Decision(Page, redwood_views.PageMixin):
+    timeout_seconds = Constants.period_length + 10
+
+    def when_all_players_ready(self):
         # calculate start and end times for the period
         start_time = timezone.now()
         end_time = start_time + timedelta(seconds=Constants.period_length)
 
         self.log_decision_bookends(
             start_time, end_time, Constants.name_in_url, 'continuous-bimatrix', -1)
-
-
-class Decision(Page):
-    timeout_seconds = Constants.period_length
+        self.start_period_timer(Constants.period_length)
 
 
 class Results(Page):
@@ -73,7 +74,6 @@ class Results(Page):
             'decisions_over_time': self.player.decisions_over_time,
             'total_plus_base': self.player.payoff + Constants.base_points
         }
-
 
 
 page_sequence = [
