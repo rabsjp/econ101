@@ -28,14 +28,18 @@
     <link
     		rel="import"
     		href="{% static "webcomponents/app/continuous-bimatrix/continuous-bimatrix.html" %}">
+    <link
+    		rel="import"
+    		href="{% static "otree-redwood/webcomponents/otree-ready/otree-ready.html" %}">
 
 {% endblock %}
 
 {% block content %}
     <continuous-bimatrix
-        payoff-matrix='{{ Constants.payoff_grid }}'
+        payoff-matrix='{{ payoff_matrix }}'
         period-length='{{ Constants.period_length }}'>
     </continuous-bimatrix>
+    <otree-ready></otree-ready>
 
     {% include 'continuous_bimatrix/Instructions.html' %}
 

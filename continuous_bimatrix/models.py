@@ -26,21 +26,49 @@ class Constants(BaseConstants):
     players_per_group = 2
     num_rounds = 10
 
-    #payoff grid
-    payoff_grid = [
-        [ 800, 0   ], [ 0,   200 ],
-        [ 0,   200 ], [ 200, 0   ],
+    #payoff grids
+    payoff_grids = [
+        [
+            [800, 0], [0, 200],
+            [0, 200], [200, 0],
+        ],
+        [
+            [500, 100], [0, 200],
+            [0, 200], [300, 0],
+        ],
+        [
+            [100, 0], [0, 200],
+            [200, 100], [50, 0],
+        ],
+        [
+            [300, 200], [100, 100],
+            [100, 150], [150, 350],
+        ]
     ]
 
     base_points = 0
 
     # Amount of time the game stays on the decision page in seconds.
-    period_length = 120
+    period_length = 180
 
 
 class Subsession(BaseSubsession):
     def before_session_starts(self):
         self.group_randomly()
+
+    def get_cur_payoffs(self):
+        roundno = self.round_number
+
+        if roundno in [1, 2, 3]:
+            return Constants.payoff_grids[0]
+        elif roundno in [4, 5, 6]:
+            return Constants.payoff_grids[1]
+        elif roundno in [7, 8]:
+            return Constants.payoff_grids[2]
+        elif roundno in [9, 10]:
+            return Constants.payoff_grids[3]
+        else:
+            print("invalid round number!")
 
 
 class Group(BaseGroup):
@@ -66,8 +94,8 @@ class Player(BasePlayer):
         my_state = .5
         other_state = .5
 
-        payoff_grid = Constants.payoff_grid
-        
+        payoff_grid = self.subsession.get_cur_payoffs()
+
         if (self.id_in_group == 1):
             A_A_payoff = payoff_grid[0][0]
             A_B_payoff = payoff_grid[1][0]

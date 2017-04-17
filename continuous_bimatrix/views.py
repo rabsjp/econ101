@@ -12,40 +12,38 @@ from datetime import timedelta
 import json
 import logging
 
-
-def vars_for_all_templates(self):
-    payoff_grid = Constants.payoff_grid
-    if (self.player.id_in_group == 1):
-        return {
-            "my_A_A_payoff": payoff_grid[0][0],
-            "my_A_B_payoff": payoff_grid[1][0],
-            "my_B_A_payoff": payoff_grid[2][0],
-            "my_B_B_payoff": payoff_grid[3][0],
-            "other_A_A_payoff": payoff_grid[0][1],
-            "other_A_B_payoff": payoff_grid[1][1],
-            "other_B_A_payoff": payoff_grid[2][1],
-            "other_B_B_payoff": payoff_grid[3][1],
-            "total_q": 1
-        }
-    else:
-        return {
-            "my_A_A_payoff": payoff_grid[0][1],
-            "my_A_B_payoff": payoff_grid[1][1],
-            "my_B_A_payoff": payoff_grid[2][1],
-            "my_B_B_payoff": payoff_grid[3][1],
-            "other_A_A_payoff": payoff_grid[0][0],
-            "other_A_B_payoff": payoff_grid[1][0],
-            "other_B_A_payoff": payoff_grid[2][0],
-            "other_B_B_payoff": payoff_grid[3][0],
-            "total_q": 1
-        }
-
-
 class Introduction(Page):
     timeout_seconds = 100
 
     def is_displayed(self):
         return self.round_number == 1
+
+    def vars_for_template(self):
+        payoff_grid = self.subsession.get_cur_payoffs()
+        if (self.player.id_in_group == 1):
+            return {
+                "my_A_A_payoff": payoff_grid[0][0],
+                "my_A_B_payoff": payoff_grid[1][0],
+                "my_B_A_payoff": payoff_grid[2][0],
+                "my_B_B_payoff": payoff_grid[3][0],
+                "other_A_A_payoff": payoff_grid[0][1],
+                "other_A_B_payoff": payoff_grid[1][1],
+                "other_B_A_payoff": payoff_grid[2][1],
+                "other_B_B_payoff": payoff_grid[3][1],
+                "total_q": 1
+            }
+        else:
+            return {
+                "my_A_A_payoff": payoff_grid[0][1],
+                "my_A_B_payoff": payoff_grid[1][1],
+                "my_B_A_payoff": payoff_grid[2][1],
+                "my_B_B_payoff": payoff_grid[3][1],
+                "other_A_A_payoff": payoff_grid[0][0],
+                "other_A_B_payoff": payoff_grid[1][0],
+                "other_B_A_payoff": payoff_grid[2][0],
+                "other_B_B_payoff": payoff_grid[3][0],
+                "total_q": 1
+            }
 
 
 class DecisionWaitPage(WaitPage):
@@ -63,6 +61,35 @@ class Decision(Page, redwood_views.PageMixin):
         self.log_decision_bookends(
             start_time, end_time, Constants.name_in_url, 'continuous-bimatrix', -1)
         self.start_period_timer(Constants.period_length)
+
+    def vars_for_template(self):
+        payoff_grid = self.subsession.get_cur_payoffs()
+        if (self.player.id_in_group == 1):
+            return {
+                "my_A_A_payoff": payoff_grid[0][0],
+                "my_A_B_payoff": payoff_grid[1][0],
+                "my_B_A_payoff": payoff_grid[2][0],
+                "my_B_B_payoff": payoff_grid[3][0],
+                "other_A_A_payoff": payoff_grid[0][1],
+                "other_A_B_payoff": payoff_grid[1][1],
+                "other_B_A_payoff": payoff_grid[2][1],
+                "other_B_B_payoff": payoff_grid[3][1],
+                "total_q": 1,
+                'payoff_matrix': payoff_grid
+            }
+        else:
+            return {
+                "my_A_A_payoff": payoff_grid[0][1],
+                "my_A_B_payoff": payoff_grid[1][1],
+                "my_B_A_payoff": payoff_grid[2][1],
+                "my_B_B_payoff": payoff_grid[3][1],
+                "other_A_A_payoff": payoff_grid[0][0],
+                "other_A_B_payoff": payoff_grid[1][0],
+                "other_B_A_payoff": payoff_grid[2][0],
+                "other_B_B_payoff": payoff_grid[3][0],
+                "total_q": 1,
+                'payoff_matrix': payoff_grid
+            }
 
 
 class Results(Page):
