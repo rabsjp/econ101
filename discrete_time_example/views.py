@@ -43,10 +43,14 @@ class Introduction(Page):
     timeout_seconds = 100
 
 
-class DecisionWaitPage(WaitPage, redwood_views.WaitPageMixin):
+class DecisionWaitPage(WaitPage):
     body_text = 'Waiting for all players to be ready'
 
-    def after_all_players_arrive(self):
+
+class Decision(Page, redwood_views.PageMixin):
+    timeout_seconds = Constants.period_length + 10
+
+    def when_all_players_ready(self):
         # calculate start and end times for the period
         start_time = timezone.now()
         end_time = start_time + timedelta(seconds=Constants.period_length)
@@ -55,10 +59,6 @@ class DecisionWaitPage(WaitPage, redwood_views.WaitPageMixin):
             start_time, end_time, Constants.name_in_url, 'bimatrix', -1)
 
         self.start_subperiod_emitter(Constants.period_length, 10)
-
-
-class Decision(Page):
-    timeout_seconds = Constants.period_length
 
 
 class Results(Page):
