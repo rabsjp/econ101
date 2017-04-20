@@ -4,7 +4,6 @@ from . import models
 from ._builtin import Page, WaitPage
 from otree.common import Currency as c, currency_range
 from .models import Constants
-from otree_redwood.models import Decision as DecisionModel
 import otree_redwood.abstract_views as redwood_views
 
 from django.utils import timezone
@@ -59,7 +58,7 @@ class Decision(redwood_views.Page):
         end_time = start_time + timedelta(seconds=Constants.period_length)
 
         self.log_decision_bookends(
-            start_time, end_time, Constants.name_in_url, 'continuous-bimatrix', -1)
+            start_time, end_time, -1)
         self.start_period_timer(Constants.period_length)
 
     def vars_for_template(self):

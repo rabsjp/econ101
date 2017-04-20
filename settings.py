@@ -137,36 +137,36 @@ SESSION_CONFIG_DEFAULTS = {
 }
 
 SESSION_CONFIGS = [
-    {
-        'name': 'full_bimatrix',
-        'display_name': "Continuous and Discrete Bimatrix Game",
-        'num_demo_participants': 2,
-        'app_sequence': ['continuous_bimatrix', 'discrete_bimatrix', 'payment_info'],
-    },
-    {
-        'name': 'discrete_bimatrix',
-        'display_name': "Discrete Bimatrix Game",
-        'num_demo_participants': 2,
-        'app_sequence': ['discrete_bimatrix', 'payment_info'],
-    },
+    #{
+    #    'name': 'full_bimatrix',
+    #    'display_name': "Continuous and Discrete Bimatrix Game",
+    #    'num_demo_participants': 2,
+    #    'app_sequence': ['continuous_bimatrix', 'discrete_bimatrix', 'payment_info'],
+    #},
+    #{
+    #    'name': 'discrete_bimatrix',
+    #    'display_name': "Discrete Bimatrix Game",
+    #    'num_demo_participants': 2,
+    #    'app_sequence': ['discrete_bimatrix', 'payment_info'],
+    #},
     {
         'name': 'continuous_bimatrix',
         'display_name': "Continuous Bimatrix Game",
         'num_demo_participants': 2,
         'app_sequence': ['continuous_bimatrix', 'payment_info'],
     },
-    {
-        'name': 'discrete_time_example',
-        'display_name': "Discrete Time Example Game",
-        'num_demo_participants': 2,
-        'app_sequence': ['discrete_time_example', 'payment_info'],
-    },
-    {
-        'name': 'stochastic_bimatrix',
-        'display_name': "Stochastic Bimatrix Game",
-        'num_demo_participants': 2,
-        'app_sequence': ['stochastic_bimatrix', 'payment_info'],
-    },
+    #{
+    #    'name': 'discrete_time_example',
+    #    'display_name': "Discrete Time Example Game",
+    #    'num_demo_participants': 2,
+    #    'app_sequence': ['discrete_time_example', 'payment_info'],
+    #},
+    #{
+    #    'name': 'stochastic_bimatrix',
+    #    'display_name': "Stochastic Bimatrix Game",
+    #    'num_demo_participants': 2,
+    #    'app_sequence': ['stochastic_bimatrix', 'payment_info'],
+    #},
     {
         'name': 'public_goods',
         'display_name': "Public Goods",
