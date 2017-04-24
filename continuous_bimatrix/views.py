@@ -6,8 +6,6 @@ from otree.common import Currency as c, currency_range
 from .models import Constants
 import otree_redwood.abstract_views as redwood_views
 
-from django.utils import timezone
-from datetime import timedelta
 import json
 import logging
 
@@ -49,17 +47,8 @@ class DecisionWaitPage(WaitPage):
     body_text = 'Waiting for all players to be ready'
 
 
-class Decision(redwood_views.Page):
-    timeout_seconds = Constants.period_length + 10
-
-    def when_all_players_ready(self):
-        # calculate start and end times for the period
-        start_time = timezone.now()
-        end_time = start_time + timedelta(seconds=Constants.period_length)
-
-        self.log_decision_bookends(
-            start_time, end_time, -1)
-        self.start_period_timer(Constants.period_length)
+class Decision(redwood_views.ContinuousDecisionPage):
+    period_length = Constants.period_length
 
     def vars_for_template(self):
         payoff_grid = self.subsession.get_cur_payoffs()

@@ -19,7 +19,6 @@ else:
 # don't share this with anybody.
 SECRET_KEY = '{{ secret_key }}'
 
-
 DATABASES = {
     'default': dj_database_url.config(
         # Rather than hardcoding the DB parameters here,
