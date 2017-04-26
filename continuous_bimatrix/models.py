@@ -8,7 +8,7 @@ from otree.constants import BaseConstants
 from otree.common import Currency as c, currency_range
 from otree.models import BaseSubsession, BaseGroup, BasePlayer
 
-from otree_redwood.models import Decision
+from otree_redwood.models import Event
 
 doc = """
 This is a continuous time/continuous space bimatrix game.
@@ -49,7 +49,7 @@ class Constants(BaseConstants):
     base_points = 0
 
     # Amount of time the game stays on the decision page in seconds.
-    period_length = 180
+    period_length = 1800
 
 
 class Subsession(BaseSubsession):
@@ -81,8 +81,8 @@ class Player(BasePlayer):
         return self.get_others_in_group()[0]
 
     def set_payoff(self):
-        self.decisions_over_time = Decision.objects.filter(
-                component='continuous-bimatrix',
+        self.decisions_over_time = Event.objects.filter(
+                channel='decisions',
                 session=self.session,
                 subsession=self.subsession.name(),
                 round=self.round_number,

@@ -6,6 +6,7 @@ import random
 from django.test import TestCase
 from otree.common import Currency as c, currency_range
 from otree_redwood.models import Decision
+from selenium import webdriver
 
 from ._builtin import Bot
 from .models import Constants
@@ -25,3 +26,12 @@ class PayoffFunctionTestCase(TestCase):
 
     def test_payoff_function(self):
         self.assertEqual(True, False)
+
+
+class WebcomponentTest(TestCase):
+
+	def test_app_load(self):
+		driver = webdriver.Chrome()
+		driver.get('http://localhost:8000')
+		assert 'oTree' in driver.title
+		driver.close()

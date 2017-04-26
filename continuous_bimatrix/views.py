@@ -4,11 +4,8 @@ from . import models
 from ._builtin import Page, WaitPage
 from otree.common import Currency as c, currency_range
 from .models import Constants
-from otree_redwood.models import Decision as DecisionModel
 import otree_redwood.abstract_views as redwood_views
 
-from django.utils import timezone
-from datetime import timedelta
 import json
 import logging
 
@@ -46,20 +43,12 @@ class Introduction(Page):
             }
 
 
-class DecisionWaitPage(WaitPage, redwood_views.WaitPageMixin):
+class DecisionWaitPage(WaitPage):
     body_text = 'Waiting for all players to be ready'
 
-    def after_all_players_arrive(self):
-        # calculate start and end times for the period
-        start_time = timezone.now()
-        end_time = start_time + timedelta(seconds=Constants.period_length)
 
-        self.log_decision_bookends(
-            start_time, end_time, Constants.name_in_url, 'continuous-bimatrix', -1)
-
-
-class Decision(Page):
-    timeout_seconds = Constants.period_length
+class Decision(redwood_views.ContinuousDecisionPage):
+    period_length = Constants.period_length
 
     def vars_for_template(self):
         payoff_grid = self.subsession.get_cur_payoffs()
