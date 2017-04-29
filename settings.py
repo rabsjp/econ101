@@ -141,6 +141,12 @@ ROOMS = [
 
 SESSION_CONFIGS = [
     {
+        'name': 'imperfect_monitoring',
+        'display_name': "Imperfect Monitoring",
+        'num_demo_participants': 2,
+        'app_sequence': ['imperfect_monitoring', 'payment_info'],
+    },
+    {
         'name': 'full_bimatrix',
         'display_name': "Continuous and Discrete Bimatrix Game",
         'num_demo_participants': 2,

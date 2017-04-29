@@ -1,0 +1,58 @@
+{% extends "global/Base.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Your Choice
+{% endblock %}
+
+{% block content %}
+
+    <otree-imperfect-monitoring
+        row-labels='["Cooperate", "Defect"]'
+        payoff-matrix=
+        '[
+            [
+                "{{ Constants.p1_A_p2_A_amount }}",
+                "{{ Constants.p2_A_p1_A_amount }}"
+            ],
+            [
+                "{{ Constants.p1_A_p2_B_amount }}",
+                "{{ Constants.p2_A_p1_B_amount }}"
+            ],
+            [
+                "{{ Constants.p1_B_p2_A_amount }}",
+                "{{ Constants.p2_B_p1_A_amount }}"
+            ],
+            [
+                "{{ Constants.p1_B_p2_B_amount }}",
+                "{{ Constants.p2_B_p1_B_amount }}"
+            ]
+        ]'
+        probability-matrix=
+        '[
+            [
+                "{{ Constants.p1_A_p2_A_signal }}",
+                "{{ Constants.p2_A_p1_A_signal }}"
+            ],
+            [
+                "{{ Constants.p1_A_p2_B_signal }}",
+                "{{ Constants.p2_A_p1_B_signal }}"
+            ],
+            [
+                "{{ Constants.p1_B_p2_A_signal }}",
+                "{{ Constants.p2_B_p1_A_signal }}"
+            ],
+            [
+                "{{ Constants.p1_B_p2_B_signal }}",
+                "{{ Constants.p2_B_p1_B_signal }}"
+            ]
+        ]'
+        player-index='{{ player.id_in_group|add:"-1"}}'
+        period-length='{{ Constants.period_length }}'>
+    </otree-imperfect-monitoring>
+
+
+
+    {% include 'imperfect_monitoring/Instructions.html' %}
+
+{% endblock %}
