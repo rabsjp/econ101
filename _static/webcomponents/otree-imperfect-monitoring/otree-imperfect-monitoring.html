@@ -1,0 +1,520 @@
+<link
+		rel="import"
+		href="/static/bower_components/polymer/polymer.html" />
+<link
+		rel="import"
+		href="/static/bower_components/polymerfire/firebase-document.html" />
+<link
+		rel="import"
+		href="/static/webcomponents/otree-vars/otree-vars.html" />
+
+<script src="pause.js"></script>
+
+<dom-module id="otree-imperfect-monitoring">
+
+	<template>
+
+		<link rel="stylesheet" type="text/css" href="styles.css">
+	
+		<firebase-document
+	      path="[[path_]]"
+	      data="{{decisions}}">
+  	  	</firebase-document>
+
+    	<otree-vars id="vars"></otree-vars>
+
+        <div id="experiment-container">
+        <div id="pause">
+            <div id="pause-bar">PAUSED</div>
+        </div>
+
+        <div class="graph-container">
+            <div id="payoff_graph"></div>
+            <div id="strategy_graph"></div>
+        </div>
+
+        <div id="my-decision-container">
+            <!--
+            buttons for choosing strategy.
+            -->
+            <button
+                id="buttonA" 
+				name="decision"
+				on-tap="_setMyDecision"
+				value= 1
+				class="btn btn-success btn-large">
+				Contribute
+			</button>
+            <button 
+                id="buttonB"
+				name="decision"
+				on-tap="_setMyDecision" 
+				value= 0
+				class="btn btn-warning btn-large">
+				Don't Contribute
+			</button>
+        </div>    
+        </div>
+    
+	</template>
+
+	<script>
+		Polymer({
+			is: 'otree-imperfect-monitoring',
+			properties: {
+				// 2x2 array of payoffs for each player.
+                payoffMatrix: Array,
+                // 2x2 array of probability based on player's decision.
+                probabilityMatrix: Array,
+                // index describing which entry in payoff matrix is to be used by this player
+                playerIndex: Number,
+                // boolean to choose whether or not to play against a human or robot. 0 is for robot, 1 is for human.
+                alpha: Number,
+                // associative array relating participant code to current decision
+                // holds this player's decision and the opponent's decision
+                decisions: {
+                    type: Object,
+         //           observer: '_decisionsChanged'
+                },
+                // path to use with firebase
+                path_: String,
+                // probablility that game continues in any period-- which... I don't really understand what that means
+                delta: Number,
+                // deltat in ms
+                periodLength: Number,
+                // a parameter for controlling the y-axis in basically all the graphs
+                axis: Number,
+                // numer of periods over which the subject's action is held fixed
+                tau: Number,
+                // N milliseconds in the pause between every tau-window
+                pauseTime: Number,
+			},
+			ready() {
+				this.path_ = (
+				'/session/' + this.$.vars.session +
+				'/app/' + this.$.vars.appName +
+				'/subsession/' + this.$.vars.subsession +
+				'/round/' + this.$.vars.round +
+				'/group/' + this.$.vars.group +
+				'/page/' + this.$.vars.page +
+				'/component/otree-imperfect-monitoring' +
+				'/decisions');
+
+				// variables for this player's decision and the opponent's decision. It's random until player clicks the buttons.
+                this.temp_decision = Math.floor(Math.random() * 2);
+        	   	this.my_decision = Math.floor(Math.random() * 2);
+           		this.other_decision = Math.floor(Math.random() * 2);
+           		this.otherPlayerIndex = this.playerIndex == 0 ? 1 : 0;
+
+                // separate each player's payoffs into two separate arrays
+                this.my_payoffs = this.payoffMatrix.map(function (current_val) {
+                    return parseInt(current_val[this.playerIndex]);
+                }, this);
+
+                this.other_payoffs = this.payoffMatrix.map(function (current_val) {
+                    return parseInt(current_val[this.otherPlayerIndex]);
+                }, this);
+
+                this.my_signals = this.probabilityMatrix.map(function (current_val) {
+                    return parseFloat(current_val[this.playerIndex]);
+                }, this);
+
+                this.other_signals = this.probabilityMatrix.map(function (current_val) {
+                    return parseFloat(current_val[this.otherPlayerIndex]);
+                }, this);
+			},
+            attached() {
+                this._setupPayoffGraph();
+                this._setupStrategyGraph();
+                this.start_time = performance.now();
+                // start update function
+                this._updateGraph(0, []);
+            },
+			_equals(d, decision) {
+				return d == decision;
+			},
+            _setMyDecision(event) {
+                event.preventDefault();
+                var d = parseFloat(event.target.value);
+
+                // if decisions hasn't been created yet, create it
+                if (this.decisions === null) {
+                    this.decisions = {};
+                }
+                // pcode is this player's participant code
+                var pcode = this.$.vars.participantCode;
+                // use polymer this.set to change decisions. I don't really know why I have to do this but it doesn't work if I don't
+                this.set('decisions.' + pcode, d);
+                this.temp_decision = d;
+            },
+            // listener on firebase decisions array. reacts to the opponent changing their strategy
+            _decisionsChanged() {
+                if (this.decisions === null) {
+                    return;
+                }
+                var pcode = this.$.vars.participantCode;
+                // if I haven't set a decision yet, use my decision from firebase. here in case someone refreshes the page
+                if (this.decisions[pcode]) {
+                    this.my_decision = this.decisions[pcode];
+                }
+                // get other player's decision by picking the key that isn't yours
+                for (var key in this.decisions) {
+                    if (key != pcode) {
+                        this.other_decision = this.decisions[key];
+                        //this._graphUpdatePayoffs();
+                        break;
+                    }
+                }
+            },
+            // returns a specific entry in the payoff table. I don't really know what's going on here, it's more polymer weirdness
+            _payoff: function (change, x, y) {
+                return change.base[x][y];
+            },
+            // sets up payoff over subperiods graph
+            _setupPayoffGraph() {
+                // call highcharts setup function
+                this.payoff_graph_obj = Highcharts.chart({
+                    chart: {
+                        animation: false,
+                        renderTo: 'payoff_graph',
+                        enabled: false,
+                    },
+                    title: { text: null },
+                    exporting: { enabled: false },
+                    tooltip: { enabled: false },
+                    legend: { enabled: false },
+                    credits: { enabled: false },
+                    xAxis: {
+                        min: 0,
+                        max: 5,
+                        labels: { enabled: false }
+                    },
+                    yAxis: {
+                        title: { text: undefined },
+                        min: this.my_payoffs[1],
+                        max: this.my_payoffs[2],
+                        labels: { enabled: false },
+                    },
+                    plotOptions: {
+                        column: {
+                            pointPadding: -.3,
+                        },
+                        line: {marker: {enabled: false}},
+                        series: {
+                            states: {
+                                hover: {
+                                    enabled: false,
+                                }
+                            }
+                       }
+                    },
+                    line: {
+                        marker: {
+                            enabled: false,
+                            states: {
+                                hover: { enabled: false },
+                                select: { enabled: false }
+                            }
+                        }
+                    },
+                    series: [
+                        // subperiod payoff
+                        {
+                            type: "column",
+                            data: [],
+                            step: "left"
+                        },
+                        // average payoff
+                           {
+                            type: "line",
+                            data: [],
+                            step: "left"
+                        },
+                        // predictions
+                        {
+                            type: "line",
+                            color: 'rgba(0, 100, 0, 0.4)',
+                            lineWidth: 10,
+                            data: [],
+                            step: "left"
+                        },
+                        {
+                            type: "line",
+                            color: 'rgba(0, 100, 0, 0.4)',
+                            lineWidth: 10,
+                            data: [],
+                            step: "left"
+                        },
+                        {
+                            type: "line",
+                            color: 'rgba(255, 100, 0, 0.4)',
+                            lineWidth: 10,
+                            data: [],
+                            step: "left"
+                        },
+                        {
+                            type: "line",
+                            color: 'rgba(255, 100, 0, 0.4)',
+                            lineWidth: 10,
+                            data: [],
+                            step: "left"
+                        },
+                    ]
+                });
+            },
+            _setupStrategyGraph() {
+                // call highcharts setup function
+                this.strategy_graph_obj = Highcharts.chart({
+                    chart: {
+                        animation: false,
+                        renderTo: 'strategy_graph',
+                        enabled: false,
+                        reflow: false
+                    },
+                    title: { text: null },
+                    exporting: { enabled: false },
+                    tooltip: { enabled: false },
+                    legend: { enabled: false },
+                    credits: { enabled: false },
+                    xAxis: {
+                        min: 0,
+                        max: 5,
+                        labels: { enabled: false },
+                        scrollbar: { enabled: true },
+                        plotLines: [{
+                            value: 6,
+                            width: 6,
+                            color: 'lightgrey'
+                        }]
+                    },
+                    yAxis: {
+                        title: { text: undefined },
+                        min: this.my_payoffs[1],
+                        max: this.my_payoffs[2],
+                        labels: { enabled: false },
+                    },
+                    plotOptions: {
+                        column: {
+                            pointPadding: -.8,
+                            pointWidth: 20
+                        },
+                        line: {marker: {enabled: false}},
+                        series: {
+                            states: {
+                                hover: {
+                                    enabled: false,
+                                }
+                            }
+                       }
+                    },
+                    line: {
+                        marker: {
+                            enabled: false,
+                            states: {
+                                hover: { enabled: false },
+                                select: { enabled: false }
+                            }
+                        }
+                    },
+                    series: [
+                        // period payoff
+                        {
+                            type: "column",
+                            data: [],
+                            step: "left",
+                            pointPlacement: .5
+                        },
+                        // subperiod average payoff
+                        {
+                            type: "line",
+                            data: [],
+                            step: "left"
+                        },
+                        {
+                            type: "line",
+                            color: 'rgba(0, 100, 0, 0.4)',
+                            lineWidth: 10,
+                            data: [],
+                            step: "left"
+                        },
+                        {
+                            type: "line",
+                            color: 'rgba(0, 100, 0, 0.4)',
+                            lineWidth: 10,
+                            data: [],
+                            step: "left"
+                        },
+                        {
+                            type: "line",
+                            color: 'rgba(255, 100, 0, 0.4)',
+                            lineWidth: 10,
+                            data: [],
+                            step: "left"
+                        },
+                        {
+                            type: "line",
+                            color: 'rgba(255, 100, 0, 0.4)',
+                            lineWidth: 10,
+                            data: [],
+                            step: "left"
+                        },
+                    ]
+                });
+            },
+            _getRandom(){
+                return Math.random();
+            },
+            // updates current payoff value every 50 ms
+            _updateGraph(count, draws) {
+                document.getElementById("pause-bar").style.visibility = "hidden";
+
+                // calculate the probability of getting a Good or Bad signal based on player's decisions
+                var probIndex = (this.my_decision * this.other_decision * this.my_signals[0]) +
+                                (this.my_decision * (1- this.other_decision) * this.my_signals[1]) +
+                                ((1 - this.my_decision) * this.other_decision * this.my_signals[2]) +
+                                ((1 - this.my_decision) * (1 - this.other_decision) * this.my_signals[3]);
+
+                if(this._getRandom() <= probIndex){
+                    if(this.my_decision == 1){
+                        my_draw = this.my_payoffs[0];
+                    }else{
+                        my_draw = this.my_payoffs[2];
+                    }
+                }else if(this.my_decision == 0){
+                    my_draw = this.my_payoffs[1];
+                }else{
+                    my_draw = this.my_payoffs[3];
+                }
+
+                // keep this information to update the strategy graph later
+                draws.push(my_draw);
+
+                // add a bar per second
+                var dataset = this.payoff_graph_obj.series[0];
+                dataset.addPoint(my_draw);
+                if (++count % 6 != 0){
+                    window.setTimeout(this._updateGraph.bind(this), 1000, count, draws);
+                }else{
+                    this._updateStrategy(count, draws);
+                }
+            },
+            _updateStrategy(count, draws){
+
+                document.getElementById("pause-bar").style.visibility = "visible";
+
+                // calculate payoffs
+                var my_point_payoff = (this.my_decision * this.other_decision * this.my_payoffs[0]) +
+                                      (this.my_decision * (1 - this.other_decision) * this.my_payoffs[1]) +
+                                      ((1 - this.my_decision) * this.other_decision * this.my_payoffs[2]) +
+                                      ((1 - this.my_decision) * (1 - this.other_decision) * this.my_payoffs[3]);
+
+                var my_predicted_payoff = [(this.my_payoffs[0]*(1-this.my_signals[0]) + this.my_payoffs[1]*this.my_signals[0]),
+                                      (this.my_payoffs[0]*(1-this.my_signals[1]) + this.my_payoffs[1]*this.my_signals[1]),
+                                      (this.my_payoffs[2]*(1-this.my_signals[2]) + this.my_payoffs[3]*this.my_signals[2]),
+                                      (this.my_payoffs[2]*(1-this.my_signals[3]) + this.my_payoffs[3]*this.my_signals[3])];
+
+                // calculate average
+                var my_average_payoff = (draws.reduce(function(a, b) { return a + b; }, 0))/6;
+                dataset = this.payoff_graph_obj.series[1];
+                dataset.addPoint([-1, my_average_payoff]);
+                dataset.addPoint([6, my_average_payoff]);
+
+                // mark predictions
+                dataset = this.payoff_graph_obj.series[2];
+                if(this.my_decision == 1){
+                    dataset.addPoint([-1, my_predicted_payoff[0]]);
+                    dataset.addPoint([6, my_predicted_payoff[0]]);
+                }
+
+                dataset = this.payoff_graph_obj.series[3];
+                if(this.my_decision == 1){
+                    dataset.addPoint([-1, my_predicted_payoff[1]]);
+                    dataset.addPoint([6, my_predicted_payoff[1]]);
+                }
+
+                dataset = this.payoff_graph_obj.series[4];
+                if(this.my_decision == 0){
+                    dataset.addPoint([-1, my_predicted_payoff[2]]);
+                    dataset.addPoint([6, my_predicted_payoff[2]]);
+                }
+
+                dataset = this.payoff_graph_obj.series[5];
+                if(this.my_decision == 0){
+                    dataset.addPoint([-1, my_predicted_payoff[3]]);
+                    dataset.addPoint([6, my_predicted_payoff[3]]);
+                }
+
+                var xval = count;
+
+                 //add bars to the strategy graph
+                dataset = this.strategy_graph_obj.series[0];
+                while(draws.length != 0)
+                    dataset.addPoint(draws.shift());
+              
+                // add point for my average payoff
+                dataset = this.strategy_graph_obj.series[1];
+                dataset.addPoint([xval-6, my_average_payoff]);
+                dataset.addPoint([xval, my_average_payoff]);
+
+                dataset = this.strategy_graph_obj.series[2];
+                if(this.my_decision == 1){
+                    dataset.addPoint([xval-6, my_predicted_payoff[0]]);
+                    dataset.addPoint([xval, my_predicted_payoff[0]]);
+                }else{
+                    dataset.addPoint([xval-6, null]);
+                    dataset.addPoint([xval, null]);
+                }
+
+                dataset = this.strategy_graph_obj.series[3];
+                if(this.my_decision == 1){
+                    dataset.addPoint([xval-6, my_predicted_payoff[1]]);
+                    dataset.addPoint([xval, my_predicted_payoff[1]]);
+                }else{
+                    dataset.addPoint([xval-6, null]);
+                    dataset.addPoint([xval, null]);
+                }
+
+                dataset = this.strategy_graph_obj.series[4];
+                if(this.my_decision == 0){
+                    dataset.addPoint([xval-6, my_predicted_payoff[2]]);
+                    dataset.addPoint([xval, my_predicted_payoff[2]]);
+                }else{
+                    dataset.addPoint([xval-6, null]);
+                    dataset.addPoint([xval, null]);
+                }
+
+                dataset = this.strategy_graph_obj.series[5];
+                if(this.my_decision == 0){
+                    dataset.addPoint([xval-6, my_predicted_payoff[3]]);
+                    dataset.addPoint([xval, my_predicted_payoff[3]]);
+                }else{
+                    dataset.addPoint([xval-6, null]);
+                    dataset.addPoint([xval, null]);
+                }
+
+                // add a subperiod line and update scrollbar
+                this.strategy_graph_obj.xAxis[0].addPlotLine({
+                    value: count,
+                    width: 6,
+                    color: 'lightgrey'
+                });
+
+                this.strategy_graph_obj.xAxis[0].update({
+                    max: 17,
+                    scrollbar: {
+                        enabled: true
+                    }
+                });
+
+                window.setTimeout(this._clearGraph.bind(this), 5000, count);
+            },
+            _clearGraph(count){
+                this.payoff_graph_obj.destroy();
+                this._setupPayoffGraph();
+                this.my_decision = this.temp_decision;
+                window.setTimeout(this._updateGraph.bind(this), 1000, count, []);
+            },
+        });
+    </script>
+
+</dom-module>

@@ -1,0 +1,49 @@
+#experiment-container {
+    position: relative;
+    width: 100%;
+    height: 570px;
+}
+
+#payoff_graph {
+    position: absolute;
+    border: 1px black solid;
+    top: 50px;
+    width: 200px;
+    height: 400px;
+}
+
+#strategy_graph {
+    position: absolute;
+    border: 1px black solid;
+    top: 50px;
+    left: 250px;
+    width: 500px;
+    height: 420px;
+}
+
+#pause {
+    width: 200px;
+    float: right;
+}
+
+#pause-bar {
+    text-align: center;
+    color: black;
+    font-size: 20px;
+}
+
+#my-decision-container {
+    position: relative;
+    top: 500px;
+    left: 300px;
+    float: center;
+}
+
+#buttonA {
+    padding-left: 25px;
+    padding-right: 25px;
+}
+
+#button:active {
+     border: solid #000000 4px;
+}
