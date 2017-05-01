@@ -72,4 +72,10 @@ class Player(BasePlayer):
 
     def set_payoff(self):
         # TODO
+        self.decisions_over_time = Event.objects.filter(
+            channel='decisions',
+            session=self.session,
+            subsession=self.subsession.name(),
+            round=self.round_number,
+            group=self.group.id_in_subsession)
         self.payoff = 0
