@@ -136,6 +136,12 @@ SESSION_CONFIG_DEFAULTS = {
 }
 
 SESSION_CONFIGS = [
+    {
+        'name': 'imperfect_monitoring',
+        'display_name': "Imperfect Monitoring",
+        'num_demo_participants': 2,
+        'app_sequence': ['imperfect_monitoring', 'payment_info'],
+    },
     #{
     #    'name': 'full_bimatrix',
     #    'display_name': "Continuous and Discrete Bimatrix Game",
@@ -160,12 +166,12 @@ SESSION_CONFIGS = [
     #    'num_demo_participants': 2,
     #    'app_sequence': ['discrete_time_example', 'payment_info'],
     #},
-    #{
-    #    'name': 'stochastic_bimatrix',
-    #    'display_name': "Stochastic Bimatrix Game",
-    #    'num_demo_participants': 2,
-    #    'app_sequence': ['stochastic_bimatrix', 'payment_info'],
-    #},
+    {
+        'name': 'stochastic_bimatrix',
+        'display_name': "Stochastic Bimatrix Game",
+        'num_demo_participants': 2,
+        'app_sequence': ['stochastic_bimatrix', 'payment_info'],
+    },
     {
         'name': 'public_goods',
         'display_name': "Public Goods",

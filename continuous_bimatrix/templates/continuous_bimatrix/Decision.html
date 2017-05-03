@@ -26,8 +26,8 @@
     <script src="//code.highcharts.com/highcharts.js"></script>
 
     <link
-    		rel="import"
-    		href="{% static "webcomponents/app/continuous-bimatrix/continuous-bimatrix.html" %}">
+        rel="import"
+        href="{% static "webcomponents/app/continuous-bimatrix/continuous-bimatrix.html" %}">
 {% endblock %}
 
 {% block content %}
@@ -35,7 +35,6 @@
         payoff-matrix='{{ payoff_matrix }}'
         period-length='{{ Constants.period_length }}'>
     </continuous-bimatrix>
-    <otree-ready></otree-ready>
 
     {% include 'continuous_bimatrix/Instructions.html' %}
 
