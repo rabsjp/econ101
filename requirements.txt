@@ -3,4 +3,4 @@
 -r requirements_server.txt
 
 # Stress test
-selenium==2.53.2
+selenium==3.4.1
