@@ -49,6 +49,7 @@ class DecisionWaitPage(WaitPage):
 
 class Decision(redwood_views.ContinuousDecisionPage):
     period_length = Constants.period_length
+    initial_decision = 0.5
 
     def vars_for_template(self):
         payoff_grid = self.subsession.get_cur_payoffs()
