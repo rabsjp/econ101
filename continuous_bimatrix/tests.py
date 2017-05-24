@@ -1,16 +1,4 @@
-# -*- coding: utf-8 -*-
-from __future__ import division
-
-import asyncio
-import random
-import time
-
-from django.test import TestCase
 from otree.api import Bot, Submission
-from otree.common import Currency as c, currency_range
-from selenium import webdriver
-
-from .models import Constants
 from . import views
 
 
