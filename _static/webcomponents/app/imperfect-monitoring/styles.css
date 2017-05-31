@@ -8,7 +8,7 @@
     position: absolute;
     border: 1px black solid;
     top: 50px;
-    width: 200px;
+    width: 150px;
     height: 400px;
 }
 
@@ -16,20 +16,23 @@
     position: absolute;
     border: 1px black solid;
     top: 50px;
-    left: 250px;
-    width: 500px;
+    left: 200px;
+    width: 600px;
     height: 420px;
 }
 
-#pause {
-    width: 200px;
+#myProgress {
+    width: 100px;
+    background-color: lightgrey;
     float: right;
 }
 
-#pause-bar {
+#myBar {
+    width: 10%;
+    height: 20px;
+    background-color: grey;
     text-align: center;
-    color: black;
-    font-size: 20px;
+    color: white;
 }
 
 #my-decision-container {

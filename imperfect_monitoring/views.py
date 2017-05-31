@@ -5,6 +5,7 @@ from ._builtin import Page, WaitPage
 from otree.common import Currency as c, currency_range
 from .models import Constants
 import otree_redwood.abstract_views as redwood_views
+from otree_redwood import consumers
 
 from django.utils import timezone
 import logging
@@ -39,6 +40,9 @@ def vars_for_all_templates(self):
 class Introduction(Page):
     timeout_seconds = 100
 
+    def is_displayed(self):
+        return self.round_number == 1
+
 
 class DecisionWaitPage(WaitPage):
     body_text = 'Waiting for all players to be ready'
@@ -46,6 +50,24 @@ class DecisionWaitPage(WaitPage):
 
 class Decision(redwood_views.ContinuousDecisionPage):
     period_length = Constants.period_length
+    initial_decision = .5
+
+    def when_all_players_ready(self):
+        super().when_all_players_ready()
+
+        emitter = redwood_views.DiscreteEventEmitter(1, self.period_length, self.group, self.tick)
+        emitter.start()
+
+    def tick(self, current_interval, intervals, group):
+        consumers.send(self.group, "realizedDecisions", None)
+        Event.objects.create(
+            session=self.session,
+            subsession=self.subsession.name(),
+            round=self.round_number,
+            group=self.group.id_in_subsession,
+            channel='realizedDecisions',
+            value=None) 
+        pass
 
 
 class Results(Page):

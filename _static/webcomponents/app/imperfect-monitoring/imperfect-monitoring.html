@@ -1,13 +1,16 @@
 <link
-		rel="import"
-		href="/static/bower_components/polymer/polymer.html" />
+	rel="import"
+	href="/static/bower_components/polymer/polymer.html" />
 <link
     rel="import"
     href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
 <link
     rel="import"
     href="/static/otree-redwood/webcomponents/otree-continuous-decision/otree-continuous-decision.html">
-
+<link
+    rel="import"
+    href="/static/otree-redwood/webcomponents/otree-channel/otree-channel.html">
+    
 <dom-module id="imperfect-monitoring">
 
 	<template>
@@ -20,10 +23,14 @@
             my-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}">
         </otree-continuous-decision>
+        <otree-channel
+            channel = "realizedDecisions"
+            on-event = "_onRealizedDecisions"
+            ></otree-channel>
 
         <div id="experiment-container">
-        <div id="pause">
-            <div id="pause-bar">PAUSED</div>
+        <div id="myProgress">
+            <div id="myBar">PAUSED</div>
         </div>
 
         <div class="graph-container">
@@ -114,6 +121,9 @@
                 // start update function
                 this._updateGraph(0, []);
             },
+            _onRealizedDecisions(event){
+                console.log(event);
+            },
 			_equals(d, decision) {
 				return d == decision;
 			},
@@ -154,10 +164,11 @@
                     },
                     plotOptions: {
                         column: {
-                            pointPadding: -.3,
                         },
                         line: {marker: {enabled: false}},
                         series: {
+                            pointPadding: 0,
+                            borderWidth: 0,
                             states: {
                                 hover: {
                                     enabled: false,
@@ -179,7 +190,8 @@
                         {
                             type: "column",
                             data: [],
-                            step: "left"
+                            step: "left",
+                            pointWidth: 20
                         },
                         // average payoff
                            {
@@ -235,13 +247,14 @@
                     credits: { enabled: false },
                     xAxis: {
                         min: 0,
-                        max: 5,
+                        max: 34,
                         labels: { enabled: false },
                         scrollbar: { enabled: true },
                         plotLines: [{
-                            value: 6,
-                            width: 6,
-                            color: 'lightgrey'
+                            value: 0,
+                            width: 0,
+                            color: 'lightgrey',
+                        reversed: true
                         }]
                     },
                     yAxis: {
@@ -252,11 +265,11 @@
                     },
                     plotOptions: {
                         column: {
-                            pointPadding: -.8,
-                            pointWidth: 20
                         },
                         line: {marker: {enabled: false}},
                         series: {
+                            borderWidth: 0,
+                            pointPadding: 0,
                             states: {
                                 hover: {
                                     enabled: false,
@@ -279,7 +292,8 @@
                             type: "column",
                             data: [],
                             step: "left",
-                            pointPlacement: .5
+                            pointWidth: 16,
+                            pointPlacement: -0.5
                         },
                         // subperiod average payoff
                         {
@@ -318,12 +332,25 @@
                     ]
                 });
             },
+            _move(){
+                var elem = document.getElementById("myBar");   
+                var width = 10;
+                var id = setInterval(frame, 50);
+                function frame() {
+                    if (width >= 100) {
+                    clearInterval(id);
+                    } else {
+                    width++; 
+                    elem.style.width = width + '%'; 
+                    }
+                }
+            },
             _getRandom(){
                 return Math.random();
             },
             // updates current payoff value every 50 ms
             _updateGraph(count, draws) {
-                document.getElementById("pause-bar").style.visibility = "hidden";
+                document.getElementById("myProgress").style.visibility = "hidden";
 
                 // calculate the probability of getting a Good or Bad signal based on player's decisions
                 var probIndex = (this.my_decision * this.other_decision * this.my_signals[0]) +
@@ -331,19 +358,30 @@
                                 ((1 - this.my_decision) * this.other_decision * this.my_signals[2]) +
                                 ((1 - this.my_decision) * (1 - this.other_decision) * this.my_signals[3]);
 
+                // probability of a Bad Signal
                 if(this._getRandom() <= probIndex){
+                    // if player Contributes
                     if(this.my_decision == 1){
+                        // pi(A,Bad) = 0
+                        my_draw = this.my_payoffs[1];
+                    }else{
+                        // pi(B, Bad) = 25
+                        my_draw = this.my_payoffs[3];
+                    }
+                }else{
+                    if(this.my_decision == 1){
+                        // pi(A,Good) = 100
                         my_draw = this.my_payoffs[0];
                     }else{
+                        // pi(B, Good) = 125
                         my_draw = this.my_payoffs[2];
                     }
-                }else if(this.my_decision == 0){
-                    my_draw = this.my_payoffs[1];
-                }else{
-                    my_draw = this.my_payoffs[3];
                 }
 
                 // keep this information to update the strategy graph later
+                if(my_draw==0){
+                    my_draw = 1;
+                }
                 draws.push(my_draw);
 
                 // add a bar per second
@@ -356,8 +394,8 @@
                 }
             },
             _updateStrategy(count, draws){
-
-                document.getElementById("pause-bar").style.visibility = "visible";
+                document.getElementById("myProgress").style.visibility = "visible";
+                this._move();
 
                 // calculate payoffs
                 var my_point_payoff = (this.my_decision * this.other_decision * this.my_payoffs[0]) +
@@ -406,7 +444,8 @@
                  //add bars to the strategy graph
                 dataset = this.strategy_graph_obj.series[0];
                 while(draws.length != 0)
-                    dataset.addPoint(draws.shift());
+                //depending on direction its shift or pop
+                    dataset.addPoint(draws.pop());
               
                 // add point for my average payoff
                 dataset = this.strategy_graph_obj.series[1];
@@ -455,13 +494,17 @@
                     width: 6,
                     color: 'lightgrey'
                 });
-
                 this.strategy_graph_obj.xAxis[0].update({
-                    max: 17,
-                    scrollbar: {
-                        enabled: true
-                    }
+                        reversed: true
                 });
+
+                if(count > 35){
+                    this.strategy_graph_obj.xAxis[0].update({
+                        min: count-30,
+                        max: count,
+                        reversed: true,
+                   });
+                }
 
                 window.setTimeout(this._clearGraph.bind(this), 5000, count);
             },
