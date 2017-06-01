@@ -20,18 +20,15 @@
 		<otree-constants id="constants"></otree-constants>
         <otree-continuous-decision
             component="imperfect-monitoring"
-            my-decision="{{ myDecision }}"
-            other-decision="{{ otherDecision }}">
+            my-decision="{{ myDecision }}">
         </otree-continuous-decision>
         <otree-channel
-            channel = "realizedDecisions"
-            on-event = "_onRealizedDecisions"
-            ></otree-channel>
+            channel="tick"
+            on-event="_onTick">
+        </otree-channel>
 
         <div id="experiment-container">
-        <div id="myProgress">
-            <div id="myBar">PAUSED</div>
-        </div>
+        <progress id="myProgress" value="0"></progress>
 
         <div class="graph-container">
             <div id="payoff_graph"></div>
@@ -77,8 +74,6 @@
                 alpha: Number,
                 // synced by the otree-continuous-decision component
                 myDecision: Number,
-                // synced by the otree-continuous-decision component
-                otherDecision: Number,
                 // probablility that game continues in any period-- which... I don't really understand what that means
                 delta: Number,
                 // deltat in ms
@@ -91,38 +86,36 @@
                 pauseTime: Number,
 			},
 			ready() {
-				// variables for this player's decision and the opponent's decision. It's random until player clicks the buttons.
-                this.temp_decision = Math.floor(Math.random() * 2);
-        	   	this.my_decision = Math.floor(Math.random() * 2);
-           		this.other_decision = Math.floor(Math.random() * 2);
-           		this.otherPlayerIndex = this.playerIndex == 0 ? 1 : 0;
-
                 // separate each player's payoffs into two separate arrays
-                this.my_payoffs = this.payoffMatrix.map(function (current_val) {
+                this.myPayoffs = this.payoffMatrix.map(function (current_val) {
                     return parseInt(current_val[this.playerIndex]);
                 }, this);
-
-                this.other_payoffs = this.payoffMatrix.map(function (current_val) {
-                    return parseInt(current_val[this.otherPlayerIndex]);
-                }, this);
-
-                this.my_signals = this.probabilityMatrix.map(function (current_val) {
+                this.mySignals = this.probabilityMatrix.map(function (current_val) {
                     return parseFloat(current_val[this.playerIndex]);
-                }, this);
-
-                this.other_signals = this.probabilityMatrix.map(function (current_val) {
-                    return parseFloat(current_val[this.otherPlayerIndex]);
                 }, this);
 			},
             attached() {
                 this._setupPayoffGraph();
                 this._setupStrategyGraph();
-                this.start_time = performance.now();
-                // start update function
-                this._updateGraph(0, []);
+                this.draws = [];
+                document.getElementById("myProgress").style.visibility = "hidden";
+
             },
-            _onRealizedDecisions(event){
-                console.log(event);
+            _onTick(event){
+                let msg = event.detail.payload;
+               // console.log(msg);
+                if(msg.hasOwnProperty("realizedPayoff")) {
+                    this._updateGraph(msg.realizedPayoff);
+                }
+                if (msg.updateStrategy) {
+                    this._updateStrategy();
+                }
+                if (msg.clearGraph) {
+                    this._clearGraph();
+                }
+                if (msg.hasOwnProperty("pauseProgress")) {
+                    document.getElementById("myProgress").value = msg.pauseProgress;
+                }
             },
 			_equals(d, decision) {
 				return d == decision;
@@ -131,7 +124,6 @@
                 event.preventDefault();
                 var d = parseFloat(event.target.value);
                 this.myDecision = d;
-                this.temp_decision = d;
             },
             // returns a specific entry in the payoff table. I don't really know what's going on here, it's more polymer weirdness
             _payoff: function (change, x, y) {
@@ -140,7 +132,7 @@
             // sets up payoff over subperiods graph
             _setupPayoffGraph() {
                 // call highcharts setup function
-                this.payoff_graph_obj = Highcharts.chart({
+                this.payoffGraphObj = Highcharts.chart({
                     chart: {
                         animation: false,
                         renderTo: 'payoff_graph',
@@ -158,8 +150,8 @@
                     },
                     yAxis: {
                         title: { text: undefined },
-                        min: this.my_payoffs[1],
-                        max: this.my_payoffs[2],
+                        min: this.myPayoffs[1],
+                        max: this.myPayoffs[2],
                         labels: { enabled: false },
                     },
                     plotOptions: {
@@ -233,7 +225,7 @@
             },
             _setupStrategyGraph() {
                 // call highcharts setup function
-                this.strategy_graph_obj = Highcharts.chart({
+                this.strategyGraphObj = Highcharts.chart({
                     chart: {
                         animation: false,
                         renderTo: 'strategy_graph',
@@ -259,8 +251,8 @@
                     },
                     yAxis: {
                         title: { text: undefined },
-                        min: this.my_payoffs[1],
-                        max: this.my_payoffs[2],
+                        min: this.myPayoffs[1],
+                        max: this.myPayoffs[2],
                         labels: { enabled: false },
                     },
                     plotOptions: {
@@ -332,187 +324,131 @@
                     ]
                 });
             },
-            _move(){
-                var elem = document.getElementById("myBar");   
-                var width = 10;
-                var id = setInterval(frame, 50);
-                function frame() {
-                    if (width >= 100) {
-                    clearInterval(id);
-                    } else {
-                    width++; 
-                    elem.style.width = width + '%'; 
-                    }
-                }
-            },
-            _getRandom(){
-                return Math.random();
-            },
-            // updates current payoff value every 50 ms
-            _updateGraph(count, draws) {
+            // updates current payoff value every 100 ms
+            _updateGraph(realizedPayoff) {
                 document.getElementById("myProgress").style.visibility = "hidden";
 
-                // calculate the probability of getting a Good or Bad signal based on player's decisions
-                var probIndex = (this.my_decision * this.other_decision * this.my_signals[0]) +
-                                (this.my_decision * (1- this.other_decision) * this.my_signals[1]) +
-                                ((1 - this.my_decision) * this.other_decision * this.my_signals[2]) +
-                                ((1 - this.my_decision) * (1 - this.other_decision) * this.my_signals[3]);
-
-                // probability of a Bad Signal
-                if(this._getRandom() <= probIndex){
-                    // if player Contributes
-                    if(this.my_decision == 1){
-                        // pi(A,Bad) = 0
-                        my_draw = this.my_payoffs[1];
-                    }else{
-                        // pi(B, Bad) = 25
-                        my_draw = this.my_payoffs[3];
-                    }
-                }else{
-                    if(this.my_decision == 1){
-                        // pi(A,Good) = 100
-                        my_draw = this.my_payoffs[0];
-                    }else{
-                        // pi(B, Good) = 125
-                        my_draw = this.my_payoffs[2];
-                    }
+                // if payoff is 0, change it to 1 for the sake of showing a bar on the graph
+                if (realizedPayoff == 0) {
+                    realizedPayoff = 1;
                 }
-
-                // keep this information to update the strategy graph later
-                if(my_draw==0){
-                    my_draw = 1;
-                }
-                draws.push(my_draw);
+                this.draws.push(realizedPayoff);
 
                 // add a bar per second
-                var dataset = this.payoff_graph_obj.series[0];
-                dataset.addPoint(my_draw);
-                if (++count % 6 != 0){
-                    window.setTimeout(this._updateGraph.bind(this), 1000, count, draws);
-                }else{
-                    this._updateStrategy(count, draws);
-                }
+                var dataset = this.payoffGraphObj.series[0];
+                dataset.addPoint(realizedPayoff);
             },
-            _updateStrategy(count, draws){
+            _updateStrategy(pauseTime) {
                 document.getElementById("myProgress").style.visibility = "visible";
-                this._move();
 
                 // calculate payoffs
-                var my_point_payoff = (this.my_decision * this.other_decision * this.my_payoffs[0]) +
-                                      (this.my_decision * (1 - this.other_decision) * this.my_payoffs[1]) +
-                                      ((1 - this.my_decision) * this.other_decision * this.my_payoffs[2]) +
-                                      ((1 - this.my_decision) * (1 - this.other_decision) * this.my_payoffs[3]);
-
-                var my_predicted_payoff = [(this.my_payoffs[0]*(1-this.my_signals[0]) + this.my_payoffs[1]*this.my_signals[0]),
-                                      (this.my_payoffs[0]*(1-this.my_signals[1]) + this.my_payoffs[1]*this.my_signals[1]),
-                                      (this.my_payoffs[2]*(1-this.my_signals[2]) + this.my_payoffs[3]*this.my_signals[2]),
-                                      (this.my_payoffs[2]*(1-this.my_signals[3]) + this.my_payoffs[3]*this.my_signals[3])];
+                var myPredictedPayoff = [(this.myPayoffs[0]*(1-this.mySignals[0]) + this.myPayoffs[1]*this.mySignals[0]),
+                                      (this.myPayoffs[0]*(1-this.mySignals[1]) + this.myPayoffs[1]*this.mySignals[1]),
+                                      (this.myPayoffs[2]*(1-this.mySignals[2]) + this.myPayoffs[3]*this.mySignals[2]),
+                                      (this.myPayoffs[2]*(1-this.mySignals[3]) + this.myPayoffs[3]*this.mySignals[3])];
 
                 // calculate average
-                var my_average_payoff = (draws.reduce(function(a, b) { return a + b; }, 0))/6;
-                dataset = this.payoff_graph_obj.series[1];
-                dataset.addPoint([-1, my_average_payoff]);
-                dataset.addPoint([6, my_average_payoff]);
+                var myAveragePayoff = (this.draws.reduce(function(a, b) { return a + b; }, 0))/6;
+                dataset = this.payoffGraphObj.series[1];
+                dataset.addPoint([-1, myAveragePayoff]);
+                dataset.addPoint([6, myAveragePayoff]);
 
                 // mark predictions
-                dataset = this.payoff_graph_obj.series[2];
-                if(this.my_decision == 1){
-                    dataset.addPoint([-1, my_predicted_payoff[0]]);
-                    dataset.addPoint([6, my_predicted_payoff[0]]);
+                dataset = this.payoffGraphObj.series[2];
+                if(this.myDecision == 1){
+                    dataset.addPoint([-1, myPredictedPayoff[0]]);
+                    dataset.addPoint([6, myPredictedPayoff[0]]);
                 }
 
-                dataset = this.payoff_graph_obj.series[3];
-                if(this.my_decision == 1){
-                    dataset.addPoint([-1, my_predicted_payoff[1]]);
-                    dataset.addPoint([6, my_predicted_payoff[1]]);
+                dataset = this.payoffGraphObj.series[3];
+                if(this.myDecision == 1){
+                    dataset.addPoint([-1, myPredictedPayoff[1]]);
+                    dataset.addPoint([6, myPredictedPayoff[1]]);
                 }
 
-                dataset = this.payoff_graph_obj.series[4];
-                if(this.my_decision == 0){
-                    dataset.addPoint([-1, my_predicted_payoff[2]]);
-                    dataset.addPoint([6, my_predicted_payoff[2]]);
+                dataset = this.payoffGraphObj.series[4];
+                if(this.myDecision == 0){
+                    dataset.addPoint([-1, myPredictedPayoff[2]]);
+                    dataset.addPoint([6, myPredictedPayoff[2]]);
                 }
 
-                dataset = this.payoff_graph_obj.series[5];
-                if(this.my_decision == 0){
-                    dataset.addPoint([-1, my_predicted_payoff[3]]);
-                    dataset.addPoint([6, my_predicted_payoff[3]]);
+                dataset = this.payoffGraphObj.series[5];
+                if(this.myDecision == 0){
+                    dataset.addPoint([-1, myPredictedPayoff[3]]);
+                    dataset.addPoint([6, myPredictedPayoff[3]]);
                 }
-
-                var xval = count;
 
                  //add bars to the strategy graph
-                dataset = this.strategy_graph_obj.series[0];
-                while(draws.length != 0)
+                dataset = this.strategyGraphObj.series[0];
+                while(this.draws.length != 0)
                 //depending on direction its shift or pop
-                    dataset.addPoint(draws.pop());
+                    dataset.addPoint(this.draws.pop());
+
+                var xval = dataset.data.length;
+                console.log(xval);
               
                 // add point for my average payoff
-                dataset = this.strategy_graph_obj.series[1];
-                dataset.addPoint([xval-6, my_average_payoff]);
-                dataset.addPoint([xval, my_average_payoff]);
+                dataset = this.strategyGraphObj.series[1];
+                dataset.addPoint([xval-6, myAveragePayoff]);
+                dataset.addPoint([xval, myAveragePayoff]);
 
-                dataset = this.strategy_graph_obj.series[2];
-                if(this.my_decision == 1){
-                    dataset.addPoint([xval-6, my_predicted_payoff[0]]);
-                    dataset.addPoint([xval, my_predicted_payoff[0]]);
+                dataset = this.strategyGraphObj.series[2];
+                if(this.myDecision == 1){
+                    dataset.addPoint([xval-6, myPredictedPayoff[0]]);
+                    dataset.addPoint([xval, myPredictedPayoff[0]]);
                 }else{
                     dataset.addPoint([xval-6, null]);
                     dataset.addPoint([xval, null]);
                 }
 
-                dataset = this.strategy_graph_obj.series[3];
-                if(this.my_decision == 1){
-                    dataset.addPoint([xval-6, my_predicted_payoff[1]]);
-                    dataset.addPoint([xval, my_predicted_payoff[1]]);
+                dataset = this.strategyGraphObj.series[3];
+                if(this.myDecision == 1){
+                    dataset.addPoint([xval-6, myPredictedPayoff[1]]);
+                    dataset.addPoint([xval, myPredictedPayoff[1]]);
                 }else{
                     dataset.addPoint([xval-6, null]);
                     dataset.addPoint([xval, null]);
                 }
 
-                dataset = this.strategy_graph_obj.series[4];
-                if(this.my_decision == 0){
-                    dataset.addPoint([xval-6, my_predicted_payoff[2]]);
-                    dataset.addPoint([xval, my_predicted_payoff[2]]);
+                dataset = this.strategyGraphObj.series[4];
+                if(this.myDecision == 0){
+                    dataset.addPoint([xval-6, myPredictedPayoff[2]]);
+                    dataset.addPoint([xval, myPredictedPayoff[2]]);
                 }else{
                     dataset.addPoint([xval-6, null]);
                     dataset.addPoint([xval, null]);
                 }
 
-                dataset = this.strategy_graph_obj.series[5];
-                if(this.my_decision == 0){
-                    dataset.addPoint([xval-6, my_predicted_payoff[3]]);
-                    dataset.addPoint([xval, my_predicted_payoff[3]]);
+                dataset = this.strategyGraphObj.series[5];
+                if(this.myDecision == 0){
+                    dataset.addPoint([xval-6, myPredictedPayoff[3]]);
+                    dataset.addPoint([xval, myPredictedPayoff[3]]);
                 }else{
                     dataset.addPoint([xval-6, null]);
                     dataset.addPoint([xval, null]);
                 }
 
                 // add a subperiod line and update scrollbar
-                this.strategy_graph_obj.xAxis[0].addPlotLine({
-                    value: count,
+                this.strategyGraphObj.xAxis[0].addPlotLine({
+                    value: xval,
                     width: 6,
                     color: 'lightgrey'
                 });
-                this.strategy_graph_obj.xAxis[0].update({
+                this.strategyGraphObj.xAxis[0].update({
                         reversed: true
                 });
 
-                if(count > 35){
-                    this.strategy_graph_obj.xAxis[0].update({
-                        min: count-30,
-                        max: count,
+                if(xval > 35){
+                    this.strategyGraphObj.xAxis[0].update({
+                        min: xval-30,
+                        max: xval,
                         reversed: true,
                    });
                 }
-
-                window.setTimeout(this._clearGraph.bind(this), 5000, count);
             },
-            _clearGraph(count){
-                this.payoff_graph_obj.destroy();
+            _clearGraph(){
+                this.payoffGraphObj.destroy();
                 this._setupPayoffGraph();
-                this.my_decision = this.temp_decision;
-                window.setTimeout(this._updateGraph.bind(this), 1000, count, []);
             },
         });
     </script>

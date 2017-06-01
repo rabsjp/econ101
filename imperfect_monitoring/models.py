@@ -51,7 +51,8 @@ class Constants(BaseConstants):
     base_points = 0
 
     # Amount of time the game stays on the decision page in seconds.
-    period_length = 100
+    num_subperiods = 100
+    subperiod_length = 12
 
     # Number of discrete time subperiods in a single period.
  #   num_periods = 10
