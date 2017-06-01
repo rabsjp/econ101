@@ -27,26 +27,9 @@
     float: right;
 }
 
-#myBar {
-    width: 10%;
-    height: 20px;
-    background-color: grey;
-    text-align: center;
-    color: white;
-}
-
 #my-decision-container {
     position: relative;
     top: 500px;
     left: 300px;
     float: center;
-}
-
-#buttonA {
-    padding-left: 25px;
-    padding-right: 25px;
-}
-
-#button:active {
-     border: solid #000000 4px;
 }

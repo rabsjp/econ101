@@ -44,15 +44,15 @@
 				name="decision"
 				on-tap="_setMyDecision"
 				value=1
-				class="btn btn-success btn-large">
+				class$="btn btn-success btn-large [[_buttonAActive(myDecision)]]">
 				Contribute
 			</button>
-            <button 
+            <button
                 id="buttonB"
 				name="decision"
 				on-tap="_setMyDecision" 
 				value=0
-				class="btn btn-warning btn-large">
+				class$="btn btn-warning btn-large [[_buttonBActive(myDecision)]]">
 				Don't Contribute
 			</button>
         </div>    
@@ -104,8 +104,8 @@
             _onTick(event){
                 let msg = event.detail.payload;
                // console.log(msg);
-                if(msg.hasOwnProperty("realizedPayoff")) {
-                    this._updateGraph(msg.realizedPayoff);
+                if(msg.realizedPayoffs) {
+                    this._updateGraph(msg.realizedPayoffs[this.$.constants.participantCode]);
                 }
                 if (msg.updateStrategy) {
                     this._updateStrategy();
@@ -449,6 +449,12 @@
             _clearGraph(){
                 this.payoffGraphObj.destroy();
                 this._setupPayoffGraph();
+            },
+            _buttonAActive(myDecision) {
+                return myDecision ? 'active' : '';
+            },
+            _buttonBActive(myDecision) {
+                return myDecision ? '' : 'active';
             },
         });
     </script>

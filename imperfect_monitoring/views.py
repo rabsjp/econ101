@@ -56,7 +56,7 @@ class Decision(redwood_views.ContinuousDecisionPage):
     def __init__(self, *args, **kwargs):
         self.period_length = Constants.num_subperiods * Constants.subperiod_length
         super().__init__(*args, **kwargs)
-        self.fixedGroupDecisions = None
+        self.fixed_group_decisions = None
 
     def when_all_players_ready(self):
         super().when_all_players_ready()
@@ -71,7 +71,7 @@ class Decision(redwood_views.ContinuousDecisionPage):
         msg = {}
         if self.state == 'results':
             msg = {
-                'realizedPayoff': self.realizedPayoff()
+                'realizedPayoffs': self.realized_payoffs()
             }
         elif self.state == 'pause':
             if self.t == 6:
@@ -96,20 +96,52 @@ class Decision(redwood_views.ContinuousDecisionPage):
         if self.t == 12:
             self.state = 'results'
             self.t = 0
-            self.fixedGroupDecisions = dict(self.group_decisions)
+            self.fixed_group_decisions = dict(self.group_decisions)
 
 
-    def realizedPayoff(self):
-        choices = [Constants.p1_A_p2_A_amount, Constants.p1_A_p2_B_amount, Constants.p1_B_p2_A_amount, Constants.p1_B_p2_B_amount]
-        myDecision, otherDecision = None, None
-        if self.fixedGroupDecisions:
-            myDecision = self.fixedGroupDecisions[self.player.participant.code]
-            otherDecision = self.fixedGroupDecisions[self.get_partner().participant.code]
-        else:
-            myDecision = random.choice([0, 1])
-            otherDecision = random.choice([0, 1])
-        
-        return random.choice(choices)
+    def realized_payoffs(self):
+
+        realized_payoffs = {}
+
+        players = self.group.get_players()
+        for i, player in enumerate(players):
+
+            payoffs = None
+            if i == 0:
+                payoffs = [Constants.p1_A_p2_A_amount, Constants.p1_A_p2_B_amount, Constants.p1_B_p2_A_amount, Constants.p1_B_p2_B_amount]
+                signals = [Constants.p1_A_p2_A_signal, Constants.p1_A_p2_B_signal, Constants.p1_B_p2_A_signal, Constants.p1_B_p2_B_signal]
+            else:
+                payoffs = [Constants.p2_A_p1_A_amount, Constants.p2_A_p1_B_amount, Constants.p2_B_p1_A_amount, Constants.p2_B_p1_B_amount]
+                signals = [Constants.p2_A_p1_A_signal, Constants.p2_A_p1_B_signal, Constants.p2_B_p1_A_signal, Constants.p2_B_p1_B_signal]
+
+            other = players[i-1]
+
+            if self.fixed_group_decisions:
+                my_decision = self.fixed_group_decisions[player.participant.code]
+                other_decision = self.fixed_group_decisions[other.participant.code]
+            else:
+                my_decision = random.choice([0, 1])
+                other_decision = random.choice([0, 1])
+
+            prob = ((my_decision * other_decision * signals[0]) +
+                    (my_decision * (1 - other_decision) * signals[1]) +
+                    ((1 - my_decision) * other_decision * signals[2]) +
+                    ((1 - my_decision) * (1 - other_decision) * signals[3]))
+            payoff_index = 0
+            if random.random() <= prob:
+                if my_decision:
+                    payoff_index = 1
+                else:
+                    payoff_index = 3
+            else:
+                if my_decision:
+                    payoff_index = 0
+                else:
+                    payoff_index = 2
+
+            realized_payoffs[player.participant.code] = payoffs[payoff_index]
+
+        return realized_payoffs
 
 
 class Results(Page):
