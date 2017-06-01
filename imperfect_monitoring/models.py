@@ -51,7 +51,7 @@ class Constants(BaseConstants):
     base_points = 0
 
     # Amount of time the game stays on the decision page in seconds.
-    num_subperiods = 100
+    num_subperiods = 10
     subperiod_length = 12
 
     # Number of discrete time subperiods in a single period.
@@ -72,11 +72,13 @@ class Player(BasePlayer):
         return self.get_others_in_group()[0]
 
     def set_payoff(self):
-        # TODO
-        self.decisions_over_time = Event.objects.filter(
-            channel='decisions',
+        ticks = Event.objects.filter(
+            channel='ticks',
             session=self.session,
             subsession=self.subsession.name(),
             round=self.round_number,
             group=self.group.id_in_subsession)
         self.payoff = 0
+        for tick in ticks:
+            if 'realizedPayoffs' in tick.value:
+                self.payoff += tick.value.realizedPayoffs[self.participant.code]

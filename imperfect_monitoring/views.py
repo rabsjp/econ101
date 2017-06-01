@@ -150,7 +150,6 @@ class Results(Page):
         self.player.set_payoff()
 
         return {
-            'decisions_over_time': self.player.decisions_over_time,
             'total_plus_base': self.player.payoff + Constants.base_points
         }
 
