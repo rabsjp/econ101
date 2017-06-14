@@ -154,6 +154,11 @@ class Results(Page):
         }
 
 
+@redwood_views.output_table
+def ticks(events):
+    print(events)
+    return []
+
 
 page_sequence = [
         Introduction,
