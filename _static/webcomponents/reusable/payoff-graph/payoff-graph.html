@@ -131,11 +131,11 @@
 					(timestamp - this.start_time) /
 					(this.periodLength * 1000));
 
-				let dataset = this.graph_obj.series[0];
+				let dataset;
+				dataset = this.graph_obj.series[0];
 				this._lastElem(dataset.data).update({x: xval});
 
 				dataset = this.graph_obj.series[1];
-				len = dataset.data.length;
 				this._lastElem(dataset.data).update({x: xval});
 
 				// recursively call update
@@ -156,10 +156,10 @@
 					((1 - this.myDecision) * (1 - this.otherDecision) * this.myPayoffs[3]);
 
 				const other_point_payoff =
-					(this.otherDecision * this.myDecision * this.otherPayoffs[0]) +
-					(this.otherDecision * (1 - this.myDecision) * this.otherPayoffs[1]) +
-					((1 - this.otherDecision) * this.myDecision * this.otherPayoffs[2]) +
-					((1 - this.otherDecision) * (1 - this.myDecision) * this.otherPayoffs[3]);
+					(this.myDecision * this.otherDecision * this.otherPayoffs[0]) +
+					(this.myDecision * (1 - this.otherDecision) * this.otherPayoffs[1]) +
+					((1 - this.myDecision) * this.otherDecision * this.otherPayoffs[2]) +
+					((1 - this.myDecision) * (1 - this.otherDecision) * this.otherPayoffs[3]);
 
 				// console.log(my_point_payoff, other_point_payoff);
 
