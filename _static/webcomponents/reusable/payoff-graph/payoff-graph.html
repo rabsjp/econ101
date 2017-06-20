@@ -27,10 +27,12 @@
 					observer: '_updateDataset'
 				},
 				myPayoffs: {
-                    type: Array
+                    type: Array,
+					observer: '_updateDataset'
                 },
 				otherPayoffs: {
-				    type: Array
+				    type: Array,
+					observer: '_updateDataset'
                 },
 				periodLength: Number,
 			},
@@ -144,6 +146,8 @@
 				// if graph hasn't been initialized, don't do anything
 				if (!this.graph_obj) return;
 
+				// console.log(this.myPayoffs, this.otherPayoffs);
+				// console.log(this.myDecision, this.otherDecision);
 				// calculate the payoff with current decision values
 				const my_point_payoff =
 					(this.myDecision * this.otherDecision * this.myPayoffs[0]) +
@@ -156,6 +160,8 @@
 					(this.otherDecision * (1 - this.myDecision) * this.otherPayoffs[1]) +
 					((1 - this.otherDecision) * this.myDecision * this.otherPayoffs[2]) +
 					((1 - this.otherDecision) * (1 - this.myDecision) * this.otherPayoffs[3]);
+
+				// console.log(my_point_payoff, other_point_payoff);
 
 				// calculate new decision's timestamp as a value between 0 and 1
 				const xval = (
