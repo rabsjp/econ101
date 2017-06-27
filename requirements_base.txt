@@ -1,3 +1,4 @@
 git+git://github.com/Leeps-Lab/otree-core.git#egg=otree-core
 Django==1.8.8 # for heroku, needs to be explicitly in requirements file
 git+git://github.com/Leeps-Lab/otree-redwood.git#egg=otree-redwood
+txredisapi # enable Twisted for asgiredis Channel Layer
