@@ -28,6 +28,7 @@ def treatment(self):
 
 def vars_for_all_templates(self):
     payoff_grid = treatment(self)['payoff_grid']
+    transition_probabilities = treatment(self)['transition_probabilities']
 
     return locals()
 
@@ -56,14 +57,17 @@ class Decision(redwood_views.ContinuousDecisionPage):
         self.emitter.start()
 
     def tick(self, current_interval, intervals, group):
-        # TODO: make this stop when game exited potentially before 120s
         q1, q2 = list(self.group_decisions.values()) # decisions
         p11, p12, p21, p22 = [pij[self.current_matrix] for pij in treatment(self)['transition_probabilities']] # transition probabilities
-        Pmax = .2
+        # probability of a switch in 2 seconds = 1/2
+        # solved by P(switch in t) = (1-p)^10t = 1/2
+        Pmax = .034064
         Pswitch = (p11 * q1 * q2 +
                    p12 * q1 * (1 - q2) +
                    p21 * (1 - q1) * q2 +
                    p22 * (1 - q1) * (1 - q2)) * Pmax
+
+        if random.uniform(0, 1) < .1: print(Pswitch, list(self.group_decisions.values()), self.current_matrix)
 
         if random.uniform(0, 1) < Pswitch:
             self.current_matrix = 1 - self.current_matrix
@@ -78,7 +82,6 @@ class Decision(redwood_views.ContinuousDecisionPage):
             )
 
             consumers.send(self.group, 'current_matrix', self.current_matrix)
-            consumers.send(self.group, 'hazard_rate', Pswitch/Pmax)
 
 
 class Results(Page):

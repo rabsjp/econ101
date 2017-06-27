@@ -23,10 +23,6 @@
             <canvas id="hazard_display"></canvas>
         </div>
         <otree-constants id="constants"></otree-constants>
-    	<otree-channel
-    		channel="hazard_rate"
-    		on-event="_handleHazardRateEvent">
-	    </otree-channel>
 	</template>
     
 	<script>
@@ -35,13 +31,12 @@
             properties: {
                 hazardRate: {
                     type: Number,
-                    value: .5,
+                    value: 0.5,
                     observer: 'make_hazard_bar',
                 },
             },
             attached() {
                 this.canvas = this.$.hazard_display;
-                this.make_hazard_bar();
             },
             make_hazard_bar() {
                 if (!this.hazardRate || !this.canvas)
@@ -65,9 +60,6 @@
 				}
 
 				ctx.putImageData(imageData, 0, 0);
-            },
-            _handleHazardRateEvent() {
-                this.hazardRate = event.detail.payload;
             },
         })
     </script>
