@@ -131,6 +131,7 @@
             _onInitialDecisions(event){
                 let initialDecisions = event.detail.payload;
                 this.myDecision = initialDecisions[this.$.constants.participantCode];
+                this.pausedDecision = this.myDecision;
             },
 			_equals(d, decision) {
 				return d == decision;
@@ -538,8 +539,8 @@
 
                 var myAverageB = (this.AverageB.reduce(function(a, b) { return a + b; }, 0))/this.AverageB.length;
                 dataset = this.averageBGraphObj.series[0];
-                dataset.addPoint([-1, myAverageB]);
-                dataset.addPoint([2, myAverageB]);
+                dataset.addPoint([-1, 5]);
+                dataset.addPoint([2, 5]);
 
                 dataset = this.averageBGraphObj.series[1];
                 dataset.addPoint([-1, myPredictedPayoff[2]]);
@@ -549,7 +550,7 @@
                 dataset.addPoint([-1, myPredictedPayoff[3]]);
                 dataset.addPoint([2, myPredictedPayoff[3]]);
 
-            console.log(myAverageA, myAverageB, "AAAA")
+console.log("A="+ myAverageA, " B="+myAverageB)
 
                 // mark predictions
                 dataset = this.payoffGraphObj.series[2];
@@ -595,36 +596,36 @@ console.log("AAAAA" + xval);
                 dataset = this.strategyGraphObj.series[2];
                 if(this.pausedDecision == 1){
                     dataset.addPoint([xval-5.5, myPredictedPayoff[0]]);
-                    dataset.addPoint([xval, myPredictedPayoff[0]]);
+                    dataset.addPoint([xval-.5, myPredictedPayoff[0]]);
                 }else{
-                    dataset.addPoint([xval-5.5, null]);
+                    dataset.addPoint([xval, null]);
                     dataset.addPoint([xval, null]);
                 }
 
                 dataset = this.strategyGraphObj.series[3];
                 if(this.pausedDecision == 1){
                     dataset.addPoint([xval-5.5, myPredictedPayoff[1]]);
-                    dataset.addPoint([xval, myPredictedPayoff[1]]);
+                    dataset.addPoint([xval-.5, myPredictedPayoff[1]]);
                 }else{
-                    dataset.addPoint([xval-5.5, null]);
+                    dataset.addPoint([xval, null]);
                     dataset.addPoint([xval, null]);
                 }
 
                 dataset = this.strategyGraphObj.series[4];
                 if(this.pausedDecision == 0){
                     dataset.addPoint([xval-5.5, myPredictedPayoff[2]]);
-                    dataset.addPoint([xval, myPredictedPayoff[2]]);
+                    dataset.addPoint([xval-.5, myPredictedPayoff[2]]);
                 }else{
-                    dataset.addPoint([xval-5.5, null]);
+                    dataset.addPoint([xval, null]);
                     dataset.addPoint([xval, null]);
                 }
 
                 dataset = this.strategyGraphObj.series[5];
                 if(this.pausedDecision == 0){
                     dataset.addPoint([xval-5.5, myPredictedPayoff[3]]);
-                    dataset.addPoint([xval, myPredictedPayoff[3]]);
+                    dataset.addPoint([xval-.5, myPredictedPayoff[3]]);
                 }else{
-                    dataset.addPoint([xval-5.5, null]);
+                    dataset.addPoint([xval, null]);
                     dataset.addPoint([xval, null]);
                 }
 
@@ -632,13 +633,13 @@ console.log("AAAAA" + xval);
                 this.strategyGraphObj.xAxis[0].addPlotLine({
                     zIndex: 5,
                     value: xval,
-                    width: 5,
-                    color: 'grey'
+                    width: 6,
+                    color: 'lightgrey'
                 });
 
-                if(xval != 0 && xval%30 == 0){
+                if(xval>35){
                     this.strategyGraphObj.xAxis[0].update({
-                        min: xval-30,
+                        min: xval-35,
                         max: xval,
                         reversed: true,
                    });
