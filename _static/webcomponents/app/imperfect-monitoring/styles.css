@@ -17,13 +17,30 @@
     border: 1px black solid;
     top: 50px;
     left: 200px;
-    width: 600px;
+    width: 450px;
     height: 420px;
 }
 
+#average_A_graph {
+    position: absolute;
+    border: 1px black solid;
+    top: 50px;
+    left: 700px;
+    width: 50px;
+    height: 400px;
+}
+
+#average_B_graph {
+    position: absolute;
+    border: 1px black solid;
+    top: 50px;
+    left: 775px;
+    width: 50px;
+    height: 400px;
+}
+
 #myProgress {
-    width: 100px;
-    background-color: lightgrey;
+    width: 150px;
     float: right;
 }
 
@@ -32,4 +49,20 @@
     top: 500px;
     left: 300px;
     float: center;
+}
+
+#buttonA {
+    width: 120px;
+}
+
+#buttonA:focus{
+    border: black;
+    border-style: solid;
+    border-width: 2px;
+}
+
+#buttonB:focus{
+    border: black;
+    border-style: solid;
+    border-width: 2px;
 }

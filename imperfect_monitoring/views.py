@@ -56,22 +56,26 @@ class Decision(redwood_views.ContinuousDecisionPage):
     def __init__(self, *args, **kwargs):
         self.period_length = Constants.num_subperiods * Constants.subperiod_length
         super().__init__(*args, **kwargs)
-        self.fixed_group_decisions = None
+        self.fixed_group_decisions = {}
 
     def when_all_players_ready(self):
         super().when_all_players_ready()
 
         self.state = 'results'
         self.t = 0
+        for i, player in enumerate(self.group.get_players()):
+            self.fixed_group_decisions[player.participant.code] = random.choice([1, 0])
+        consumers.send(self.group, 'initialDecisions', self.fixed_group_decisions)
 
-        emitter = redwood_views.DiscreteEventEmitter(1, self.period_length, self.group, self.tick)
+        emitter = redwood_views.DiscreteEventEmitter(.25, self.period_length, self.group, self.tick)
         emitter.start()
 
     def tick(self, current_interval, intervals, group):
         msg = {}
         if self.state == 'results':
             msg = {
-                'realizedPayoffs': self.realized_payoffs()
+                'realizedPayoffs': self.realized_payoffs(),
+                'fixedDecisions' : self.group_decisions
             }
         elif self.state == 'pause':
             if self.t == 6:
@@ -156,8 +160,19 @@ class Results(Page):
 
 @redwood_views.output_table
 def ticks(events):
-    print(events)
-    return []
+    table = []
+    for e in events:
+        if e.channel == 'decisions':
+            table.append(e.value),
+            table.append(e.participant.code) 
+        if e.channel == 'tick':
+            if 'realizedPayoffs' in e.value:
+                table.append(e.value ['realizedPayoffs'])
+            if 'fixedDecisions' in e.value:
+                table.append(e.value ['fixedDecisions'])
+    
+    print(table)
+    return table
 
 
 page_sequence = [
