@@ -1,36 +1,15 @@
-# -*- coding: utf-8 -*-
-from __future__ import division
-
-import random
-
-from django.test import TestCase
-from otree.common import Currency as c, currency_range
-from selenium import webdriver
-
-from ._builtin import Bot
-from .models import Constants
+from otree.api import Bot, Submission
 from . import views
 
 
 class PlayerBot(Bot):
 
     def play_round(self):
-        pass
+        if self.player.round_number == 1:
+            yield views.Introduction
+        yield Submission(views.Decision, {}, check_html=False)
+        yield views.Results
+
 
     def validate_play(self):
-        pass
-
-
-class PayoffFunctionTestCase(TestCase):
-
-    def test_payoff_function(self):
-        pass
-
-
-class WebcomponentTest(TestCase):
-
-	def test_app_load(self):
-		driver = webdriver.Chrome()
-		driver.get('http://localhost:8000')
-		assert 'oTree' in driver.title
-		driver.close()
+        assert self.payoff > 0

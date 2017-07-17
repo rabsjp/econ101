@@ -8,7 +8,7 @@
     position: absolute;
     border: 1px black solid;
     top: 50px;
-    width: 200px;
+    width: 150px;
     height: 400px;
 }
 
@@ -16,20 +16,32 @@
     position: absolute;
     border: 1px black solid;
     top: 50px;
-    left: 250px;
-    width: 500px;
+    left: 200px;
+    width: 450px;
     height: 420px;
 }
 
-#pause {
-    width: 200px;
-    float: right;
+#average_A_graph {
+    position: absolute;
+    border: 1px black solid;
+    top: 50px;
+    left: 700px;
+    width: 50px;
+    height: 400px;
 }
 
-#pause-bar {
-    text-align: center;
-    color: black;
-    font-size: 20px;
+#average_B_graph {
+    position: absolute;
+    border: 1px black solid;
+    top: 50px;
+    left: 775px;
+    width: 50px;
+    height: 400px;
+}
+
+#myProgress {
+    width: 150px;
+    float: right;
 }
 
 #my-decision-container {
@@ -40,10 +52,17 @@
 }
 
 #buttonA {
-    padding-left: 25px;
-    padding-right: 25px;
+    width: 120px;
 }
 
-#button:active {
-     border: solid #000000 4px;
+#buttonA:focus{
+    border: black;
+    border-style: solid;
+    border-width: 2px;
+}
+
+#buttonB:focus{
+    border: black;
+    border-style: solid;
+    border-width: 2px;
 }

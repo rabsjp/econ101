@@ -15,26 +15,57 @@ Two-by-two game with stochastic transitions between payoff matrices.
 """
 
 
+# from .test_payoff import fill_events
+# do_test = False
+
+# if
+
+
 class Constants(BaseConstants):
     name_in_url = 'stochastic_bimatrix'
     players_per_group = 2
     num_rounds = 10
 
-    #payoff grid
-    payoff_grid_array = [
-        [
-            [ 100, 100 ], [ 0,   800 ],
-            [ 800, 0   ], [ 300, 300 ]
-        ],
-        [
-            [ 800, 0   ], [ 0,   200 ],
-            [ 0,   200 ], [ 200, 0   ]
-        ]
-    ]
-
     base_points = 0
 
     period_length = 120
+
+    treatments = {
+        'A': {
+            'payoff_grid': [
+                [
+                    [ 100, 100 ], [   0, 800 ],
+                    [ 800,   0 ], [ 300, 300 ]
+                ],
+                [
+                    [ 800,   0 ], [   0, 200 ],
+                    [   0, 200 ], [ 200,   0 ]
+                ]
+            ],
+            'transition_probabilities':
+                [
+                    [   1,   0 ], [   0,   0 ],
+                    [   0,   0 ], [   0,   1 ]
+                ]
+        },
+        'B': {
+            'payoff_grid': [
+                [
+                    [ 100, 100 ], [   0, 800 ],
+                    [ 800,   0 ], [ 300, 300 ]
+                ],
+                [
+                    [ 800,   0 ], [   0, 200 ],
+                    [   0, 200 ], [ 200,   0 ]
+                ]
+            ],
+            'transition_probabilities':
+                [
+                    [ 0.8, 0.2 ], [   0,   0 ],
+                    [   0,   0 ], [ 0.2, 0.8 ]
+                ]
+        },
+    }
 
 
 class Subsession(BaseSubsession):
@@ -48,61 +79,72 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-    
+
     def other_player(self):
         return self.get_others_in_group()[0]
 
-    def set_payoff(self):
-        self.decisions_over_time = Event.objects.filter(
-            channel='decisions',
+    def set_payoff(self, initial_decision):
+        events_over_time = Event.objects.filter(
             session=self.session,
             subsession=self.subsession.name(),
             round=self.round_number,
             group=self.group.id_in_subsession
         )
 
-        payoff = 0
+        if not events_over_time:
+            return 0
 
-        # default state when no decisions have been made
-        my_state = .5
-        other_state = .5
+        useful_events_over_time = [
+            event for event in events_over_time
+            if event.channel == 'decisions' or event.channel == 'transitions'
+        ]
 
-        payoff_grid = Constants.payoff_grid[1]
-        if (self.id_in_group == 1):
-            A_A_payoff = payoff_grid[0][0]
-            A_B_payoff = payoff_grid[1][0]
-            B_A_payoff = payoff_grid[2][0]
-            B_B_payoff = payoff_grid[3][0]
-        else:
-            A_A_payoff = payoff_grid[0][1]
-            A_B_payoff = payoff_grid[1][1]
-            B_A_payoff = payoff_grid[2][1]
-            B_B_payoff = payoff_grid[3][1]
+        # always None due to a bug. REMOVE WHEN THIS IS FIXED
+        del useful_events_over_time[2]
 
-        cur_payoff = (A_A_payoff + A_B_payoff + B_A_payoff + B_B_payoff) * .25 / Constants.period_length
-        if (len(self.decisions_over_time) > 0):
-            next_change_time = self.decisions_over_time[0].timestamp
-        else:
-            next_change_time = self.session.vars['end_time_{}'.format(self.group.id_in_subsession)]
-        payoff += (next_change_time - self.session.vars['start_time_{}'.format(self.group.id_in_subsession)]).total_seconds() * cur_payoff
+        self.payoff = get_payoff(
+            useful_events_over_time,
+            self.id_in_group,
+            self.participant.code,
+            Constants.treatments[self.session.config['treatment']]['payoff_grid']
+        )
+        print(self.payoff)
 
-        for i, change in enumerate(self.decisions_over_time):
-            if change.participant == self.participant:
-                my_state = change.value
+
+def get_payoff(events_over_time, id_in_group, participant_code, payoff_grids):
+    payoff = 0
+
+    # defaults
+    q1, q2 = 0.5, 0.5
+    current_matrix = 0
+
+    for i, change in enumerate(events_over_time):
+        if change.value == None: break
+
+        if change.channel == 'transitions':
+            current_matrix = change.value
+        elif change.channel == 'decisions':
+            # decision was made by me and my id is 1, or decision was made by opponent and my id is 2
+            if (change.participant.code == participant_code) is (id_in_group == 1):
+                q1 = change.value
+                print('q1={}'.format(change.value))
             else:
-                other_state = change.value
+                q2 = change.value
+                print('q2={}'.format(change.value))
 
-            cur_payoff = ((A_A_payoff * my_state * other_state) +
-                          (A_B_payoff * my_state * (1 - other_state)) +
-                          (B_A_payoff * (1 - my_state) * other_state) +
-                          (B_B_payoff * (1 - my_state) * (1 - other_state))) / Constants.period_length
+        payoff_grid = [payoff[id_in_group - 1] for payoff in payoff_grids[current_matrix]]
 
-            if i == len(self.decisions_over_time) - 1:
-                next_change_time = self.session.vars['end_time_{}'.format(self.group.id_in_subsession)]
-            else:
-                next_change_time = self.decisions_over_time[i + 1].timestamp
+        cur_payoff = (
+            payoff_grid[0] * q1 * q2 +
+            payoff_grid[1] * q1 * (1 - q2) +
+            payoff_grid[2] * (1 - q1) * q2 +
+            payoff_grid[3] * (1 - q1) * (1 - q2)
+        )
 
-            payoff += (next_change_time - change.timestamp).total_seconds() * cur_payoff
+        next_change_time = events_over_time[i + 1].timestamp
 
-        self.payoff = payoff
+        time_diff = (next_change_time - change.timestamp).total_seconds()
 
+        payoff += time_diff * cur_payoff
+
+    return payoff / Constants.period_length

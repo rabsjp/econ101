@@ -51,7 +51,7 @@
                         ></bimatrix-heatmap>
                     </div>
                     <div style="display:inline-block">
-                        <hazard-bar hazard=".9"></hazard-bar>
+                        <hazard-bar hazard-rate="[[ hazardRate ]]"></hazard-bar>
                     </div>
                     <div style="display:inline-block;margin-left:20px">
                         <bimatrix-heatmap
@@ -96,14 +96,14 @@
                         <div style="margin-top:10px; text-align:center">Your Payoff</div>
                     </div>
                     <div style="display:inline-block; margin-left:20px; margin-right:20px">
-                        <div style="position:relative; bottom:20px">
+                        <div style="position:relative; bottom:35px">
                             <input
                                 id="slider"
                                 type="range"
                                 min="0"
                                 max="1"
                                 step=".01"
-                                value="{{ myDecision::input }}">
+                                value="{{ myDecision::change }}">
                         </div>
                     </div>
                     <div style="display:inline-block">
@@ -134,15 +134,23 @@
             is: 'stochastic-bimatrix',
             properties: {
                 payoffMatrices: Array,
-                myDecision: Number,
-                otherDecision: Number,
+                transitionProbabilities: Array,
+                myDecision: {
+                    type: Number,
+                    observer: '_handleDecisionChanged',
+                },
+                otherDecision: {
+                    type: Number,
+                    observer: '_handleDecisionChanged',
+                },
                 periodLength: Number,
                 currentMatrix: {
                     type: Number,
-                    observer: '_currentMatrixChanged',
+                    observer: '_handleMatrixTransition',
                 }
             },
             ready() {
+                console.log('ID in Group: ' + this.$.constants.idInGroup);
                 // set payoff indices
                 if (this.$.constants.idInGroup == undefined) {
                     console.log('Not in game, manually setting payoffIndex');
@@ -150,20 +158,40 @@
                 } else {
                     this.payoffIndex = this.$.constants.idInGroup - 1;
                 }
-                this.otherPayoffIndex = 1 - this.payoffIndex
+                this.otherPayoffIndex = 1 - this.payoffIndex;
 
-                this.currentMatrix = 1;
+                // transpose payoff matrices if is player controlling vertical line
+                if (this.$.constants.idInGroup == 2) {
+                    let temp;
+                    temp = this.payoffMatrices[0][1][0];
+                    this.payoffMatrices[0][1][0] = this.payoffMatrices[0][2][0];
+                    this.payoffMatrices[0][2][0] = temp;
+                    temp = this.payoffMatrices[0][1][1];
+                    this.payoffMatrices[0][1][1] = this.payoffMatrices[0][2][1]
+                    this.payoffMatrices[0][2][1] = temp;
+                    temp = this.payoffMatrices[1][1][0];
+                    this.payoffMatrices[1][1][0] = this.payoffMatrices[1][2][0];
+                    this.payoffMatrices[1][2][0] = temp;
+                    temp = this.payoffMatrices[1][1][1];
+                    this.payoffMatrices[1][1][1] = this.payoffMatrices[1][2][1]
+                    this.payoffMatrices[1][2][1] = temp;
+                }
+
+                this.currentMatrix = 0;
 
                 // color schemes for each player's heatmaps
                 this.myColor = 'rainbow';
                 this.otherColor = 'mono';
 
                 this._calcPayoffs();
+                this._calcHazardRate();
             },
             _calcPayoffs() {
                 // get two matrix indices
                 const index_A = this.currentMatrix;
                 const index_B = 1 - index_A;
+                console.log(this.currentMatrix);
+
                 // get four payoff matrices
                 this.myPayoffs_A = this.payoffMatrices[index_A].map(
                     val => parseInt(val[this.payoffIndex]));
@@ -174,21 +202,28 @@
                 this.otherPayoffs_B = this.payoffMatrices[index_B].map(
                     val => parseInt(val[this.otherPayoffIndex]));
             },
-            // handle switch-matrix button pressed
-            _currentMatrixChanged(event) {
-                console.log('current matrix changed to ', event);
-                // get heatmaps
-                // const
-                //     P1A = $('#heatmap-P1-A'),
-                //     P2A = $('#heatmap-P2-A'),
-                //     P1B = $('#heatmap-P1-B'),
-                //     P2B = $('#heatmap-P2-B');
-                // do animation
-                // P1A.animate({ left: P1B.offset().left, top: P1B.offset().top });
-
-                // change payoff functions
+            _calcHazardRate() {
+                if (this.currentMatrix == undefined || this.myDecision == undefined || this.otherDecision == undefined)
+                    return;
+                const p11 = this.transitionProbabilities[0][this.currentMatrix];
+                const p12 = this.transitionProbabilities[1][this.currentMatrix];
+                const p21 = this.transitionProbabilities[2][this.currentMatrix];
+                const p22 = this.transitionProbabilities[3][this.currentMatrix];
+                const q1 = this.$.constants.idInGroup == 1 ? this.myDecision : this.otherDecision;
+                const q2 = this.$.constants.idInGroup == 2 ? this.myDecision : this.otherDecision;
+                this.hazardRate =
+                    p11 * q1 * q2 +
+                    p12 * q1 * (1 - q2) +
+                    p21 * (1 - q1) * q2 +
+                    p22 * (1 - q1) * (1 - q2);
+            },
+            _handleDecisionChanged() {
+                this._calcHazardRate();
+            },
+            _handleMatrixTransition() {
                 this._calcPayoffs();
-            }
+                this._calcHazardRate();
+            },
         })
     </script>
 </dom-module>

@@ -171,6 +171,7 @@ SESSION_CONFIGS = [
         'display_name': "Stochastic Bimatrix Game",
         'num_demo_participants': 2,
         'app_sequence': ['stochastic_bimatrix', 'payment_info'],
+        'treatment': 'A'
     },
     {
         'name': 'public_goods',

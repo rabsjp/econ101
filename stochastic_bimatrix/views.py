@@ -6,6 +6,7 @@ from otree.common import Currency as c, currency_range
 from .models import Constants
 import otree_redwood.abstract_views as redwood_views
 from otree_redwood import consumers
+from otree_redwood.models import Event
 
 from django.utils import timezone
 from datetime import timedelta
@@ -16,33 +17,20 @@ from math import sqrt
 import random
 
 
-def vars_for_all_templates(self):
-    payoff_grid = Constants.payoff_grid_array[1]
-    if (self.player.id_in_group == 1):
-        return {
-            "my_A_A_payoff": payoff_grid[0][0],
-            "my_A_B_payoff": payoff_grid[1][0],
-            "my_B_A_payoff": payoff_grid[2][0],
-            "my_B_B_payoff": payoff_grid[3][0],
-            "other_A_A_payoff": payoff_grid[0][1],
-            "other_A_B_payoff": payoff_grid[1][1],
-            "other_B_A_payoff": payoff_grid[2][1],
-            "other_B_B_payoff": payoff_grid[3][1],
-            "total_q": 1
-        }
-    else:
-        return {
-            "my_A_A_payoff": payoff_grid[0][1],
-            "my_A_B_payoff": payoff_grid[1][1],
-            "my_B_A_payoff": payoff_grid[2][1],
-            "my_B_B_payoff": payoff_grid[3][1],
-            "other_A_A_payoff": payoff_grid[0][0],
-            "other_A_B_payoff": payoff_grid[1][0],
-            "other_B_A_payoff": payoff_grid[2][0],
-            "other_B_B_payoff": payoff_grid[3][0],
-            "total_q": 1
-        }
+class UndefinedTreatmentError(ValueError):
+    pass
 
+def treatment(self):
+    if 'treatment' in self.session.config:
+        return Constants.treatments[self.session.config['treatment']]
+    else:
+        raise UndefinedTreatmentError('no treatment attribute in settings.py')
+
+def vars_for_all_templates(self):
+    payoff_grid = treatment(self)['payoff_grid']
+    transition_probabilities = treatment(self)['transition_probabilities']
+
+    return locals()
 
 class Introduction(Page):
     timeout_seconds = 100
@@ -55,6 +43,7 @@ class DecisionWaitPage(WaitPage):
 class Decision(redwood_views.ContinuousDecisionPage):
     period_length = Constants.period_length
     current_matrix = 0
+    initial_decision = .5
 
     def when_all_players_ready(self):
         super().when_all_players_ready()
@@ -68,35 +57,39 @@ class Decision(redwood_views.ContinuousDecisionPage):
         self.emitter.start()
 
     def tick(self, current_interval, intervals, group):
-        # set C to be distance from decision to corner with lowest probability divided by the maximum distance
-        A, B = list(self.group_decisions.values())
-        # 0th matrix has high probability in bottom right
-        if self.current_matrix == 0:
-            A, B = 1 - A, 1 - B
-        C = sqrt(A**2 + B**2) / sqrt(2)
+        q1, q2 = list(self.group_decisions.values()) # decisions
+        p11, p12, p21, p22 = [pij[self.current_matrix] for pij in treatment(self)['transition_probabilities']] # transition probabilities
+        # probability of a switch in 2 seconds = 1/2
+        # solved by P(switch in t) = (1-p)^10t = 1/2
+        Pmax = .034064
+        Pswitch = (p11 * q1 * q2 +
+                   p12 * q1 * (1 - q2) +
+                   p21 * (1 - q1) * q2 +
+                   p22 * (1 - q1) * (1 - q2)) * Pmax
 
-        # probability of a change is proportional to C^4 (arbitrary, but this makes a nice slope towards corner)
-        Pmax = .2
-        P = C**4 * Pmax
-        if random.uniform(0, 1) < P:
+        if random.uniform(0, 1) < .1: print(Pswitch, list(self.group_decisions.values()), self.current_matrix)
+
+        if random.uniform(0, 1) < Pswitch:
             self.current_matrix = 1 - self.current_matrix
-            print(str.format('matrix changed with A={}, B={}, P={}', A, B, P))
+            print(str.format('matrix changed with q1={}, q2={}, P={}', q1, q2, Pswitch))
+            Event.objects.create(
+                session=self.session,
+                subsession=self.subsession.name(),
+                round=self.round_number,
+                group=self.group.id_in_subsession,
+                channel='transitions',
+                value=self.current_matrix
+            )
 
-        consumers.send(self.group, 'current_matrix', self.current_matrix)
-        consumers.send(self.group, 'tick', {
-            'current_interval': current_interval,
-            'intervals': intervals,
-            'timestamp': time.time()
-        })
+            consumers.send(self.group, 'current_matrix', self.current_matrix)
 
 
 class Results(Page):
     
     def vars_for_template(self):
-        self.player.set_payoff()
+        self.player.set_payoff(Decision.initial_decision)
 
         return {
-            'decisions_over_time': self.player.decisions_over_time,
             'total_plus_base': self.player.payoff + Constants.base_points
         }
 

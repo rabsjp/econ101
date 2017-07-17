@@ -20,6 +20,11 @@
          oTree.participantCode = "{{ player.participant.code }}";
          oTree.appName = "{{ subsession.app_name }}";
          oTree.idInGroup = "{{ player.id_in_group }}";
+         {% if True %}
+         oTree.debug = true;
+         {% else %}
+         oTree.debug = false;
+         {% endif %}
        })();
      </script>
 
@@ -33,7 +38,8 @@
 
 {% block content %}
     <stochastic-bimatrix
-        payoff-matrices='{{ Constants.payoff_grid_array }}'
+        payoff-matrices='{{ payoff_grid }}'
+        transition-probabilities='{{ transition_probabilities }}'
         period-length='{{ Constants.period_length }}'>
     </stochastic-bimatrix>
 
