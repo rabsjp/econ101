@@ -1,35 +1,41 @@
-#experiment-container {
-    position: relative;
+#experimentContainer {
     width: 100%;
-    height: 570px;
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
 }
 
-#payoff_graph {
-    position: absolute;
-    border: 1px black solid;
-    top: 50px;
-    width: 150px;
-    height: 400px;
+.graph-container {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    height: 100%;
+    align-self: center;
 }
 
-#strategy_graph {
-    position: absolute;
-    border: 1px black solid;
-    top: 50px;
-    left: 200px;
-    width: 600px;
-    height: 420px;
+#payoffGraph {
+    border: 1px solid black;
+    margin: 0 10px 0 0;
+}
+
+#strategyGraph {
+    border: 1px solid black;
 }
 
 #myProgress {
-    width: 100px;
-    background-color: lightgrey;
-    float: right;
+    margin: 10px 0 10px 0;
+    width: 200px;
+    height: 30px;
+    background: lightgrey;
+    align-self: flex-end;
 }
 
-#my-decision-container {
-    position: relative;
-    top: 500px;
-    left: 300px;
-    float: center;
+#myProgress[hidden] {
+    display: inline-block !important;
+    visibility: hidden;
+}
+
+#myDecisionContainer {
+    margin: 10px 0 10px 0;
+    align-self: center;
 }
