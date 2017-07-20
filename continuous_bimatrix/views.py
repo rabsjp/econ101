@@ -6,6 +6,8 @@ from otree.common import Currency as c, currency_range
 from .models import Constants
 import otree_redwood.abstract_views as redwood_views
 
+from collections import defaultdict
+import datetime
 import json
 import logging
 
@@ -82,6 +84,7 @@ class Decision(redwood_views.ContinuousDecisionPage):
 
 
 class Results(Page):
+    timeout_seconds = 30
 
     def vars_for_template(self):
         self.player.set_payoff()
@@ -90,6 +93,26 @@ class Results(Page):
             'decisions_over_time': self.player.decisions_over_time,
             'total_plus_base': self.player.payoff + Constants.base_points
         }
+
+
+def get_output_table(session_events):
+    groups = max(e.group for e in session_events)
+    rounds = max(e.round for e in session_events)
+    events_by_round_then_group = defaultdict(lambda: defaultdict(lambda: []))
+    for e in session_events:
+        events_by_round_then_group[e.round][e.group].append(e)
+    for events_by_group in events_by_round_then_group.values():
+        for group_events in events_by_group.values():
+            players = set(e.participant.code for e in group_events if e.participant)
+            minT = min(e.timestamp for e in group_events)
+            maxT = max(e.timestamp for e in group_events)
+            for tick in range((maxT - minT).seconds):
+                currT = minT + datetime.timedelta(seconds=tick)
+                tick_events = []
+                while group_events[0].timestamp <= currT:
+                    tick_events.append(group_events.pop(0))
+                print(tick, len(tick_events))
+    raise Exception('not implemented')
 
 
 page_sequence = [

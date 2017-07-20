@@ -1,27 +1,15 @@
 <link rel="import" href="/static/bower_components/polymer/polymer.html">
-<link
-    rel="import"
-    href="/static/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="/static/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 
-<link
-    rel="import"
-    href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
-<link
-    rel="import"
-    href="/static/otree-redwood/webcomponents/otree-continuous-decision/otree-continuous-decision.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision/otree-continuous-decision.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision-bot/otree-continuous-decision-bot.html">
 
-<link
-    rel="import"
-    href="/static/webcomponents/reusable/bimatrix-heatmap/bimatrix-heatmap.html">
-<link
-    rel="import"
-    href="/static/webcomponents/reusable/otree-thermometer/otree-thermometer.html">
-<link
-    rel="import"
-    href="/static/webcomponents/reusable/payoff-graph/payoff-graph.html">
-<link
-    rel="import"
-    href="/static/webcomponents/reusable/strategy-graph/strategy-graph.html">
+<link rel="import" href="/static/webcomponents/reusable/bimatrix-heatmap/bimatrix-heatmap.html">
+<link rel="import" href="/static/webcomponents/reusable/otree-thermometer/otree-thermometer.html">
+<link rel="import" href="/static/webcomponents/reusable/payoff-graph/payoff-graph.html">
+<link rel="import" href="/static/webcomponents/reusable/strategy-graph/strategy-graph.html">
+
 
 <dom-module id="continuous-bimatrix">
     <template>
@@ -72,6 +60,12 @@
             my-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}">
         </otree-continuous-decision>
+        <otree-continuous-decision-bot
+            id="bot"
+            component="continuous-bimatrix"
+            my-decision="{{ myDecision }}"
+            other-decision="{{ otherDecision }}">
+        </otree-continuous-decision-bot>
 
         <div id="app" class="layout horizontal">
             
@@ -168,6 +162,14 @@
                 otherPayoffsTranspose[1] = otherPayoffsTranspose[2];
                 otherPayoffsTranspose[2] = tmp;
                 this.otherPayoffsTranspose = otherPayoffsTranspose;
+
+                this.$.bot.payoffFunction = (myDecision, otherDecision) => {
+                    const m = this.myPayoffs;
+                    const row1 = myDecision * m[0] + (1 - myDecision) * m[2];
+                    const row2 = myDecision * m[1] + (1 - myDecision) * m[3];
+                    const flowPayoff = otherDecision * row1 + (1 - otherDecision) * row2;
+                    return flowPayoff;
+                };
             }
         })
     </script>
