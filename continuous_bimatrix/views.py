@@ -3,7 +3,7 @@ from __future__ import division
 from . import models
 from ._builtin import Page, WaitPage
 from otree.common import Currency as c, currency_range
-from .models import Constants
+from .models import Constants, Player
 import otree_redwood.abstract_views as redwood_views
 
 from collections import defaultdict
@@ -101,23 +101,64 @@ def get_output_table(session_events):
     events_by_round_then_group = defaultdict(lambda: defaultdict(lambda: []))
     for e in session_events:
         events_by_round_then_group[e.round][e.group].append(e)
-    for events_by_group in events_by_round_then_group.values():
-        for group_events in events_by_group.values():
+    header = [
+        'session',
+        'round',
+        'group',
+        'tick',
+        'player1',
+        'player2',
+    ]
+    session = session_events[0].session
+    rows = []
+    for round, events_by_group in events_by_round_then_group.items():
+        for group, group_events in events_by_group.items():
             players = set(e.participant.code for e in group_events if e.participant)
             minT = min(e.timestamp for e in group_events)
             maxT = max(e.timestamp for e in group_events)
+            last_p1_mean = float('nan')
+            last_p2_mean = float('nan')
             for tick in range((maxT - minT).seconds):
                 currT = minT + datetime.timedelta(seconds=tick)
                 tick_events = []
                 while group_events[0].timestamp <= currT:
-                    tick_events.append(group_events.pop(0))
-                print(tick, len(tick_events))
-    raise Exception('not implemented')
+                    e = group_events.pop(0)
+                    if e.channel == 'decisions' and e.value is not None:
+                        tick_events.append(e)
+                p1_decisions = []
+                p2_decisions = []
+                for event in tick_events:
+                    player = Player.objects.get(
+                        participant=event.participant,
+                        session=session,
+                        round_number=round)
+                    if player.id_in_group == 1:
+                        p1_decisions.append(event.value)
+                    elif player.id_in_group == 2:
+                        p2_decisions.append(event.value)
+                    else:
+                        raise ValueError('Invalid player id in group {}'.format(player.id_in_group))
+                p1_mean, p2_mean = last_p1_mean, last_p2_mean
+                if p1_decisions:
+                    p1_mean = sum(p1_decisions) / len(p1_decisions)
+                if p2_decisions:
+                    p2_mean = sum(p2_decisions) / len(p2_decisions)
+                rows.append([
+                    session.code,
+                    round,
+                    group,
+                    tick,
+                    p1_mean,
+                    p2_mean
+                ])
+                last_p1_mean = p1_mean
+                last_p2_mean = p2_mean
+    return header, rows
 
 
 page_sequence = [
-        Introduction,
-        DecisionWaitPage,
-        Decision,
-        Results
-    ]
+    Introduction,
+    DecisionWaitPage,
+    Decision,
+    Results
+]
