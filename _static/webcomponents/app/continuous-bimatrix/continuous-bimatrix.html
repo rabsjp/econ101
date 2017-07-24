@@ -15,19 +15,19 @@
     <template>
         <style include="iron-flex iron-flex-alignment">
         </style>
+        <link rel="stylesheet" href="/static/global/slider.css">
         <style>
             :host {
                 display: block;
                 margin: 30px 0 40px 0;
             }
 
-            input {
-                writing-mode: bt-lr; /* IE */
+            input[type=range] {
                 -webkit-appearance: slider-vertical; /* WebKit */
                 width: 40px;
                 height: 310px;
                 position: relative;
-                top: -11px;
+                top: -38px;
             }
 
             #graphs-column {
