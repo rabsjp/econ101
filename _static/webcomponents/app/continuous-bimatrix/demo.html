@@ -6,24 +6,49 @@
     </script>
     <link
         rel="import"
-        href="/static/bower_components/polymerfire/firebase-app.html">
-    <firebase-app
-        api-key="AIzaSyDhaihpJ2W7mR_bScBsc6brBQyFG2N8tJo"
-        auth-domain="otree.firebaseapp.com"
-        database-url="otree.firebaseio.com">
-    </firebase-app>
+        href="/static/webcomponents/app/continuous-bimatrix/continuous-bimatrix.html">
     <link
-        rel="import"
-        href="/static/webcomponents/smart/otree-continuous-bimatrix/otree-continuous-bimatrix.html">
+        rel="stylesheet"
+        href="/static/bootstrap/css/bootstrap.min.css">
   </head>
   <body>
-    <otree-continuous-bimatrix
+    <script src="//code.highcharts.com/highcharts.js"></script>
+    <script src="/static/otree/js/jquery.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script>
+        var oTree = oTree || {};
+        (function() {
+            oTree.session = "demo";
+            oTree.subsession = 1;
+            oTree.round = 1;
+            oTree.group = 1;
+            oTree.role = 'demo';
+            oTree.participantCode = 'demo';
+            oTree.appName = "continuous-bimatrix";
+            oTree.idInGroup = 0;
+            oTree.debug = true;
+        })();
+        class ReconnectingWebSocket {
+            constructor() {
+                setTimeout(() => { this.readyState = 1; this.onopen(); }, 1000);
+            }
+            send(msg) {
+                event = JSON.parse(msg);
+                if (event.channel == 'echo') {
+                    this.onmessage({
+                        data: JSON.stringify(event)
+                    });
+                }
+            }
+        }
+    </script>
+    <continuous-bimatrix
         payoff-matrix=
-        '[
+        "[
             [ 400, 400 ], [ 0,   800 ],
             [ 800, 0   ], [ 200, 200 ]
-        ]'
-        period-length=120
-    ></otree-continuous-bimatrix>
+        ]"
+        period-length="120">
+    </continuous-bimatrix>
   </body>
 </html>
