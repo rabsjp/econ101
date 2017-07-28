@@ -13,7 +13,7 @@ services:
     volumes:
       - "redisdata:/data"
   web:
-    build: .
+    image: leepslab/otree
     environment:
       - OTREE_PRODUCTION=1
       - DATABASE_URL=postgres://postgres@postgres:5432/postgres

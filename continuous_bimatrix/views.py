@@ -96,8 +96,6 @@ class Results(Page):
 
 
 def get_output_table(session_events):
-    groups = max(e.group for e in session_events)
-    rounds = max(e.round for e in session_events)
     events_by_round_then_group = defaultdict(lambda: defaultdict(lambda: []))
     for e in session_events:
         events_by_round_then_group[e.round][e.group].append(e)
@@ -113,7 +111,6 @@ def get_output_table(session_events):
     rows = []
     for round, events_by_group in events_by_round_then_group.items():
         for group, group_events in events_by_group.items():
-            players = set(e.participant.code for e in group_events if e.participant)
             minT = min(e.timestamp for e in group_events)
             maxT = max(e.timestamp for e in group_events)
             last_p1_mean = float('nan')
