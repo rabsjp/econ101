@@ -28,11 +28,11 @@
 				},
 				myPayoffs: {
                     type: Array,
-					observer: '_updateDataset'
+					observer: '_addTransitionBand'
                 },
 				otherPayoffs: {
 				    type: Array,
-					observer: '_updateDataset'
+					observer: '_addTransitionBand'
                 },
 				periodLength: Number,
 			},
@@ -68,9 +68,9 @@
 						renderTo: this.$.chart,
 						enabled: false,
 						width: this.offsetWidth,
-						height: this.offsetHeight
+						height: this.offsetHeight,
 					},
-					title: { text: null },
+					title: { text: 'Payoff vs. Time Chart' },
 					exporting: { enabled: false },
 					tooltip: { enabled: false },
 					legend: { enabled: false },
@@ -78,10 +78,11 @@
 					xAxis: {
 						min: 0,
 						max: 1,
-						labels: { enabled: false }
+						labels: { enabled: false },
+						plotBands: [],
 					},
 					yAxis: {
-						title: { text: undefined },
+						title: { text: 'Player Payoff' },
 						min: 0,
 						max: maxPayoff,
 						endOnTick: false,
@@ -109,16 +110,25 @@
 					},
 					series: [
 						{
+							name: 'Your Payoff',
 							type: "area",
 							data: [[0, myInitialPayoff], [0, myInitialPayoff]],
 							step: "left"
 						},
 						{
+							name: 'Opponent\'s Payoff',
 							type: "line",
 							data: [[0, otherInitialPayoff], [0, otherInitialPayoff]],
 							step: "left"
 						}
-					]
+					],
+					legend: {
+						align: 'right',
+						verticalAlign: 'top',
+						// layout: 'vertical',
+						floating: true,
+						y: 15,
+					},
 				});
 
 				window.requestAnimationFrame(
@@ -179,6 +189,26 @@
 				this._lastElem(dataset.data).remove()
 				dataset.addPoint([xval, other_point_payoff], false, false);
 				dataset.addPoint([xval, other_point_payoff], true, false);
+			},
+			// called every time a matrix transition occurs
+			_addTransitionBand() {
+				if (!this.graph_obj) return;
+
+				// console.log('adding transition band');
+				const xval = (
+					(performance.now() - this.start_time) /
+					(this.periodLength * 1000))
+				this.graph_obj.xAxis[0].addPlotBand({
+					value: xval,
+					width: 3,
+					color: 'red',
+					label: {
+						text: 'Transition Occurred',
+						layout: 'vertical',
+					}
+				});
+
+				this._updateDataset();
 			}
 		})
 	</script>

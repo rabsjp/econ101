@@ -2,13 +2,17 @@
 // contains color definitions for 'mono' and 'rainbow' color schemes
 
 var color_stops = {
-    'mono': [
+    'red': [
         [255, 255, 255],
         [255, 0, 0]
     ],
     'gray': [
         [255, 255, 255],
         [0, 0, 0]
+    ],
+    'blue': [
+        [255, 255, 255],
+        [148, 0, 211]
     ],
     'rainbow': [
         [148, 0, 211],
