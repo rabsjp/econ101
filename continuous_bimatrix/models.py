@@ -2,6 +2,7 @@
 from __future__ import division
 import random
 
+from django.contrib.contenttypes.models import ContentType
 from otree import widgets
 from otree.db import models
 from otree.constants import BaseConstants
@@ -81,18 +82,25 @@ class Player(BasePlayer):
         return self.get_others_in_group()[0]
 
     def set_payoff(self):
-        self.decisions_over_time = Event.objects.filter(
-                channel='decisions',
-                session=self.session,
-                subsession=self.subsession.name(),
-                round=self.round_number,
-                group=self.group.id_in_subsession).order_by("timestamp")
+        group_decisions = list(Event.objects.filter(
+                channel='group_decisions',
+                content_type=ContentType.objects.get_for_model(self.group),
+                group_pk=self.group.pk).order_by("timestamp"))
+
+        period_start = Event.objects.get(
+                channel='state',
+                content_type=ContentType.objects.get_for_model(self.group),
+                group_pk=self.group.pk,
+                value='period_start')
+        period_end = Event.objects.get(
+                channel='state',
+                content_type=ContentType.objects.get_for_model(self.group),
+                group_pk=self.group.pk,
+                value='period_end')
+
+        period_duration = period_end.timestamp - period_start.timestamp
 
         payoff = 0
-
-        # default state when no decisions have been made
-        my_state = .5
-        other_state = .5
 
         payoff_grid = self.subsession.get_cur_payoffs()
 
@@ -107,25 +115,21 @@ class Player(BasePlayer):
             B_A_payoff = payoff_grid[2][1]
             B_B_payoff = payoff_grid[3][1]
 
-        for i, change in enumerate(self.decisions_over_time):
-            # skip end dummy decisions
-            if change.value is None:
-                break
-
-            if change.value == -1:
-                # don't change state for front dummy decisions
-                pass
-            elif change.participant == self.participant:
-                my_state = change.value
-            else:
-                other_state = change.value
+        my_state = None
+        other_state = None
+        for i, d in enumerate(group_decisions):
+            my_state = d.value[self.participant.code]
+            other_state = d.value[self.get_others_in_group()[0].participant.code]
 
             cur_payoff = ((A_A_payoff * my_state * other_state) +
                           (A_B_payoff * my_state * (1 - other_state)) +
                           (B_A_payoff * (1 - my_state) * other_state) +
-                          (B_B_payoff * (1 - my_state) * (1 - other_state))) / Constants.period_length
+                          (B_B_payoff * (1 - my_state) * (1 - other_state))) / period_duration.total_seconds()
 
-            next_change_time = self.decisions_over_time[i + 1].timestamp
-            payoff += (next_change_time - change.timestamp).total_seconds() * cur_payoff
+            if i + 1 < len(group_decisions):
+                next_change_time = group_decisions[i + 1].timestamp
+            else:
+                next_change_time = period_end.timestamp
+            payoff += (next_change_time - d.timestamp).total_seconds() * cur_payoff
 
         self.payoff = payoff
