@@ -121,8 +121,7 @@ def get_output_table(events):
         for event in tick_events:
             player = Player.objects.get(
                 participant=event.participant,
-                session=session,
-                round_number=round)
+                group=e.group)
             if player.id_in_group == 1:
                 p1_decisions.append(event.value)
             elif player.id_in_group == 2:
