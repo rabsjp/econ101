@@ -51,12 +51,16 @@ class DecisionWaitPage(WaitPage):
 
 
 class Decision(redwood_views.ContinuousDecisionPage):
-    initial_decision = 0
     
     def __init__(self, *args, **kwargs):
-        self.period_length = Constants.num_subperiods * Constants.subperiod_length
         super().__init__(*args, **kwargs)
         self.fixed_group_decisions = {}
+
+    def initial_decision(self):
+        return 0
+
+    def period_length(self):
+        return Constants.num_subperiods * Constants.subperiod_length
 
     def when_all_players_ready(self):
         super().when_all_players_ready()
@@ -67,7 +71,7 @@ class Decision(redwood_views.ContinuousDecisionPage):
             self.fixed_group_decisions[player.participant.code] = random.choice([1, 0])
         consumers.send(self.group, 'initialDecisions', self.fixed_group_decisions)
 
-        emitter = redwood_views.DiscreteEventEmitter(.25, self.period_length, self.group, self.tick)
+        emitter = redwood_views.DiscreteEventEmitter(.25, self.period_length(), self.group, self.tick)
         emitter.start()
 
     def tick(self, current_interval, intervals, group):
