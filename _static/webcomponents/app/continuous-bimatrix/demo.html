@@ -18,19 +18,19 @@
     <script>
         var oTree = oTree || {};
         (function() {
-            oTree.session = "demo";
-            oTree.subsession = 1;
-            oTree.round = 1;
             oTree.group = 1;
             oTree.role = 'demo';
             oTree.participantCode = 'demo';
             oTree.appName = "continuous-bimatrix";
-            oTree.idInGroup = 0;
+            oTree.idInGroup = 1;
             oTree.debug = true;
         })();
         class ReconnectingWebSocket {
             constructor() {
                 setTimeout(() => { this.readyState = 1; this.onopen(); }, 1000);
+            }
+            onopen() {
+
             }
             send(msg) {
                 event = JSON.parse(msg);

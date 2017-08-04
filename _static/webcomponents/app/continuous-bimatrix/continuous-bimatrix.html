@@ -5,6 +5,7 @@
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision/otree-continuous-decision.html">
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision-bot/otree-continuous-decision-bot.html">
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-period/otree-period.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-redwood-debug/otree-redwood-debug.html">
 
 <link rel="import" href="/static/webcomponents/reusable/bimatrix-heatmap/bimatrix-heatmap.html">
 <link rel="import" href="/static/webcomponents/reusable/otree-thermometer/otree-thermometer.html">
@@ -60,7 +61,7 @@
 
         </style>
 
-        <otree-constants id="constants"></otree-constants>
+        <otree-constants id="constants" debug="{{ debug }}"></otree-constants>
         <otree-period
             running="{{ _isPeriodRunning }}">
         </otree-period>
@@ -130,6 +131,11 @@
                 </div>
             </div>
         </div>
+
+        <template is="dom-if" if="[[ debug ]]">
+            <otree-redwood-debug>
+            </otree-redwood-debug>
+        </template>
     </template>
     
     <script src="/static/general/color.js"></script>
