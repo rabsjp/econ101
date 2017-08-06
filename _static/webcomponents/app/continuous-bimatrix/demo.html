@@ -25,22 +25,6 @@
             oTree.idInGroup = 1;
             oTree.debug = true;
         })();
-        class ReconnectingWebSocket {
-            constructor() {
-                setTimeout(() => { this.readyState = 1; this.onopen(); }, 1000);
-            }
-            onopen() {
-
-            }
-            send(msg) {
-                event = JSON.parse(msg);
-                if (event.channel == 'echo') {
-                    this.onmessage({
-                        data: JSON.stringify(event)
-                    });
-                }
-            }
-        }
     </script>
     <continuous-bimatrix
         payoff-matrix=
