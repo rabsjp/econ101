@@ -70,12 +70,14 @@
             my-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}">
         </otree-continuous-decision>
+        <!--
         <otree-continuous-decision-bot
             id="bot"
             component="continuous-bimatrix"
             my-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}">
         </otree-continuous-decision-bot>
+        -->
 
         <div id="app" class="layout horizontal">
             
@@ -185,6 +187,7 @@
                 otherPayoffsTranspose[2] = tmp;
                 this.otherPayoffsTranspose = otherPayoffsTranspose;
 
+                /*
                 this.$.bot.payoffFunction = (myDecision, otherDecision) => {
                     const m = this.myPayoffs;
                     const row1 = myDecision * m[0] + (1 - myDecision) * m[2];
@@ -192,6 +195,7 @@
                     const flowPayoff = otherDecision * row1 + (1 - otherDecision) * row2;
                     return flowPayoff;
                 };
+                */
             }
         })
     </script>
