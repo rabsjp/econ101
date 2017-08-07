@@ -351,3 +351,13 @@ SESSION_CONFIGS = [
 # anything you put after the below line will override
 # oTree's default settings. Use with caution.
 otree.settings.augment_settings(globals())
+
+LOGGING['handlers']['console_debug'] = {
+    'level': 'DEBUG',
+    'class': 'logging.StreamHandler',
+    'formatter': 'verbose',
+}
+LOGGING['loggers']['otree_redwood'] = {
+    'level': 'DEBUG',
+    'handlers': ['console_debug'],
+}

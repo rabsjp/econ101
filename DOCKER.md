@@ -1,18 +1,12 @@
 Build the image:
 
 ```
-> sudo docker build .
+> sudo docker build . -t leepslab/otree
   ...
   Successfully built a59a280b4c46
 ```
 
-Tag the image:
-
-```
-> sudo docker tag a59a280b4c46 leepslab/otree
-```
-
-Bring up the tagged container:
+Bring up the container:
 
 ```
 > sudo docker-compose up

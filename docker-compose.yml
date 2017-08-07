@@ -18,7 +18,8 @@ services:
       - OTREE_PRODUCTION=0
       - DATABASE_URL=postgres://postgres@postgres:5432/postgres
       - REDIS_URL=redis://redis:6379
-    command: bash -c "otree resetdb --noinput && otree runprodserver --port 8000"
+      - DJANGO_LOG_LEVEL=DEBUG
+    command: bash -c "otree resetdb --noinput && bash /code/runserver.sh"
     volumes:
       - .:/code
     ports:
