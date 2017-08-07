@@ -9,8 +9,5 @@ COPY . .
 
 RUN pip install -r requirements.txt
 
-RUN git clone https://github.com/Leeps-Lab/otree-core.git
-RUN pip install otree-core
-
 RUN git clone https://github.com/Leeps-Lab/otree-redwood.git
 RUN pip install otree-redwood

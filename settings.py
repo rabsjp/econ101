@@ -72,7 +72,7 @@ USE_POINTS = True
 LANGUAGE_CODE = 'en'
 
 # if an app is included in SESSION_CONFIGS, you don't need to list it here
-INSTALLED_APPS = ['otree', 'otree_redwood']
+INSTALLED_APPS = ['otree', 'otree_redwood', 'django_extensions']
 
 # SENTRY_DSN = ''
 

@@ -5,7 +5,6 @@
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision/otree-continuous-decision.html">
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision-bot/otree-continuous-decision-bot.html">
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-period/otree-period.html">
-<link rel="import" href="/static/otree-redwood/webcomponents/otree-redwood-debug/otree-redwood-debug.html">
 
 <link rel="import" href="/static/webcomponents/reusable/bimatrix-heatmap/bimatrix-heatmap.html">
 <link rel="import" href="/static/webcomponents/reusable/otree-thermometer/otree-thermometer.html">
@@ -61,7 +60,7 @@
 
         </style>
 
-        <otree-constants id="constants" debug="{{ debug }}"></otree-constants>
+        <otree-constants id="constants"></otree-constants>
         <otree-period
             running="{{ _isPeriodRunning }}">
         </otree-period>
@@ -70,14 +69,12 @@
             my-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}">
         </otree-continuous-decision>
-        <!--
         <otree-continuous-decision-bot
             id="bot"
             component="continuous-bimatrix"
             my-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}">
         </otree-continuous-decision-bot>
-        -->
 
         <div id="app" class="layout horizontal">
             
@@ -134,10 +131,6 @@
             </div>
         </div>
 
-        <template is="dom-if" if="[[ debug ]]">
-            <otree-redwood-debug>
-            </otree-redwood-debug>
-        </template>
     </template>
     
     <script src="/static/general/color.js"></script>
@@ -187,7 +180,6 @@
                 otherPayoffsTranspose[2] = tmp;
                 this.otherPayoffsTranspose = otherPayoffsTranspose;
 
-                /*
                 this.$.bot.payoffFunction = (myDecision, otherDecision) => {
                     const m = this.myPayoffs;
                     const row1 = myDecision * m[0] + (1 - myDecision) * m[2];
@@ -195,7 +187,6 @@
                     const flowPayoff = otherDecision * row1 + (1 - otherDecision) * row2;
                     return flowPayoff;
                 };
-                */
             }
         })
     </script>
