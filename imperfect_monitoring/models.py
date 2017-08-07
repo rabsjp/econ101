@@ -7,10 +7,12 @@ from otree.db import models
 from otree.constants import BaseConstants
 from otree.models import BaseSubsession, BaseGroup, BasePlayer
 
+
 from otree import widgets
 from otree.common import Currency as c, currency_range
 
 from otree_redwood.models import Event, RanPlayersReadyFunction
+from django.contrib.contenttypes.models import ContentType
 
 doc = """
 This is a Prisoner's Dilemna game with discrete time. Players are given two choices,
@@ -74,10 +76,11 @@ class Player(BasePlayer):
     def set_payoff(self):
         ticks = Event.objects.filter(
             channel='ticks',
-            session=self.session,
-            subsession=self.subsession.name(),
-            round=self.round_number,
-            group=self.group.id_in_subsession)
+            content_type=ContentType.objects.get_for_model(self.group),
+            group_pk=self.group.pk)
+        
+        print(ticks)
+        
         self.payoff = 0
         for tick in ticks:
             if 'realizedPayoffs' in tick.value:
