@@ -11,7 +11,7 @@ from otree.models import BaseSubsession, BaseGroup, BasePlayer
 from otree import widgets
 from otree.common import Currency as c, currency_range
 
-from otree_redwood.models import Event, RanPlayersReadyFunction
+from otree_redwood.models import Event
 from django.contrib.contenttypes.models import ContentType
 
 doc = """

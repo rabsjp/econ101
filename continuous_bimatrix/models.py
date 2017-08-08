@@ -9,7 +9,7 @@ from otree.constants import BaseConstants
 from otree.common import Currency as c, currency_range
 from otree.models import BaseSubsession, BaseGroup, BasePlayer
 
-from otree_redwood.models import Event
+from otree_redwood.models import Event, ContinuousDecisionGroup
 
 doc = """
 This is a continuous time/continuous space bimatrix game.
@@ -72,8 +72,13 @@ class Subsession(BaseSubsession):
             print("invalid round number!")
 
 
-class Group(BaseGroup):
-    pass
+class Group(ContinuousDecisionGroup):
+
+    def period_length(self):
+        return Constants.period_length
+
+    def initial_decision(self):
+        return 0.5
 
 
 class Player(BasePlayer):

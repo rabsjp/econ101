@@ -162,7 +162,7 @@ SESSION_CONFIGS = [
     {
         'name': 'continuous_bimatrix',
         'display_name': "Continuous Bimatrix Game",
-        'num_demo_participants': 2,
+        'num_demo_participants': 4,
         'app_sequence': ['continuous_bimatrix', 'payment_info'],
     },
     #{
@@ -352,6 +352,8 @@ SESSION_CONFIGS = [
 # oTree's default settings. Use with caution.
 otree.settings.augment_settings(globals())
 
+LOGGING_CONFIG = None
+LOGGING['handlers']['console']['class'] = 'logging.NullHandler'
 LOGGING['handlers']['console_debug'] = {
     'level': 'DEBUG',
     'class': 'logging.StreamHandler',
@@ -361,3 +363,5 @@ LOGGING['loggers']['otree_redwood'] = {
     'level': 'DEBUG',
     'handlers': ['console_debug'],
 }
+import logging.config
+logging.config.dictConfig(LOGGING)

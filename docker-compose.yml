@@ -13,13 +13,14 @@ services:
     volumes:
       - "redisdata:/data"
   web:
-    image: leepslab/otree
+    restart: always
+    build:
+      context: .
     environment:
       - OTREE_PRODUCTION=0
       - DATABASE_URL=postgres://postgres@postgres:5432/postgres
       - REDIS_URL=redis://redis:6379
-      - DJANGO_LOG_LEVEL=DEBUG
-    command: bash -c "otree resetdb --noinput && bash /code/runserver.sh"
+    command: bash -c "bash /code/runserver.sh"
     volumes:
       - .:/code
     ports:
