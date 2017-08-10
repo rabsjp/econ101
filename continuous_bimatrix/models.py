@@ -88,23 +88,19 @@ class Player(BasePlayer):
                 content_type=ContentType.objects.get_for_model(self.group),
                 group_pk=self.group.pk).order_by("timestamp"))
 
-        period_start = Event.objects.get(
-                channel='state',
-                content_type=ContentType.objects.get_for_model(self.group),
-                group_pk=self.group.pk,
-                value='period_start')
-
         try:
+            period_start = Event.objects.get(
+                    channel='state',
+                    content_type=ContentType.objects.get_for_model(self.group),
+                    group_pk=self.group.pk,
+                    value='period_start')
             period_end = Event.objects.get(
                     channel='state',
                     content_type=ContentType.objects.get_for_model(self.group),
                     group_pk=self.group.pk,
                     value='period_end')
         except Event.DoesNotExist:
-            raise Exception(list(Event.objects.filter(
-                    channel='state',
-                    content_type=ContentType.objects.get_for_model(self.group),
-                    group_pk=self.group.pk)))
+            return float('nan')
 
         period_duration = period_end.timestamp - period_start.timestamp
 
