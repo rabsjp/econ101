@@ -162,7 +162,7 @@ SESSION_CONFIGS = [
     {
         'name': 'continuous_bimatrix',
         'display_name': "Continuous Bimatrix Game",
-        'num_demo_participants': 4,
+        'num_demo_participants': 2,
         'app_sequence': ['continuous_bimatrix', 'payment_info'],
     },
     #{

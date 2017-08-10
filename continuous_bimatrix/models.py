@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
-import random
 
 from django.contrib.contenttypes.models import ContentType
-from otree import widgets
-from otree.db import models
 from otree.constants import BaseConstants
-from otree.common import Currency as c, currency_range
-from otree.models import BaseSubsession, BaseGroup, BasePlayer
+from otree.models import BasePlayer, BaseSubsession
 
 from otree_redwood.models import Event, ContinuousDecisionGroup
 

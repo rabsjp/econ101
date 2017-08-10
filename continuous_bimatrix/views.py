@@ -1,15 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
-from . import models
 from ._builtin import Page, WaitPage
-from otree.common import Currency as c, currency_range
 from .models import Constants, Player
-import otree_redwood.abstract_views as redwood_views
 
-from collections import defaultdict
 import datetime
-import json
-import logging
 
 class Introduction(Page):
     timeout_seconds = 100
@@ -49,7 +43,7 @@ class DecisionWaitPage(WaitPage):
     body_text = 'Waiting for all players to be ready'
 
 
-class Decision(redwood_views.ContinuousDecisionPage):
+class Decision(Page):
     
     def vars_for_template(self):
         payoff_grid = self.subsession.get_cur_payoffs()
