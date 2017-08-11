@@ -7,9 +7,13 @@
         <link
             rel="import"
             href="/static/webcomponents/app/imperfect-monitoring/imperfect-monitoring.html">
+        <link
+            rel="import"
+            href="/static/otree-redwood/webcomponents/otree-redwood-debug/otree-redwood-debug.html">
     </head>
     <body>
         <script src="//code.highcharts.com/highcharts.js"></script>
+        <script src="/static/otree/js/jquery.min.js"></script>
         <script>
             var oTree = oTree || {};
             (function() {
@@ -23,19 +27,6 @@
                 oTree.idInGroup = 0;
                 oTree.debug = true;
             })();
-            class ReconnectingWebSocket {
-                constructor() {
-                    setTimeout(() => { this.readyState = 1; this.onopen(); }, 1000);
-                }
-                send(msg) {
-                    event = JSON.parse(msg);
-                    if (event.channel == 'echo') {
-                        this.onmessage({
-                            data: JSON.stringify(event)
-                        });
-                    }
-                }
-            }
         </script>
         <imperfect-monitoring
             row-labels='["Cooperate", "Defect"]'
@@ -56,6 +47,6 @@
             player-index='0'
             period-length='120'>
        </imperfect-monitoring>
-
+       <otree-redwood-debug></otree-redwood-debug>
     </body>
 </html>
