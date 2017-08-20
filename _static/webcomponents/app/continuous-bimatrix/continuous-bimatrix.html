@@ -10,13 +10,12 @@
 <link rel="import" href="/static/webcomponents/reusable/otree-thermometer/otree-thermometer.html">
 <link rel="import" href="/static/webcomponents/reusable/payoff-graph/payoff-graph.html">
 <link rel="import" href="/static/webcomponents/reusable/strategy-graph/strategy-graph.html">
+<link rel="import" href="/static/webcomponents/reusable/styled-range/styled-range.html">
 
 
 <dom-module id="continuous-bimatrix">
     <template>
-        <style include="iron-flex iron-flex-alignment">
-        </style>
-        <link rel="stylesheet" href="/static/global/range.css">
+        <style include="iron-flex iron-flex-alignment"></style>
         <style>
             :host {
                 display: block;
@@ -32,9 +31,9 @@
                 margin-top: 30px;
             }
 
-            input[type=range] {
+            styled-range {
                 transform: rotate(270deg) translateX(-100%);
-                transform-origin: 0 0;
+                transform-origin: 0 0px;
                 width: 315px;
                 height: 50px;
             }
@@ -90,13 +89,13 @@
                     </bimatrix-heatmap>
                     <div id="your-heatmap" class="layout horizontal center">
                         <div class="slider-container">
-                            <input
-                                type="range"
+                            <styled-range
                                 min="0"
                                 max="1"
-                                step=".01"
-                                disabled$="[[ !_isPeriodRunning ]]"
-                                value="{{ myDecision::input }}">
+                                step="0.1"
+                                disabled="[[ !_isPeriodRunning ]]"
+                                value="{{ myDecision }}">
+                            </styled-range>
                         </div>
                         <bimatrix-heatmap
                             size="300"

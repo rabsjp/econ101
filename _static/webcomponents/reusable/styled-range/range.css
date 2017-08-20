@@ -86,3 +86,19 @@ input[type=range]:focus::-ms-fill-lower {
 input[type=range]:focus::-ms-fill-upper {
   background: #367ebd;
 }
+input[disabled]::-webkit-slider-runnable-track {
+  background: #aaaaaa;
+  opacity: 0.4;
+}
+input[disabled]::-ms-slider-runnable-track {
+  background: #aaaaaa;
+  opacity: 0.4;
+}
+input[disabled]::-webkit-slider-thumb {
+  background: #aaaaaa;
+  opacity: 0.4;
+}
+input[disabled]::-ms-thumb {
+  background: #aaaaaa;
+  opacity: 0.4;
+}
