@@ -21,7 +21,7 @@
 		    max="[[ max ]]"
 		    step="[[ step ]]"
 		    disabled$="[[ disabled ]]"
-		    value="{{ value::input }}">
+            on-change="_valueChanged">
     </template>
 
     <script>
@@ -41,9 +41,13 @@
             		type: Number,
             	},
             	value: {
+                    type: Number,
             		notify: true,
-            	}
-            }
+            	},
+            },
+            _valueChanged(event) {
+                this.value = parseFloat(event.target.value);
+            },
         })
     </script>
 

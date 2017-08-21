@@ -150,14 +150,14 @@
 				// add point for my new decision
 				let dataset = this.graph_obj.series[0];
 				this._lastElem(dataset.data).remove();
-				dataset.addPoint([xval, this.myDecision], false, false);
-				dataset.addPoint([xval, this.myDecision], true, false);
+				dataset.addPoint([xval, this.myDecision]);
+				dataset.addPoint([xval, this.myDecision]);
 
 				// add point for others' new decision
 				dataset = this.graph_obj.series[1];
 				this._lastElem(dataset.data).remove();
-				dataset.addPoint([xval, this.otherDecision], false, false);
-				dataset.addPoint([xval, this.otherDecision], true, false);
+				dataset.addPoint([xval, this.otherDecision]);
+				dataset.addPoint([xval, this.otherDecision]);
 			}
 		})
 	</script>
