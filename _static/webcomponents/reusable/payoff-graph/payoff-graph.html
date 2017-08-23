@@ -42,6 +42,12 @@
 					observer: '_addTransitionBand'
                 },
 				periodLength: Number,
+				payoffMin: {
+					type: Number,
+				},
+				payoffMax: {
+					type: Number,
+				},
 			},
 			ready() {
 				this.async(this._initHighchart.bind(this), 1);
@@ -61,9 +67,11 @@
 					(a, b) => a + b, 0) / 4;
 				const otherInitialPayoff = this.otherPayoffs.reduce(
 					(a, b) => a + b, 0) / 4;
-				// finds max of all payoffs
-				const maxPayoff = Math.max(
-					...this.myPayoffs.concat(this.otherPayoffs));
+
+				const minPayoff = this.payoffMin === undefined ?
+					Math.min(... this.myPayoffs.concat(this.otherPayoffs)) : this.payoffMin;
+				const maxPayoff = this.payoffMax === undefined ?
+					Math.max(... this.myPayoffs.concat(this.otherPayoffs)) : this.payoffMax;
 
 				// call highcharts setup function
 				this.graph_obj = Highcharts.chart({
@@ -87,10 +95,10 @@
 					},
 					yAxis: {
 						title: { text: 'Player Payoff' },
-						min: 0,
+						min: minPayoff,
 						max: maxPayoff,
 						endOnTick: false,
-						tickInterval: maxPayoff / 4
+						tickInterval: (maxPayoff-minPayoff) / 4
 					},
 					plotOptions: {
 						line: {marker: {enabled: false}},
