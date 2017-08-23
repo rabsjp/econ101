@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Leeps-Lab/oTree.svg?branch=master)](https://travis-ci.org/Leeps-Lab/oTree)
+
 # oTree 1.0
 
 oTree is a framework based on Python and Django that lets you build:
