@@ -208,8 +208,9 @@
 					(this.periodLength * 1000))
 				this.graph_obj.xAxis[0].addPlotBand({
 					value: xval,
-					width: 1,
-					color: 'red'
+					width: 2,
+					color: 'red',
+					zIndex: 100,
 				});
 
 				this._updateDataset();

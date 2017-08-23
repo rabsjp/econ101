@@ -45,6 +45,7 @@
 
             otree-thermometer {
                 margin-bottom: 20px;
+                height: 193px;
             }
 
             strategy-graph {
@@ -109,23 +110,26 @@
             </div>
 
             <div id="graphs-column" class="layout horizontal">
-                <otree-thermometer
-                    color="rainbow"
-                    class="self-end">
-                </otree-thermometer>
                 <div id="graphs">
                     <strategy-graph
                         my-decision="[[ myDecision ]]"
                         other-decision="[[ otherDecision ]]"
                         period-length="[[ periodLength ]]"
                     ></strategy-graph>
-                    <payoff-graph
-                        my-decision="[[ myDecision ]]"
-                        other-decision="[[ otherDecision ]]"
-                        my-payoffs="[[ myPayoffs ]]"
-                        other-payoffs="[[ otherPayoffs ]]"
-                        period-length="[[ periodLength ]]"
-                    ></payoff-graph>
+
+                    <div class="layout horizontal">
+                        <otree-thermometer
+                            color="rainbow"
+                            class="self-end">
+                        </otree-thermometer>
+                        <payoff-graph
+                            my-decision="[[ myDecision ]]"
+                            other-decision="[[ otherDecision ]]"
+                            my-payoffs="[[ myPayoffs ]]"
+                            other-payoffs="[[ otherPayoffs ]]"
+                            period-length="[[ periodLength ]]"
+                        ></payoff-graph>
+                    </div>
                 </div>
             </div>
         </div>
