@@ -81,6 +81,7 @@
 						enabled: false,
 						width: this.offsetWidth,
 						height: this.offsetHeight,
+
 					},
 					title: { text: 'Payoff vs. Time Chart' },
 					exporting: { enabled: false },
@@ -91,10 +92,21 @@
 						min: 0,
 						max: 1,
 						labels: { enabled: false },
-						plotBands: [],
+						plotLines: [{
+							value: 0,
+							width: 1,
+							color: '#ccd6eb',
+							zIndex: 100,
+						},
+						{
+							value: 1,
+							width: 1,
+							color: '#ccd6eb',
+							zIndex: 100,
+						}],
 					},
 					yAxis: {
-						title: { text: 'Player Payoff' },
+						title: { text: 'Payoff' },
 						min: minPayoff,
 						max: maxPayoff,
 						endOnTick: false,
@@ -128,7 +140,7 @@
 							step: "left"
 						},
 						{
-							name: 'Opponent\'s Payoff',
+							name: 'Other Payoff',
 							type: "line",
 							data: [[0, otherInitialPayoff], [0, otherInitialPayoff]],
 							step: "left"

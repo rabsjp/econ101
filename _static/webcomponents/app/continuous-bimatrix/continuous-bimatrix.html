@@ -110,18 +110,17 @@
             </div>
 
             <div id="graphs-column" class="layout horizontal">
-                <div id="graphs">
-                    <strategy-graph
-                        my-decision="[[ myDecision ]]"
-                        other-decision="[[ otherDecision ]]"
-                        period-length="[[ periodLength ]]"
-                    ></strategy-graph>
-
-                    <div class="layout horizontal">
-                        <otree-thermometer
-                            color="rainbow"
-                            class="self-end">
-                        </otree-thermometer>
+                <div class="layout horizontal end">
+                    <otree-thermometer
+                        color="rainbow"
+                        class="self-end">
+                    </otree-thermometer>
+                    <div class="layout vertical">
+                        <strategy-graph
+                            my-decision="[[ myDecision ]]"
+                            other-decision="[[ otherDecision ]]"
+                            period-length="[[ periodLength ]]"
+                        ></strategy-graph>
                         <payoff-graph
                             my-decision="[[ myDecision ]]"
                             other-decision="[[ otherDecision ]]"
