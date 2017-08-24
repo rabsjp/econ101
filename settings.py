@@ -164,7 +164,6 @@ SESSION_CONFIGS = [
         'display_name': "Continuous Bimatrix Game",
         'num_demo_participants': 2,
         'app_sequence': ['continuous_bimatrix', 'payment_info'],
-        'async_bots': True,
     },
     #{
     #    'name': 'discrete_time_example',
