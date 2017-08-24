@@ -21,7 +21,7 @@ payoff).
 class Constants(BaseConstants):
     name_in_url = 'continuous_bimatrix'
     players_per_group = 2
-    num_rounds = 10
+    num_rounds = 12
 
     #payoff grids
     payoff_grids = [
@@ -57,13 +57,13 @@ class Subsession(BaseSubsession):
         roundno = self.round_number
 
         if roundno in [1, 2, 3]:
-            return Constants.payoff_grids[0]
-        elif roundno in [4, 5, 6]:
-            return Constants.payoff_grids[1]
-        elif roundno in [7, 8]:
             return Constants.payoff_grids[2]
-        elif roundno in [9, 10]:
+        elif roundno in [4, 5, 6]:
             return Constants.payoff_grids[3]
+        elif roundno in [7, 8, 9]:
+            return Constants.payoff_grids[0]
+        elif roundno in [10, 11, 12]:
+            return Constants.payoff_grids[1]
         else:
             print("invalid round number!")
 
