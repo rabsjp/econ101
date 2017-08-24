@@ -108,6 +108,13 @@
                 this._setupPayoffGraph();
                 this._setupStrategyGraph();
                 this.draws = [];
+<<<<<<< Updated upstream
+=======
+                this.AverageA = [-1];
+                this.AverageB = [-1];
+                document.getElementById("myProgress").style.visibility = "hidden";
+                pausedDecision = 0.5;
+>>>>>>> Stashed changes
 
             },
             _onTick(event) {
@@ -359,6 +366,51 @@
                 dataset.addPoint([-1, myAveragePayoff]);
                 dataset.addPoint([6, myAveragePayoff]);
 
+<<<<<<< Updated upstream
+=======
+                if(this.pausedDecision == 1){
+                    if(this.AverageA[0]==-1){
+                        this.AverageA.shift();
+                    }
+                    this.AverageA.push(myAveragePayoff);
+                }
+                if(this.pausedDecision == 0){
+                    if(this.AverageB[0]==-1){
+                        this.AverageB.shift();
+                    }
+                    this.AverageB.push(myAveragePayoff);
+                }
+
+                // update average graphs
+                var myAverageA = (this.AverageA.reduce(function(a, b) { return a + b; }, 0))/this.AverageA.length;
+                dataset = this.averageAGraphObj.series[0];
+                dataset.addPoint([-1, myAverageA]);
+                dataset.addPoint([2, myAverageA]);
+
+                dataset = this.averageAGraphObj.series[1];
+                dataset.addPoint([-1, myPredictedPayoff[0]]);
+                dataset.addPoint([2, myPredictedPayoff[0]]);
+
+                dataset = this.averageAGraphObj.series[2];
+                dataset.addPoint([-1, myPredictedPayoff[1]]);
+                dataset.addPoint([2, myPredictedPayoff[1]]);
+
+                var myAverageB = (this.AverageB.reduce(function(a, b) { return a + b; }, 0))/this.AverageB.length;
+                dataset = this.averageBGraphObj.series[0];
+                dataset.addPoint([-1, myAverageB]);
+                dataset.addPoint([2, myAverageB]);
+
+                dataset = this.averageBGraphObj.series[1];
+                dataset.addPoint([-1, myPredictedPayoff[2]]);
+                dataset.addPoint([2, myPredictedPayoff[2]]);
+
+                dataset = this.averageBGraphObj.series[2];
+                dataset.addPoint([-1, myPredictedPayoff[3]]);
+                dataset.addPoint([2, myPredictedPayoff[3]]);
+
+console.log("A="+ myAverageA, " B="+myAverageB)
+
+>>>>>>> Stashed changes
                 // mark predictions
                 dataset = this.payoffGraphObj.series[2];
                 if (this.myDecision == 1) {
