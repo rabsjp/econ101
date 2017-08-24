@@ -7,7 +7,6 @@ from datetime import timedelta
 
 
 class Introduction(Page):
-    timeout_seconds = 100
 
     def is_displayed(self):
         return self.round_number == 1
