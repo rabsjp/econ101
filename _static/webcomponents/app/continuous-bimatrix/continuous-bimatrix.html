@@ -144,7 +144,7 @@
                 payoffMatrix: Array,
                 myDecision: {
                     type: Number,
-                    value: 0.5
+                    value: 0.5,
                 },
                 otherDecision: {
                     type: Number
@@ -190,7 +190,7 @@
                     const flowPayoff = otherDecision * row1 + (1 - otherDecision) * row2;
                     return flowPayoff;
                 };
-            }
+            },
         })
     </script>
 </dom-module>
