@@ -18,11 +18,11 @@ class PlayerBot(Bot):
 
 
 def test_get_payoff():
-	'''
-		Test the get_payoff function for the Player model.
+    '''
+        Test the get_payoff function for the Player model.
 
-		Initializes a session, participants, etc, then creates mock events.
-	'''
+        Initializes a session, participants, etc, then creates mock events.
+    '''
     from otree_redwood.models import Event
     from otree.models.participant import Participant
     from otree.models.session import Session
