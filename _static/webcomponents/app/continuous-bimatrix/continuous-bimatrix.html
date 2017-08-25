@@ -83,9 +83,9 @@
                     <bimatrix-heatmap
                         id="counterpart-heatmap"
                         size="120"
-                        my-decision="[[ otherDecision ]]"
-                        other-decision="[[ myDecision ]]"
-                        payoffs="[[ otherPayoffsTranspose ]]"
+                        my-decision="[[ myDecision ]]"
+                        other-decision="[[ otherDecision ]]"
+                        payoffs="[[ otherPayoffs ]]"
                         color="[[ otherColor ]]">
                     </bimatrix-heatmap>
                     <div id="your-heatmap" class="layout horizontal center">
@@ -165,6 +165,14 @@
                 }
                 this.otherPayoffIndex = 1 - this.payoffIndex;
 
+                // transpose payoff and probability matrices if player controls vertical line
+                if (this.$.constants.idInGroup == 2) {
+                    // first payoff matrix
+                    let temp = this.payoffMatrix[1];
+                    this.payoffMatrix[1] = this.payoffMatrix[2];
+                    this.payoffMatrix[2] = temp;
+                }
+
                 // color schemes for each player's heatmaps
                 this.myColor = 'rainbow';
                 this.otherColor = 'red';
@@ -174,13 +182,6 @@
                     val => parseInt(val[this.payoffIndex]));
                 this.otherPayoffs = this.payoffMatrix.map(
                     val => parseInt(val[this.otherPayoffIndex]));
-
-                // take inverse of other player's payoffs
-                const otherPayoffsTranspose = this.otherPayoffs.slice();
-                const tmp = otherPayoffsTranspose[1];
-                otherPayoffsTranspose[1] = otherPayoffsTranspose[2];
-                otherPayoffsTranspose[2] = tmp;
-                this.otherPayoffsTranspose = otherPayoffsTranspose;
 
                 this.$.bot.payoffFunction = (myDecision, otherDecision) => {
                     const m = this.myPayoffs;
