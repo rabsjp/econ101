@@ -18,7 +18,11 @@ class PlayerBot(Bot):
 
 
 def test_get_payoff():
+	'''
+		Test the get_payoff function for the Player model.
 
+		Initializes a session, participants, etc, then creates mock events.
+	'''
     from otree_redwood.models import Event
     from otree.models.participant import Participant
     from otree.models.session import Session
@@ -45,7 +49,7 @@ def test_get_payoff():
     decisions.append(MockEvent('decisions', 0.4, p1, start+timezone.timedelta(seconds=18)))
     decisions.append(MockEvent('decisions', 0.7, p1, start+timezone.timedelta(seconds=20)))
 
-    period_end = MockEvent('state', 'period_end', p1, start+timezone.timedelta(seconds=models.Constants.period_length))
+    period_end = MockEvent('state', 'period_end', p1, start+timezone.timedelta(seconds=30))
 
     payoff_grid = [
         [ 100, 100 ], [   0, 800 ],
@@ -56,6 +60,8 @@ def test_get_payoff():
     player1 = models.Player.objects.create(session=sess, subsession=subsession, participant=p1, id_in_group=1)
     player2 = models.Player.objects.create(session=sess, subsession=subsession, participant=p2, id_in_group=2)
     group = models.Group.objects.create(session=sess, subsession=subsession)
+    # player_set isn't part of the group model, not actually sure how it's assigned in oTree
+    # but it's required to tell row players and column players apart.
     group.player_set = { player1, player2 }
     player1.group, player2.group = group, group
 
@@ -64,5 +70,5 @@ def test_get_payoff():
 
     assert 0 <= payoff1 and payoff1 <= 800
     assert 0 <= payoff2 and payoff2 <= 800
-    assert abs(payoff1 - 306) < 1
-    assert abs(payoff2 - 86) < 1
+    assert abs(payoff1 - 296) < 1
+    assert abs(payoff2 - 134) < 1
