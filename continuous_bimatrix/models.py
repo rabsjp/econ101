@@ -83,8 +83,8 @@ class Player(BasePlayer):
         return self.get_others_in_group()[0]
 
     def set_payoff(self):
-        group_decisions = list(Event.objects.filter(
-                channel='group_decisions',
+        decisions = list(Event.objects.filter(
+                channel='decisions',
                 content_type=ContentType.objects.get_for_model(self.group),
                 group_pk=self.group.pk).order_by("timestamp"))
 
@@ -102,38 +102,44 @@ class Player(BasePlayer):
         except Event.DoesNotExist:
             return float('nan')
 
+        payoff_grid = self.subsession.get_cur_payoffs()
+
+        self.payoff = self.get_payoff(period_start, period_end, decisions, payoff_grid)
+        
+
+    def get_payoff(self, period_start, period_end, decisions, payoff_grid):
         period_duration = period_end.timestamp - period_start.timestamp
 
         payoff = 0
 
-        payoff_grid = self.subsession.get_cur_payoffs()
-
         if (self.id_in_group == 1):
-            A_A_payoff = payoff_grid[0][0]
-            A_B_payoff = payoff_grid[1][0]
-            B_A_payoff = payoff_grid[2][0]
-            B_B_payoff = payoff_grid[3][0]
+            A_a_payoff = payoff_grid[0][0]
+            A_b_payoff = payoff_grid[1][0]
+            B_a_payoff = payoff_grid[2][0]
+            B_b_payoff = payoff_grid[3][0]
+            row_player = self.participant
         else:
-            A_A_payoff = payoff_grid[0][1]
-            A_B_payoff = payoff_grid[1][1]
-            B_A_payoff = payoff_grid[2][1]
-            B_B_payoff = payoff_grid[3][1]
+            A_a_payoff = payoff_grid[0][1]
+            A_b_payoff = payoff_grid[1][1]
+            B_a_payoff = payoff_grid[2][1]
+            B_b_payoff = payoff_grid[3][1]
+            row_player = self.get_others_in_group()[0].participant
 
-        my_state = None
-        other_state = None
-        for i, d in enumerate(group_decisions):
-            my_state = d.value[self.participant.code]
-            other_state = d.value[self.get_others_in_group()[0].participant.code]
+        q1, q2 = self.group.initial_decision(), self.group.initial_decision()
+        for i, d in enumerate(decisions):
+            if d.participant == row_player:
+                q1 = d.value
+            else:
+                q2 = d.value
+            flow_payoff = ((A_a_payoff * q1 * q2) +
+                          (A_b_payoff * q1 * (1 - q2)) +
+                          (B_a_payoff * (1 - q1) * q2) +
+                          (B_b_payoff * (1 - q1) * (1 - q2)))
 
-            cur_payoff = ((A_A_payoff * my_state * other_state) +
-                          (A_B_payoff * my_state * (1 - other_state)) +
-                          (B_A_payoff * (1 - my_state) * other_state) +
-                          (B_B_payoff * (1 - my_state) * (1 - other_state))) / period_duration.total_seconds()
-
-            if i + 1 < len(group_decisions):
-                next_change_time = group_decisions[i + 1].timestamp
+            if i + 1 < len(decisions):
+                next_change_time = decisions[i + 1].timestamp
             else:
                 next_change_time = period_end.timestamp
-            payoff += (next_change_time - d.timestamp).total_seconds() * cur_payoff
+            payoff += (next_change_time - d.timestamp).total_seconds() * flow_payoff
 
-        self.payoff = payoff
+        return payoff / period_duration.total_seconds()
