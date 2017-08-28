@@ -69,5 +69,5 @@ def test_get_payoff():
 
     assert 0 <= payoff1 and payoff1 <= 800
     assert 0 <= payoff2 and payoff2 <= 800
-    assert abs(payoff1 - 296) < 1
-    assert abs(payoff2 - 134) < 1
+    assert abs(payoff1 - 271) < 1
+    assert abs(payoff2 - 205) < 1
