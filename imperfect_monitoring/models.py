@@ -85,6 +85,9 @@ class Group(ContinuousDecisionGroup):
         emitter.start()
 
     def tick(self, current_interval, intervals):
+        # TODO: Integrate into the otree-redwood DiscreteEventEmitter API, because otherwise
+        # someone will forget this and get very confused when the tick functions use stale data.
+        self.refresh_from_db()
         msg = {}
         if self.state == 'results':
             msg = {
