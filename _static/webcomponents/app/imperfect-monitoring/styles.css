@@ -13,12 +13,12 @@
     align-self: center;
 }
 
-#payoffGraph {
+#currSubperiodGraph {
     border: 1px solid black;
     margin: 0 10px 0 0;
 }
 
-#strategyGraph {
+#historyGraph {
     border: 1px solid black;
 }
 

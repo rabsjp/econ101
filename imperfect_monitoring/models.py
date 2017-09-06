@@ -97,7 +97,7 @@ class Group(ContinuousDecisionGroup):
         elif self.state == 'pause':
             if self.t == 6:
                 msg = {
-                    'updateStrategy': True,
+                    'updateHistory': True,
                     'pauseProgress': 1/6.
                 }
             else:
