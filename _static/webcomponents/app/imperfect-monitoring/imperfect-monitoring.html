@@ -31,7 +31,11 @@
         </otree-channel>
 
         <div id="experimentContainer">
-            <progress id="myProgress" value="[[ pauseProgress ]]" hidden$="[[ hideProgress ]]"></progress>
+            <progress
+                id="myProgress"
+                value="[[ pauseProgress ]]"
+                hidden$="[[ hideProgress ]]">
+            </progress>
 
             <div class="graph-container">
                 <div id="currSubperiodGraph"></div>
@@ -96,6 +100,14 @@
                     type: Boolean,
                     value: true,
                 },
+                aColor: {
+                    type: String,
+                    value: 'rgba(0, 100, 0, 0.4)'
+                },
+                bColor: {
+                    type: String,
+                    value: 'rgba(255, 100, 0, 0.4)'
+                }
 			},
 			ready() {
                 // separate each player's payoffs into two separate arrays
@@ -109,10 +121,6 @@
             attached() {
                 this._setupCurrSubperiodGraph();
                 this._setupHistoryGraph();
-                this.draws = [];
-                this.AverageA = [-1];
-                this.AverageB = [-1];
-                this.pausedDecision = 0.5;
             },
             _onTick(event) {
                 let msg = event.detail.payload;
@@ -156,12 +164,14 @@
                     xAxis: {
                         min: 0,
                         max: 5,
-                        labels: { enabled: false }
+                        tickInterval: 1,
+                        labels: { enabled: true }
                     },
                     yAxis: {
                         title: { text: undefined },
-                        min: this.myPayoffs[1],
-                        max: this.myPayoffs[2],
+                        minPadding: 0.05,
+                        maxPadding: 0.05,
+                        endOnTick: false,
                         labels: { enabled: true },
                     },
                     plotOptions: {
@@ -188,52 +198,66 @@
                         }
                     },
                     series: [
-                        // subperiod payoff
                         {
-                            name: "Subperiod Payoff",
+                            name: "Realized Payoff",
                             type: "column",
-                            data: [],
+                            data: [
+                                [0, 100],
+                                [1, 50],
+                                [2, 75],
+                                [3, 0],
+                                [4, 100],
+                            ],
                             step: "left",
-                            pointWidth: 20
                         },
-                        // average payoff
                            {
                             name: "Average Payoff",
                             type: "line",
                             data: [],
                             step: "left"
                         },
-                        // predictions
                         {
-                            name: "Prediction 0",
+                            name: "Aa",
                             type: "line",
-                            color: 'rgba(0, 100, 0, 0.4)',
+                            color: this.aColor,
                             lineWidth: 10,
-                            data: [],
+                            data: [
+                                [0, this.payoffMatrix[0][oTree.idInGroup]],
+                                [5, this.payoffMatrix[0][oTree.idInGroup]]
+                            ],
                             step: "left"
                         },
                         {
-                            name: "Prediction 1",
+                            name: "Ab",
                             type: "line",
-                            color: 'rgba(0, 100, 0, 0.4)',
+                            color: this.aColor,
                             lineWidth: 10,
-                            data: [],
+                            data: [
+                                [0, this.payoffMatrix[1][oTree.idInGroup]],
+                                [5, this.payoffMatrix[1][oTree.idInGroup]]
+                            ],
                             step: "left"
                         },
                         {
-                            name: "Prediction 2",
+                            name: "Ba",
                             type: "line",
-                            color: 'rgba(255, 100, 0, 0.4)',
+                            color: this.bColor,
                             lineWidth: 10,
-                            data: [],
+                            data: [
+                                [0, this.payoffMatrix[2][oTree.idInGroup]],
+                                [5, this.payoffMatrix[2][oTree.idInGroup]]
+                            ],
                             step: "left"
                         },
                         {
-                            name: "Prediction 3",
+                            name: "Bb",
                             type: "line",
-                            color: 'rgba(255, 100, 0, 0.4)',
+                            color: this.bColor,
                             lineWidth: 10,
-                            data: [],
+                            data: [
+                                [0, this.payoffMatrix[3][oTree.idInGroup]],
+                                [5, this.payoffMatrix[3][oTree.idInGroup]]
+                            ],
                             step: "left"
                         },
                     ]
@@ -256,20 +280,24 @@
                     credits: { enabled: false },
                     xAxis: {
                         min: 0,
-                        max: 34,
-                        labels: { enabled: false },
+                        max: (10*12)-1,
+                        tickInterval: 5,
+                        labels: { enabled: true },
                         scrollbar: { enabled: true },
                         plotLines: [{
                             value: 0,
                             width: 0,
                             color: 'lightgrey',
-                        reversed: true
+                            reversed: true
                         }]
                     },
                     yAxis: {
                         title: { text: undefined },
-                        min: this.myPayoffs[1],
-                        max: this.myPayoffs[2],
+                        min: 0,
+                        max: this.myPayoffs[2]*1.05,
+                        minPadding: 0.05,
+                        maxPadding: 0.05,
+                        endOnTick: false,
                         labels: { enabled: true },
                     },
                     plotOptions: {
@@ -296,16 +324,12 @@
                         }
                     },
                     series: [
-                        // period payoff
                         {
-                            name: "Period Payoff",
+                            name: "Realized Payoff",
                             type: "column",
                             data: [],
                             step: "left",
-                            pointWidth: 16,
-                            pointPlacement: -0.5
                         },
-                        // subperiod average payoff
                         {
                             name: "Subperiod Average Payoff",
                             type: "line",
@@ -313,7 +337,7 @@
                             step: "left"
                         },
                         {
-                            name: "??",
+                            name: "Aa",
                             type: "line",
                             color: 'rgba(0, 100, 0, 0.4)',
                             lineWidth: 10,
@@ -321,7 +345,7 @@
                             step: "left"
                         },
                         {
-                            name: "??",
+                            name: "Ab",
                             type: "line",
                             color: 'rgba(0, 100, 0, 0.4)',
                             lineWidth: 10,
@@ -329,7 +353,7 @@
                             step: "left"
                         },
                         {
-                            name: "??",
+                            name: "Ba",
                             type: "line",
                             color: 'rgba(255, 100, 0, 0.4)',
                             lineWidth: 10,
@@ -337,7 +361,7 @@
                             step: "left"
                         },
                         {
-                            name: "??",
+                            name: "Bb",
                             type: "line",
                             color: 'rgba(255, 100, 0, 0.4)',
                             lineWidth: 10,
@@ -346,171 +370,14 @@
                         },
                     ]
                 });
+                this.realizedPayoffsHistory = this.historyGraph.series[0];
             },
             // updates current payoff value every 100 ms
             _updateCurrSubperiodGraph(realizedPayoff) {
                 this.hideProgress = true;
-
-                // if payoff is 0, change it to 1 for the sake of showing a bar on the graph
-                if (realizedPayoff == 0) {
-                    realizedPayoff = 1;
-                }
-                this.draws.push(realizedPayoff);
-
-                // add a bar per second
-                let dataset = this.currSubperiodGraph.series[0];
-                dataset.addPoint(realizedPayoff);
             },
             _updateHistoryGraph(pauseTime) {
                 this.hideProgress = false;
-
-                // calculate payoffs
-                let myPredictedPayoff = [
-                    (this.myPayoffs[0]*(1-this.mySignals[0]) + this.myPayoffs[1]*this.mySignals[0]),
-                    (this.myPayoffs[0]*(1-this.mySignals[1]) + this.myPayoffs[1]*this.mySignals[1]),
-                    (this.myPayoffs[2]*(1-this.mySignals[2]) + this.myPayoffs[3]*this.mySignals[2]),
-                    (this.myPayoffs[2]*(1-this.mySignals[3]) + this.myPayoffs[3]*this.mySignals[3])];
-
-                // calculate average
-                let myAveragePayoff = (this.draws.reduce(function(a, b) { return a + b; }, 0))/6;
-                let dataset = this.currSubperiodGraph.series[1];
-                dataset.addPoint([-1, myAveragePayoff]);
-                dataset.addPoint([6, myAveragePayoff]);
-
-                if(this.pausedDecision == 1){
-                    if(this.AverageA[0] == -1){
-                        this.AverageA.shift();
-                    }
-                    this.AverageA.push(myAveragePayoff);
-                }
-                if(this.pausedDecision == 0){
-                    if(this.AverageB[0] == -1){
-                        this.AverageB.shift();
-                    }
-                    this.AverageB.push(myAveragePayoff);
-                }
-
-                // update average graphs
-                let myAverageA = (this.AverageA.reduce(function(a, b) { return a + b; }, 0))/this.AverageA.length;
-                dataset = this.averageAGraphObj.series[0];
-                dataset.addPoint([-1, myAverageA]);
-                dataset.addPoint([2, myAverageA]);
-
-                dataset = this.averageAGraphObj.series[1];
-                dataset.addPoint([-1, myPredictedPayoff[0]]);
-                dataset.addPoint([2, myPredictedPayoff[0]]);
-
-                dataset = this.averageAGraphObj.series[2];
-                dataset.addPoint([-1, myPredictedPayoff[1]]);
-                dataset.addPoint([2, myPredictedPayoff[1]]);
-
-                let myAverageB = (this.AverageB.reduce(function(a, b) { return a + b; }, 0))/this.AverageB.length;
-                dataset = this.averageBGraphObj.series[0];
-                dataset.addPoint([-1, myAverageB]);
-                dataset.addPoint([2, myAverageB]);
-
-                dataset = this.averageBGraphObj.series[1];
-                dataset.addPoint([-1, myPredictedPayoff[2]]);
-                dataset.addPoint([2, myPredictedPayoff[2]]);
-
-                dataset = this.averageBGraphObj.series[2];
-                dataset.addPoint([-1, myPredictedPayoff[3]]);
-                dataset.addPoint([2, myPredictedPayoff[3]]);
-
-                console.log("A="+ myAverageA, " B="+myAverageB)
-
-                // mark predictions
-                dataset = this.currSubperiodGraph.series[2];
-                if (this.myDecision == 1) {
-                    dataset.addPoint([-1, myPredictedPayoff[0]]);
-                    dataset.addPoint([6, myPredictedPayoff[0]]);
-                }
-
-                dataset = this.currSubperiodGraph.series[3];
-                if (this.myDecision == 1) {
-                    dataset.addPoint([-1, myPredictedPayoff[1]]);
-                    dataset.addPoint([6, myPredictedPayoff[1]]);
-                }
-
-                dataset = this.currSubperiodGraph.series[4];
-                if (this.myDecision == 0) {
-                    dataset.addPoint([-1, myPredictedPayoff[2]]);
-                    dataset.addPoint([6, myPredictedPayoff[2]]);
-                }
-
-                dataset = this.currSubperiodGraph.series[5];
-                if (this.myDecision == 0) {
-                    dataset.addPoint([-1, myPredictedPayoff[3]]);
-                    dataset.addPoint([6, myPredictedPayoff[3]]);
-                }
-
-                 //add bars to the strategy graph
-                dataset = this.historyGraph.series[0];
-                while (this.draws.length != 0) {
-                    dataset.addPoint(this.draws.pop());
-                }
-
-                let xval = dataset.data.length;
-                console.log(xval);
-              
-                // add point for my average payoff
-                dataset = this.historyGraph.series[1];
-                dataset.addPoint([xval-6, myAveragePayoff]);
-                dataset.addPoint([xval, myAveragePayoff]);
-
-                dataset = this.historyGraph.series[2];
-                if (this.myDecision == 1) {
-                    dataset.addPoint([xval-6, myPredictedPayoff[0]]);
-                    dataset.addPoint([xval, myPredictedPayoff[0]]);
-                } else {
-                    dataset.addPoint([xval-6, null]);
-                    dataset.addPoint([xval, null]);
-                }
-
-                dataset = this.historyGraph.series[3];
-                if (this.myDecision == 1) {
-                    dataset.addPoint([xval-6, myPredictedPayoff[1]]);
-                    dataset.addPoint([xval, myPredictedPayoff[1]]);
-                } else {
-                    dataset.addPoint([xval-6, null]);
-                    dataset.addPoint([xval, null]);
-                }
-
-                dataset = this.historyGraph.series[4];
-                if (this.myDecision == 0) {
-                    dataset.addPoint([xval-6, myPredictedPayoff[2]]);
-                    dataset.addPoint([xval, myPredictedPayoff[2]]);
-                } else {
-                    dataset.addPoint([xval-6, null]);
-                    dataset.addPoint([xval, null]);
-                }
-
-                dataset = this.historyGraph.series[5];
-                if (this.myDecision == 0) {
-                    dataset.addPoint([xval-6, myPredictedPayoff[3]]);
-                    dataset.addPoint([xval, myPredictedPayoff[3]]);
-                } else {
-                    dataset.addPoint([xval-6, null]);
-                    dataset.addPoint([xval, null]);
-                }
-
-                // add a subperiod line and update scrollbar
-                this.historyGraph.xAxis[0].addPlotLine({
-                    value: xval,
-                    width: 6,
-                    color: 'lightgrey'
-                });
-                this.historyGraph.xAxis[0].update({
-                        reversed: true
-                });
-
-                if (xval > 35) {
-                    this.historyGraph.xAxis[0].update({
-                        min: xval-30,
-                        max: xval,
-                        reversed: true,
-                   });
-                }
             },
             _clearGraph() {
                 this.currSubperiodGraph.destroy();
