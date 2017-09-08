@@ -16,9 +16,53 @@
 
 	<template>
 
-		<link rel="stylesheet" href="styles.css">
         <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
         <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+        <style>
+            :host {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #progressAndGraphs {
+                display: flex;
+                flex-direction: column;
+                align-self: center;
+            }
+
+            #graphs {
+                display: flex;
+                flex-direction: row;
+                align-self: center;
+            }
+
+            #currSubperiodGraph {
+                border: 1px solid black;
+                margin: 0 10px 0 0;
+            }
+
+            #historyGraph {
+                border: 1px solid black;
+            }
+
+            #progress {
+                margin: 10px 0 10px 0;
+                width: 200px;
+                height: 30px;
+                background: lightgrey;
+                align-self: flex-end;
+            }
+
+            #progress[hidden] {
+                display: inline-block !important;
+                visibility: hidden;
+            }
+
+            #decision {
+                margin-top: 10px;
+                align-self: center;
+            } 
+        </style>
 	
         <otree-period></otree-period>
         <otree-continuous-decision
@@ -30,43 +74,39 @@
             on-event="_onTick">
         </otree-channel>
 
-        <div id="experimentContainer">
+        <div id="progressAndGraphs">
             <progress
-                id="myProgress"
+                id="progress"
                 value="[[ pauseProgress ]]"
                 hidden$="[[ hideProgress ]]">
             </progress>
-
-            <div class="graph-container">
+            <div id="graphs">
                 <div id="currSubperiodGraph"></div>
                 <div id="historyGraph"></div>
             </div>
+        </div>
 
-            <div id="myDecisionContainer">
-                <!--
-                buttons for choosing strategy.
-                -->
-                <button
-                    id="buttonA" 
-    				name="decision"
-    				on-tap="_setMyDecision"
-    				value=1
-                    type="button"
-                    data-toggle="button"
-    				class$="btn btn-success btn-large [[ _buttonActive(myDecision, 1) ]]">
-    				Contribute
-    			</button>
-                <button
-                    id="buttonB"
-    				name="decision"
-    				on-tap="_setMyDecision" 
-    				value=0
-                    type="button"
-                    data-toggle="button"
-    				class$="btn btn-warning btn-large [[ _buttonActive(myDecision, 0) ]]">
-    				Don't Contribute
-    			</button>
-            </div>    
+        <div id="decision">
+            <button
+                id="buttonA" 
+				name="decision"
+				on-tap="_setMyDecision"
+				value=1
+                type="button"
+                data-toggle="button"
+				class$="btn btn-success btn-large [[ _buttonActive(myDecision, 1) ]]">
+				Contribute
+			</button>
+            <button
+                id="buttonB"
+				name="decision"
+				on-tap="_setMyDecision" 
+				value=0
+                type="button"
+                data-toggle="button"
+				class$="btn btn-warning btn-large [[ _buttonActive(myDecision, 0) ]]">
+				Don't Contribute
+			</button>
         </div>
     
 	</template>
@@ -79,26 +119,12 @@
                 payoffMatrix: Array,
                 // 2x2 array of probability based on player's decision.
                 probabilityMatrix: Array,
-                // index describing which entry in payoff matrix is to be used by this player
-                playerIndex: Number,
-                // boolean to choose whether or not to play against a human or robot. 0 is for robot, 1 is for human.
-                alpha: Number,
                 // synced by the otree-continuous-decision component
                 myDecision: Number,
-                // probablility that game continues in any period-- which... I don't really understand what that means
-                delta: Number,
-                // deltat in ms
-                periodLength: Number,
-                // a parameter for controlling the y-axis in basically all the graphs
-                axis: Number,
-                // numer of periods over which the subject's action is held fixed
-                tau: Number,
-                // N milliseconds in the pause between every tau-window
-                pauseTime: Number,
                 // True if the progress bar should be hidden.
                 hideProgress: {
                     type: Boolean,
-                    value: true,
+                    value: false,
                 },
                 aColor: {
                     type: String,
@@ -107,16 +133,27 @@
                 bColor: {
                     type: String,
                     value: 'rgba(255, 100, 0, 0.4)'
-                }
+                },
+                subperiodLength: {
+                    type: Number,
+                },
+                numSubperiods: {
+                    type: Number,
+                },
+                initialDecision: {
+                    type: Number,
+                },
 			},
 			ready() {
                 // separate each player's payoffs into two separate arrays
                 this.myPayoffs = this.payoffMatrix.map(function (current_val) {
-                    return parseInt(current_val[this.playerIndex]);
+                    return parseInt(current_val[oTree.idInGroup-1]);
                 }, this);
+                this.maxPayoff = Math.max.apply(null, this.myPayoffs);
                 this.mySignals = this.probabilityMatrix.map(function (current_val) {
-                    return parseFloat(current_val[this.playerIndex]);
+                    return parseFloat(current_val[oTree.idInGroup-1]);
                 }, this);
+                this.myDecision = this.initialDecision;
 			},
             attached() {
                 this._setupCurrSubperiodGraph();
@@ -124,18 +161,83 @@
             },
             _onTick(event) {
                 let msg = event.detail.payload;
+                if (msg.hasOwnProperty('fixedDecisions')) {
+                    this.fixedDecision = msg.fixedDecisions[oTree.participantCode];
+                }
                 if (msg.realizedPayoffs) {
-                    this._updateCurrSubperiodGraph(msg.realizedPayoffs[oTree.participantCode]);
+                    // Add realized payoffs to the current subperiod graph.
+                    this._addRealizedPayoff(
+                        msg.realizedPayoffs[oTree.participantCode],
+                        this.currSubperiodGraph);
                 }
-                if (msg.updateHistory) {
-                    this._updateHistoryGraph();
+                if (msg.showAverage) {
+                    const subperiodRealizedPayoffs = this.currSubperiodGraph.series[0].data;
+                    let totalPayoff = 0;
+                    for (let i = 0; i < subperiodRealizedPayoffs.length; i++) {
+                        totalPayoff += subperiodRealizedPayoffs[i].y;
+                    }
+                    const averagePayoff = totalPayoff / subperiodRealizedPayoffs.length;
+                    for (let i = 0; i < subperiodRealizedPayoffs.length; i++) {
+                        this.currSubperiodGraph.series[1].addPoint(averagePayoff);
+                    }
                 }
-                if (msg.clearGraph) {
-                    this._clearGraph();
+                if (msg.showPayoffBars) {
+                    let a, b, color;
+                    if (this.fixedDecision) {
+                        a = this.myPayoffs[0];
+                        b = this.myPayoffs[1];
+                        color = this.aColor;
+                    } else {
+                        a = this.myPayoffs[2];
+                        b = this.myPayoffs[3];
+                        color = this.bColor;
+                    }
+                    this.currSubperiodGraph.addSeries({
+                        type: "line",
+                        color: color,
+                        lineWidth: 10,
+                        data: [[0, a], [this.subperiodLength-1, a]],
+                    });
+                    this.currSubperiodGraph.addSeries({
+                        type: "line",
+                        color: color,
+                        lineWidth: 10,
+                        data: [[0, b], [this.subperiodLength-1, b]],
+                    });
+                }
+                if (msg.clearCurrentSubperiod) {
+                    const subperiodStart = this.historyGraph.series[0].data.length;
+                    // Append the current subperiod graph to the history graph.
+                    for (let i = 0; i < 2; i++) {
+                        for (let j = 0; j < this.currSubperiodGraph.series[i].data.length; j++) {
+                            this.historyGraph.series[i].addPoint(
+                                this.currSubperiodGraph.series[i].data[j].y);
+                        }
+                    }
+                    this.currSubperiodGraph.series[0].setData([]);
+                    this.currSubperiodGraph.series[1].setData([]);
+                    // Removing the series messes with the indexing.
+                    for (let i = 0; i < 2; i++) {
+                        const series = this.currSubperiodGraph.series[2];
+                        const color = series.color;
+                        const data = [];
+                        for (let j = 0; j < series.data.length; j++) {
+                            data.push([subperiodStart + series.data[j].x, series.data[j].y]);
+                        }
+                        series.remove();
+                        this.historyGraph.addSeries({
+                            type: "line",
+                            color: color,
+                            lineWidth: 10,
+                            data: data,
+                        });
+                    }
                 }
                 if (msg.hasOwnProperty('pauseProgress')) {
                     this.hideProgress = false;
                     this.pauseProgress = msg.pauseProgress;
+                } else {
+                    this.hideProgress = true;
                 }
             },
 			_equals(d, decision) {
@@ -159,16 +261,18 @@
                     title: { text: null },
                     exporting: { enabled: false },
                     tooltip: { enabled: false },
-                    legend: { enabled: true },
+                    legend: { enabled: false },
                     credits: { enabled: false },
                     xAxis: {
-                        min: 0,
-                        max: 5,
+                        min: -0.5,
+                        max: this.subperiodLength-0.5,
                         tickInterval: 1,
-                        labels: { enabled: true }
+                        labels: { enabled: false }
                     },
                     yAxis: {
                         title: { text: undefined },
+                        min: 0,
+                        max: this.maxPayoff*1.05,
                         minPadding: 0.05,
                         maxPadding: 0.05,
                         endOnTick: false,
@@ -201,63 +305,13 @@
                         {
                             name: "Realized Payoff",
                             type: "column",
-                            data: [
-                                [0, 100],
-                                [1, 50],
-                                [2, 75],
-                                [3, 0],
-                                [4, 100],
-                            ],
+                            data: [],
                             step: "left",
                         },
                            {
                             name: "Average Payoff",
                             type: "line",
                             data: [],
-                            step: "left"
-                        },
-                        {
-                            name: "Aa",
-                            type: "line",
-                            color: this.aColor,
-                            lineWidth: 10,
-                            data: [
-                                [0, this.payoffMatrix[0][oTree.idInGroup]],
-                                [5, this.payoffMatrix[0][oTree.idInGroup]]
-                            ],
-                            step: "left"
-                        },
-                        {
-                            name: "Ab",
-                            type: "line",
-                            color: this.aColor,
-                            lineWidth: 10,
-                            data: [
-                                [0, this.payoffMatrix[1][oTree.idInGroup]],
-                                [5, this.payoffMatrix[1][oTree.idInGroup]]
-                            ],
-                            step: "left"
-                        },
-                        {
-                            name: "Ba",
-                            type: "line",
-                            color: this.bColor,
-                            lineWidth: 10,
-                            data: [
-                                [0, this.payoffMatrix[2][oTree.idInGroup]],
-                                [5, this.payoffMatrix[2][oTree.idInGroup]]
-                            ],
-                            step: "left"
-                        },
-                        {
-                            name: "Bb",
-                            type: "line",
-                            color: this.bColor,
-                            lineWidth: 10,
-                            data: [
-                                [0, this.payoffMatrix[3][oTree.idInGroup]],
-                                [5, this.payoffMatrix[3][oTree.idInGroup]]
-                            ],
                             step: "left"
                         },
                     ]
@@ -276,13 +330,13 @@
                     title: { text: null },
                     exporting: { enabled: false },
                     tooltip: { enabled: false },
-                    legend: { enabled: true},
+                    legend: { enabled: false },
                     credits: { enabled: false },
                     xAxis: {
-                        min: 0,
-                        max: (10*12)-1,
-                        tickInterval: 5,
-                        labels: { enabled: true },
+                        min: -0.5,
+                        max: (this.numSubperiods*this.subperiodLength)-0.5,
+                        tickInterval: this.subperiodLength-1,
+                        labels: { enabled: false },
                         scrollbar: { enabled: true },
                         plotLines: [{
                             value: 0,
@@ -294,19 +348,15 @@
                     yAxis: {
                         title: { text: undefined },
                         min: 0,
-                        max: this.myPayoffs[2]*1.05,
+                        max: this.maxPayoff*1.05,
                         minPadding: 0.05,
                         maxPadding: 0.05,
                         endOnTick: false,
                         labels: { enabled: true },
                     },
                     plotOptions: {
-                        column: {
-                        },
                         line: {marker: {enabled: false}},
                         series: {
-                            borderWidth: 0,
-                            pointPadding: 0,
                             states: {
                                 hover: {
                                     enabled: false,
@@ -328,7 +378,8 @@
                             name: "Realized Payoff",
                             type: "column",
                             data: [],
-                            step: "left",
+                            pointPadding: 0.01,
+                            pointRange: 1.5,
                         },
                         {
                             name: "Subperiod Average Payoff",
@@ -336,52 +387,23 @@
                             data: [],
                             step: "left"
                         },
-                        {
-                            name: "Aa",
-                            type: "line",
-                            color: 'rgba(0, 100, 0, 0.4)',
-                            lineWidth: 10,
-                            data: [],
-                            step: "left"
-                        },
-                        {
-                            name: "Ab",
-                            type: "line",
-                            color: 'rgba(0, 100, 0, 0.4)',
-                            lineWidth: 10,
-                            data: [],
-                            step: "left"
-                        },
-                        {
-                            name: "Ba",
-                            type: "line",
-                            color: 'rgba(255, 100, 0, 0.4)',
-                            lineWidth: 10,
-                            data: [],
-                            step: "left"
-                        },
-                        {
-                            name: "Bb",
-                            type: "line",
-                            color: 'rgba(255, 100, 0, 0.4)',
-                            lineWidth: 10,
-                            data: [],
-                            step: "left"
-                        },
                     ]
                 });
-                this.realizedPayoffsHistory = this.historyGraph.series[0];
             },
-            // updates current payoff value every 100 ms
-            _updateCurrSubperiodGraph(realizedPayoff) {
-                this.hideProgress = true;
-            },
-            _updateHistoryGraph(pauseTime) {
-                this.hideProgress = false;
-            },
-            _clearGraph() {
-                this.currSubperiodGraph.destroy();
-                this._setupCurrSubperiodGraph();
+            _addRealizedPayoff(realizedPayoff, graph) {
+                if (realizedPayoff == 0) {
+                    realizedPayoff = 1;
+                }
+                const data = graph.series[0].data;
+                if (data.length == 0) {
+                    graph.series[0].addPoint([data.length, realizedPayoff]);
+                    graph.series[0].addPoint([data.length, undefined]);
+                } else if (data.length === 2 && data[1].y === undefined) {
+                    data[1].y = realizedPayoff;
+                    graph.series[0].setData(data);
+                } else {
+                    graph.series[0].addPoint([data.length, realizedPayoff]);
+                }
             },
             _buttonActive(myDecision, buttonIndex) {
                 return myDecision == buttonIndex ? 'active' : '';

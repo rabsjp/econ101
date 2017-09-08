@@ -49,7 +49,11 @@ class Constants(BaseConstants):
     # Total subperiods
     num_subperiods = 10
     # Ticks per subperiod
-    subperiod_length = 12
+    subperiod_length = 6
+    # Rest time
+    rest_length = 6
+    # Seconds per tick
+    seconds_per_tick = 1
 
 
 class Subsession(BaseSubsession):
@@ -67,7 +71,10 @@ class Group(ContinuousDecisionGroup):
         return 0
 
     def period_length(self):
-        return Constants.num_subperiods * Constants.subperiod_length
+        return (
+            Constants.num_subperiods * 
+            ((Constants.subperiod_length + Constants.rest_length) * Constants.seconds_per_tick)
+        )
 
     def when_all_players_ready(self):
         super().when_all_players_ready()
@@ -80,7 +87,8 @@ class Group(ContinuousDecisionGroup):
         self.save()
         self.send('initialDecisions', self.fixed_group_decisions)
 
-        emitter = DiscreteEventEmitter(.25, self.period_length(), self, self.tick)
+        emitter = DiscreteEventEmitter(
+            Constants.seconds_per_tick, self.period_length(), self, self.tick)
         emitter.start()
 
     def tick(self, current_interval, intervals):
@@ -91,32 +99,30 @@ class Group(ContinuousDecisionGroup):
         if self.state == 'results':
             msg = {
                 'realizedPayoffs': self.realized_payoffs(),
-                'fixedDecisions' : self.group_decisions
+                # TODO: We don't really want to send this to the subjects, but we do want it saved
+                # in the event - do we need server-private event fields?
+                'fixedDecisions' : self.fixed_group_decisions
             }
+            self.t += 1
+            if self.t == Constants.subperiod_length:
+                msg['showAverage'] = True
+                msg['showPayoffBars'] = True
+                self.state = 'pause'
+                self.t = 0
         elif self.state == 'pause':
-            if self.t == 6:
-                msg = {
-                    'updateHistory': True,
-                    'pauseProgress': 1/6.
-                }
-            else:
-                msg = {
-                    'pauseProgress': (self.t-5)/6.
-                }
-                if self.t == 11:
-                    msg['clearGraph'] = True
+            msg = {
+                'pauseProgress': (self.t+1)/Constants.rest_length
+            }
+            self.t += 1
+            if self.t == Constants.rest_length:
+                msg['clearCurrentSubperiod'] = True
+                self.state = 'results'
+                self.t = 0
+                self.fixed_group_decisions = dict(self.group_decisions)
         else:
             raise ValueError('invalid state {}'.format(self.state))
 
         self.send('tick', msg)
-
-        self.t += 1
-        if self.t == 6:
-            self.state = 'pause'
-        if self.t == 12:
-            self.state = 'results'
-            self.t = 0
-            self.fixed_group_decisions = dict(self.group_decisions)
         self.save()
 
 
@@ -175,8 +181,6 @@ class Player(BasePlayer):
             channel='ticks',
             content_type=ContentType.objects.get_for_model(self.group),
             group_pk=self.group.pk)
-        
-        print(ticks)
         
         self.payoff = 0
         for tick in ticks:

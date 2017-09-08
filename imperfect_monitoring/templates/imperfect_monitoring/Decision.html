@@ -74,8 +74,10 @@
                 "{{ Constants.p2_B_p1_B_signal }}"
             ]
         ]'
-        player-index='{{ player.id_in_group|add:"-1"}}'
-        period-length='{{ Constants.period_length }}'>
+        subperiod-length='{{ Constants.subperiod_length }}'
+        num-subperiods='{{ Constants.num_subperiods }}'
+        initial-decision='{{ player.group.initialDecision }}'>
+        
     </imperfect-monitoring>
 
     {% include 'imperfect_monitoring/Instructions.html' %}
