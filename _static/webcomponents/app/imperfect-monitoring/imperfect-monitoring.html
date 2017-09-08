@@ -36,13 +36,12 @@
                 align-self: center;
             }
 
-            #currSubperiodGraph {
+            .graph {
                 border: 1px solid black;
-                margin: 0 10px 0 0;
             }
 
-            #historyGraph {
-                border: 1px solid black;
+            .graph:not(:last-child) {
+                margin-right: 10px;
             }
 
             #progress {
@@ -81,8 +80,10 @@
                 hidden$="[[ hideProgress ]]">
             </progress>
             <div id="graphs">
-                <div id="currSubperiodGraph"></div>
-                <div id="historyGraph"></div>
+                <div id="currSubperiodGraph" class="graph"></div>
+                <div id="historyGraph" class="graph"></div>
+                <div id="averageAGraph" class="graph"></div>
+                <div id="averageBGraph" class="graph"></div>
             </div>
         </div>
 
@@ -154,10 +155,42 @@
                     return parseFloat(current_val[oTree.idInGroup-1]);
                 }, this);
                 this.myDecision = this.initialDecision;
+                this.averageA = [];
+                this.averageB = [];
 			},
             attached() {
                 this._setupCurrSubperiodGraph();
                 this._setupHistoryGraph();
+                this.averageAGraph = this._setupAverageGraph(this.$.averageAGraph, [{
+                    type: "line",
+                    color: 'black',
+                    data: [[0, NaN], [1, NaN]],
+                }, {
+                    type: "line",
+                    color: this.aColor,
+                    lineWidth: 10,
+                    data: [[0, this.myPayoffs[0]], [1, this.myPayoffs[0]]],
+                }, {
+                    type: "line",
+                    color: this.aColor,
+                    lineWidth: 10,
+                    data: [[0, this.myPayoffs[1]], [1, this.myPayoffs[1]]],
+                }]);
+                this.averageBGraph = this._setupAverageGraph(this.$.averageBGraph, [{
+                    type: "line",
+                    color: 'black',
+                    data: [[0, NaN], [1, NaN]],
+                }, {
+                    type: "line",
+                    color: this.bColor,
+                    lineWidth: 10,
+                    data: [[0, this.myPayoffs[2]], [1, this.myPayoffs[2]]],
+                }, {
+                    type: "line",
+                    color: this.bColor,
+                    lineWidth: 10,
+                    data: [[0, this.myPayoffs[3]], [1, this.myPayoffs[3]]],
+                }]);
             },
             _onTick(event) {
                 let msg = event.detail.payload;
@@ -179,6 +212,11 @@
                     const averagePayoff = totalPayoff / subperiodRealizedPayoffs.length;
                     for (let i = 0; i < subperiodRealizedPayoffs.length; i++) {
                         this.currSubperiodGraph.series[1].addPoint(averagePayoff);
+                    }
+                    if (this.fixedDecision) {
+                        this.averageA.push(averagePayoff);
+                    } else {
+                        this.averageB.push(averagePayoff);
                     }
                 }
                 if (msg.showPayoffBars) {
@@ -206,14 +244,25 @@
                     });
                 }
                 if (msg.clearCurrentSubperiod) {
-                    const subperiodStart = this.historyGraph.series[0].data.length;
+                    // Add averages to the average charts.
+                    const averageA = (
+                        this.averageA.reduce((acc, cur) => acc + cur, 0) /
+                        this.averageA.length);
+                    const averageB = (
+                        this.averageB.reduce((acc, cur) => acc + cur, 0) /
+                        this.averageB.length);
+                    this.averageAGraph.series[0].setData([[0, averageA], [1, averageA]]);
+                    this.averageBGraph.series[0].setData([[0, averageB], [1, averageB]]);
+
                     // Append the current subperiod graph to the history graph.
+                    const subperiodStart = this.historyGraph.series[0].data.length;
                     for (let i = 0; i < 2; i++) {
                         for (let j = 0; j < this.currSubperiodGraph.series[i].data.length; j++) {
                             this.historyGraph.series[i].addPoint(
                                 this.currSubperiodGraph.series[i].data[j].y);
                         }
                     }
+                    // Clear the current subperiod graph.
                     this.currSubperiodGraph.series[0].setData([]);
                     this.currSubperiodGraph.series[1].setData([]);
                     // Removing the series messes with the indexing.
@@ -264,10 +313,10 @@
                     legend: { enabled: false },
                     credits: { enabled: false },
                     xAxis: {
-                        min: -0.5,
-                        max: this.subperiodLength-0.5,
-                        tickInterval: 1,
-                        labels: { enabled: false }
+                        min: 0,
+                        max: this.subperiodLength-1,
+                        labels: { enabled: false },
+                        tickLength: 0,
                     },
                     yAxis: {
                         title: { text: undefined },
@@ -279,9 +328,7 @@
                         labels: { enabled: true },
                     },
                     plotOptions: {
-                        column: {
-                        },
-                        line: {marker: {enabled: false}},
+                        line: { marker: { enabled: false } },
                         series: {
                             pointPadding: 0,
                             borderWidth: 0,
@@ -291,15 +338,6 @@
                                 }
                             }
                        }
-                    },
-                    line: {
-                        marker: {
-                            enabled: false,
-                            states: {
-                                hover: { enabled: false },
-                                select: { enabled: false }
-                            }
-                        }
                     },
                     series: [
                         {
@@ -333,11 +371,11 @@
                     legend: { enabled: false },
                     credits: { enabled: false },
                     xAxis: {
-                        min: -0.5,
-                        max: (this.numSubperiods*this.subperiodLength)-0.5,
-                        tickInterval: this.subperiodLength-1,
+                        min: 0,
+                        max: (this.numSubperiods*this.subperiodLength)-1,
                         labels: { enabled: false },
                         scrollbar: { enabled: true },
+                        tickLength: 0,
                         plotLines: [{
                             value: 0,
                             width: 0,
@@ -352,7 +390,7 @@
                         minPadding: 0.05,
                         maxPadding: 0.05,
                         endOnTick: false,
-                        labels: { enabled: true },
+                        labels: { enabled: false },
                     },
                     plotOptions: {
                         line: {marker: {enabled: false}},
@@ -363,15 +401,6 @@
                                 }
                             }
                        }
-                    },
-                    line: {
-                        marker: {
-                            enabled: false,
-                            states: {
-                                hover: { enabled: false },
-                                select: { enabled: false }
-                            }
-                        }
                     },
                     series: [
                         {
@@ -388,6 +417,60 @@
                             step: "left"
                         },
                     ]
+                });
+            },
+            _setupAverageGraph(element, series) {
+                return Highcharts.chart({
+                    chart: {
+                        animation: false,
+                        renderTo: element,
+                        enabled: false,
+                        width: 150,
+                    },
+                    title: { text: null },
+                    exporting: { enabled: false },
+                    tooltip: { enabled: false },
+                    legend: { enabled: false },
+                    credits: { enabled: false },
+                    xAxis: {
+                        min: 0,
+                        max: 1,
+                        labels: { enabled: false },
+                        tickLength: 0,
+                    },
+                    yAxis: {
+                        title: { text: undefined },
+                        min: 0,
+                        max: this.maxPayoff*1.05,
+                        minPadding: 0.05,
+                        maxPadding: 0.05,
+                        endOnTick: false,
+                        labels: { enabled: false },
+                    },
+                    plotOptions: {
+                        column: {
+                        },
+                        line: {marker: {enabled: false}},
+                        series: {
+                            pointPadding: 0,
+                            borderWidth: 0,
+                            states: {
+                                hover: {
+                                    enabled: false,
+                                }
+                            }
+                       }
+                    },
+                    line: {
+                        marker: {
+                            enabled: false,
+                            states: {
+                                hover: { enabled: false },
+                                select: { enabled: false }
+                            }
+                        }
+                    },
+                    series: series,
                 });
             },
             _addRealizedPayoff(realizedPayoff, graph) {
