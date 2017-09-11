@@ -82,8 +82,9 @@
             <div id="graphs">
                 <div id="currSubperiodGraph" class="graph"></div>
                 <div id="historyGraph" class="graph"></div>
-                <div id="averageAGraph" class="graph"></div>
-                <div id="averageBGraph" class="graph"></div>
+                <div id="averageAGraph" class="graph" hidden$="[[ !displayAverageAGraph ]]"></div>
+                <div id="averageBGraph" class="graph" hidden$="[[ !displayAverageBGraph ]]"></div>
+                <div id="averageABGraph" class="graph" hidden$="[[ !displayAverageABGraph ]]"></div>
             </div>
         </div>
 
@@ -144,6 +145,22 @@
                 initialDecision: {
                     type: Number,
                 },
+                floatHistoryGraph: {
+                    type: Boolean,
+                    value: false,
+                },
+                displayAverageAGraph: {
+                    type: Boolean,
+                    value: true,
+                },
+                displayAverageBGraph: {
+                    type: Boolean,
+                    value: true,
+                },
+                displayAverageABGraph: {
+                    type: Boolean,
+                    value: true,
+                },
 			},
 			ready() {
                 // separate each player's payoffs into two separate arrays
@@ -155,8 +172,7 @@
                     return parseFloat(current_val[oTree.idInGroup-1]);
                 }, this);
                 this.myDecision = this.initialDecision;
-                this.averageA = [];
-                this.averageB = [];
+                this.averages = [];
 			},
             attached() {
                 this._setupCurrSubperiodGraph();
@@ -191,6 +207,31 @@
                     lineWidth: 10,
                     data: [[0, this.myPayoffs[3]], [1, this.myPayoffs[3]]],
                 }]);
+                this.averageABGraph = this._setupAverageGraph(this.$.averageABGraph, [{
+                    type: "line",
+                    color: 'black',
+                    data: [[0, NaN], [1, NaN]],
+                }, {
+                    type: "line",
+                    color: this.aColor,
+                    lineWidth: 10,
+                    data: [[0, this.myPayoffs[0]], [1, this.myPayoffs[0]]],
+                }, {
+                    type: "line",
+                    color: this.aColor,
+                    lineWidth: 10,
+                    data: [[0, this.myPayoffs[1]], [1, this.myPayoffs[1]]],
+                }, {
+                    type: "line",
+                    color: this.bColor,
+                    lineWidth: 10,
+                    data: [[0, this.myPayoffs[2]], [1, this.myPayoffs[2]]],
+                }, {
+                    type: "line",
+                    color: this.bColor,
+                    lineWidth: 10,
+                    data: [[0, this.myPayoffs[3]], [1, this.myPayoffs[3]]],
+                }]);
             },
             _onTick(event) {
                 let msg = event.detail.payload;
@@ -213,11 +254,10 @@
                     for (let i = 0; i < subperiodRealizedPayoffs.length; i++) {
                         this.currSubperiodGraph.series[1].addPoint(averagePayoff);
                     }
-                    if (this.fixedDecision) {
-                        this.averageA.push(averagePayoff);
-                    } else {
-                        this.averageB.push(averagePayoff);
-                    }
+                    this.averages.push({
+                        decision: this.fixedDecision,
+                        average: averagePayoff,
+                    });
                 }
                 if (msg.showPayoffBars) {
                     let a, b, color;
@@ -245,14 +285,22 @@
                 }
                 if (msg.clearCurrentSubperiod) {
                     // Add averages to the average charts.
-                    const averageA = (
-                        this.averageA.reduce((acc, cur) => acc + cur, 0) /
-                        this.averageA.length);
-                    const averageB = (
-                        this.averageB.reduce((acc, cur) => acc + cur, 0) /
-                        this.averageB.length);
+
+                    const aHistory = this.averages.filter((e) => e.decision == 1);
+                    const bHistory = this.averages.filter((e) => e.decision == 0);
+
+                    let averageA = (
+                        aHistory.reduce((acc, cur) => acc + cur.average, 0) /
+                        aHistory.length);
                     this.averageAGraph.series[0].setData([[0, averageA], [1, averageA]]);
+
+                    let averageB = (
+                        bHistory.reduce((acc, cur) => acc + cur.average, 0) /
+                        bHistory.length);
                     this.averageBGraph.series[0].setData([[0, averageB], [1, averageB]]);
+
+                    const average = this.averages.reduce((acc, cur) => acc + cur.average, 0) / this.averages.length;
+                    this.averageABGraph.series[0].setData([[0, average], [1, average]]);
 
                     // Append the current subperiod graph to the history graph.
                     const subperiodStart = this.historyGraph.series[0].data.length;

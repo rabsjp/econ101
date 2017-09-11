@@ -92,7 +92,9 @@ class Group(ContinuousDecisionGroup):
                 msg['clearCurrentSubperiod'] = True
                 self.state = 'results'
                 self.t = 0
-                self.fixed_group_decisions = dict(self.group_decisions)
+                for i, player in enumerate(self.get_players()):
+                    if player.participant.code in self.group_decisions:
+                        self.fixed_group_decisions[player.participant.code] = self.group_decisions[player.participant.code]
         else:
             raise ValueError('invalid state {}'.format(self.state))
 
@@ -115,12 +117,8 @@ class Group(ContinuousDecisionGroup):
 
             other = players[i-1]
 
-            if self.fixed_group_decisions:
-                my_decision = self.fixed_group_decisions[player.participant.code]
-                other_decision = self.fixed_group_decisions[other.participant.code]
-            else:
-                my_decision = random.choice([0, 1])
-                other_decision = random.choice([0, 1])
+            my_decision = self.fixed_group_decisions[player.participant.code]
+            other_decision = self.fixed_group_decisions[other.participant.code]
 
             prob = ((my_decision * other_decision * probabilities[0]) +
                     (my_decision * (1 - other_decision) * probabilities[1]) +
