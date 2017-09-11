@@ -33,6 +33,7 @@
 
 {% block content %}
     <continuous-bimatrix
+        initial-decision='{{ initial_decision }}'
         payoff-matrix='{{ payoff_matrix }}'
         period-length='{{ Constants.period_length }}'>
     </continuous-bimatrix>

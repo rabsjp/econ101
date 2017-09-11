@@ -67,9 +67,6 @@ class Group(ContinuousDecisionGroup):
     t = models.PositiveIntegerField()
     fixed_group_decisions = JSONField()
 
-    def initial_decision(self):
-        return 0
-
     def period_length(self):
         return (
             Constants.num_subperiods * 
@@ -83,9 +80,8 @@ class Group(ContinuousDecisionGroup):
         self.t = 0
         self.fixed_group_decisions = {}
         for i, player in enumerate(self.get_players()):
-            self.fixed_group_decisions[player.participant.code] = random.choice([1, 0])
+            self.fixed_group_decisions[player.participant.code] = 0
         self.save()
-        self.send('initialDecisions', self.fixed_group_decisions)
 
         emitter = DiscreteEventEmitter(
             Constants.seconds_per_tick, self.period_length(), self, self.tick)

@@ -73,9 +73,6 @@ class Group(ContinuousDecisionGroup):
     def period_length(self):
         return Constants.period_length
 
-    def initial_decision(self):
-        return 0.5
-
 
 class Player(BasePlayer):
 

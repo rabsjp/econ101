@@ -43,7 +43,11 @@ class DecisionWaitPage(WaitPage):
 
 
 class Decision(Page):
-    pass
+
+    def vars_for_template(self):
+        return {
+            'initial_decision': 0,
+        }
 
 
 class Results(Page):
