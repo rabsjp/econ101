@@ -76,7 +76,17 @@
         ]'
         subperiod-length='{{ session.config.subperiod_length }}'
         num-subperiods='{{ session.config.num_subperiods }}'
-        initial-decision='{{ initial_decision }}'>
+        initial-decision='{{ initial_decision }}'
+        {% if session.config.display_average_a_graph %}
+            display-average-a-graph
+        {% endif %}
+        {% if session.config.display_average_b_graph %}
+            display-average-b-graph
+        {% endif %}
+        {% if session.config.display_average_ab_graph %}
+            display-average-a-b-graph
+        {% endif %}
+        >
         
     </imperfect-monitoring>
 
