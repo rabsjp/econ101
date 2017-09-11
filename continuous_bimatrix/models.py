@@ -122,7 +122,7 @@ class Player(BasePlayer):
             B_b_payoff = payoff_grid[3][1]
             row_player = self.get_others_in_group()[0].participant
 
-        q1, q2 = self.group.initial_decision(), self.group.initial_decision()
+        q1, q2 = 0.5, 0.5
         for i, d in enumerate(decisions):
             if d.participant == row_player:
                 q1 = d.value
