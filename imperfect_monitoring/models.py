@@ -20,40 +20,18 @@ class Constants(BaseConstants):
     players_per_group = 2
     num_rounds = 10
 
-    #p1 payoffs
-    p1_A_p2_A_amount = 100
-    p1_A_p2_B_amount = 0
-    p1_B_p2_A_amount = 125
-    p1_B_p2_B_amount = 25
-
-    #p2 payoffs
-    p2_A_p1_A_amount = 100
-    p2_A_p1_B_amount = 0
-    p2_B_p1_A_amount = 125
-    p2_B_p1_B_amount = 25
-
-    #p1 signals
-    p1_A_p2_A_signal = .4
-    p1_A_p2_B_signal = .6
-    p1_B_p2_A_signal = .6
-    p1_B_p2_B_signal = .8
-
-    #p2 signals
-    p2_A_p1_A_signal = .4
-    p2_A_p1_B_signal = .6
-    p2_B_p1_A_signal = .6
-    p2_B_p1_B_signal = .8
-
-    base_points = 0
-
-    # Total subperiods
-    num_subperiods = 10
-    # Ticks per subperiod
-    subperiod_length = 6
-    # Rest time
-    rest_length = 6
-    # Seconds per tick
-    seconds_per_tick = 1
+    treatments = {
+        'A': {
+            'payoff_matrix': [
+                [[100, 100], [0, 0]],
+                [[125, 125], [25, 25]],
+            ],
+            'probability_matrix': [
+                [[0.4, 0.4], [0.6, 0.6]],
+                [[0.6, 0.6], [0.8, 0.8]],
+            ],
+        }
+    }
 
 
 class Subsession(BaseSubsession):
@@ -69,8 +47,8 @@ class Group(ContinuousDecisionGroup):
 
     def period_length(self):
         return (
-            Constants.num_subperiods * 
-            ((Constants.subperiod_length + Constants.rest_length) * Constants.seconds_per_tick)
+            self.session.config['num_subperiods'] *
+            ((self.session.config['subperiod_length'] + self.session.config['rest_length']) * self.session.config['seconds_per_tick'])
         )
 
     def when_all_players_ready(self):
@@ -84,7 +62,7 @@ class Group(ContinuousDecisionGroup):
         self.save()
 
         emitter = DiscreteEventEmitter(
-            Constants.seconds_per_tick, self.period_length(), self, self.tick)
+            self.session.config['seconds_per_tick'], self.period_length(), self, self.tick)
         emitter.start()
 
     def tick(self, current_interval, intervals):
@@ -100,17 +78,17 @@ class Group(ContinuousDecisionGroup):
                 'fixedDecisions' : self.fixed_group_decisions
             }
             self.t += 1
-            if self.t == Constants.subperiod_length:
+            if self.t == self.session.config['subperiod_length']:
                 msg['showAverage'] = True
                 msg['showPayoffBars'] = True
                 self.state = 'pause'
                 self.t = 0
         elif self.state == 'pause':
             msg = {
-                'pauseProgress': (self.t+1)/Constants.rest_length
+                'pauseProgress': (self.t+1)/self.session.config['rest_length']
             }
             self.t += 1
-            if self.t == Constants.rest_length:
+            if self.t == self.session.config['rest_length']:
                 msg['clearCurrentSubperiod'] = True
                 self.state = 'results'
                 self.t = 0
@@ -124,18 +102,16 @@ class Group(ContinuousDecisionGroup):
 
     def realized_payoffs(self):
 
+        payoff_matrix = Constants.treatments[self.session.config['treatment']]['payoff_matrix']
+        probability_matrix = Constants.treatments[self.session.config['treatment']]['probability_matrix']
+
         realized_payoffs = {}
 
         players = self.get_players()
         for i, player in enumerate(players):
 
-            payoffs = None
-            if i == 0:
-                payoffs = [Constants.p1_A_p2_A_amount, Constants.p1_A_p2_B_amount, Constants.p1_B_p2_A_amount, Constants.p1_B_p2_B_amount]
-                signals = [Constants.p1_A_p2_A_signal, Constants.p1_A_p2_B_signal, Constants.p1_B_p2_A_signal, Constants.p1_B_p2_B_signal]
-            else:
-                payoffs = [Constants.p2_A_p1_A_amount, Constants.p2_A_p1_B_amount, Constants.p2_B_p1_A_amount, Constants.p2_B_p1_B_amount]
-                signals = [Constants.p2_A_p1_A_signal, Constants.p2_A_p1_B_signal, Constants.p2_B_p1_A_signal, Constants.p2_B_p1_B_signal]
+            payoffs = [payoff_matrix[0][0][i], payoff_matrix[0][1][i], payoff_matrix[1][0][i], payoff_matrix[1][1][i]]
+            probabilities = [probability_matrix[0][0][i], probability_matrix[0][1][i], probability_matrix[1][0][i], probability_matrix[1][1][i]]
 
             other = players[i-1]
 
@@ -146,10 +122,10 @@ class Group(ContinuousDecisionGroup):
                 my_decision = random.choice([0, 1])
                 other_decision = random.choice([0, 1])
 
-            prob = ((my_decision * other_decision * signals[0]) +
-                    (my_decision * (1 - other_decision) * signals[1]) +
-                    ((1 - my_decision) * other_decision * signals[2]) +
-                    ((1 - my_decision) * (1 - other_decision) * signals[3]))
+            prob = ((my_decision * other_decision * probabilities[0]) +
+                    (my_decision * (1 - other_decision) * probabilities[1]) +
+                    ((1 - my_decision) * other_decision * probabilities[2]) +
+                    ((1 - my_decision) * (1 - other_decision) * probabilities[3]))
             payoff_index = 0
             if random.random() <= prob:
                 if my_decision:

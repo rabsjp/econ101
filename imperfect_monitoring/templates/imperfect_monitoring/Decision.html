@@ -39,47 +39,45 @@
         payoff-matrix=
         '[
             [
-                "{{ Constants.p1_A_p2_A_amount }}",
-                "{{ Constants.p2_A_p1_A_amount }}"
+                "{{ payoff_matrix.0.0.0 }}",
+                "{{ payoff_matrix.0.0.1 }}"
             ],
             [
-                "{{ Constants.p1_A_p2_B_amount }}",
-                "{{ Constants.p2_A_p1_B_amount }}"
+                "{{ payoff_matrix.0.1.0 }}",
+                "{{ payoff_matrix.0.1.1 }}"
             ],
             [
-                "{{ Constants.p1_B_p2_A_amount }}",
-                "{{ Constants.p2_B_p1_A_amount }}"
+                "{{ payoff_matrix.1.0.0 }}",
+                "{{ payoff_matrix.1.0.1 }}"
             ],
             [
-                "{{ Constants.p1_B_p2_B_amount }}",
-                "{{ Constants.p2_B_p1_B_amount }}"
+                "{{ payoff_matrix.1.1.0 }}",
+                "{{ payoff_matrix.1.1.1 }}"
             ]
         ]'
         probability-matrix=
         '[
             [
-                "{{ Constants.p1_A_p2_A_signal }}",
-                "{{ Constants.p2_A_p1_A_signal }}"
+                "{{ probability_matrix.0.0.0 }}",
+                "{{ probability_matrix.0.0.1 }}"
             ],
             [
-                "{{ Constants.p1_A_p2_B_signal }}",
-                "{{ Constants.p2_A_p1_B_signal }}"
+                "{{ probability_matrix.0.1.0 }}",
+                "{{ probability_matrix.0.1.1 }}"
             ],
             [
-                "{{ Constants.p1_B_p2_A_signal }}",
-                "{{ Constants.p2_B_p1_A_signal }}"
+                "{{ probability_matrix.1.0.0 }}",
+                "{{ probability_matrix.1.0.1 }}"
             ],
             [
-                "{{ Constants.p1_B_p2_B_signal }}",
-                "{{ Constants.p2_B_p1_B_signal }}"
+                "{{ probability_matrix.1.1.0 }}",
+                "{{ probability_matrix.1.1.1 }}"
             ]
         ]'
-        subperiod-length='{{ Constants.subperiod_length }}'
-        num-subperiods='{{ Constants.num_subperiods }}'
+        subperiod-length='{{ session.config.subperiod_length }}'
+        num-subperiods='{{ session.config.num_subperiods }}'
         initial-decision='{{ initial_decision }}'>
         
     </imperfect-monitoring>
-
-    {% include 'imperfect_monitoring/Instructions.html' %}
 
 {% endblock %}
