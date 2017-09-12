@@ -30,6 +30,19 @@ class Constants(BaseConstants):
                 [[0.4, 0.4], [0.6, 0.6]],
                 [[0.6, 0.6], [0.8, 0.8]],
             ],
+            # [round(max(3, numpy.random.exponential(20))) for i in range(10)] 
+            'num_subperiods': [
+                7,
+                3,
+                29,
+                11,
+                9,
+                6,
+                6,
+                3,
+                6,
+                13,
+            ]
         }
     }
 
@@ -46,9 +59,15 @@ class Group(ContinuousDecisionGroup):
     fixed_group_decisions = JSONField()
 
     def period_length(self):
+        num_subperiods = self.session.config['num_subperiods']
+        rest_length = self.session.config['rest_length']
+        subperiod_length = self.session.config['subperiod_length']
+        seconds_per_tick = self.session.config['seconds_per_tick']
+        if not num_subperiods:
+            num_subperiods = Constants.treatments[self.session.config['treatment']]['num_subperiods'][self.subsession_id-1]
         return (
-            self.session.config['num_subperiods'] *
-            ((self.session.config['subperiod_length'] + self.session.config['rest_length']) * self.session.config['seconds_per_tick'])
+            num_subperiods *
+            ((subperiod_length + rest_length) * seconds_per_tick)
         )
 
     def when_all_players_ready(self):
