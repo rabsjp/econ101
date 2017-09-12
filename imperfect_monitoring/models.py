@@ -167,11 +167,14 @@ class Player(BasePlayer):
 
     def set_payoff(self):
         ticks = Event.objects.filter(
-            channel='ticks',
+            channel='tick',
             content_type=ContentType.objects.get_for_model(self.group),
             group_pk=self.group.pk)
         
         self.payoff = 0
+        total_subperiods = 0
         for tick in ticks:
             if 'realizedPayoffs' in tick.value:
-                self.payoff += tick.value.realizedPayoffs[self.participant.code]
+                self.payoff += tick.value['realizedPayoffs'][self.participant.code]
+                total_subperiods += 1
+        self.payoff /= total_subperiods

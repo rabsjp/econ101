@@ -323,7 +323,13 @@
                             lineWidth: 10,
                             data: data,
                         });
-                        // TODO: this.historyGraph.xAxis[0].setExtremes
+                        const numSubperiods = this.numSubperiods == 0 ? 10 : this.numSubperiods;
+                        const xmax = data[data.length-1][0];
+                        const max = xmax + this.subperiodLength;
+                        const min = max - (numSubperiods * this.subperiodLength) + 1;
+                        if (min > 0) {
+                            this.historyGraph.xAxis[0].setExtremes(min, max);
+                        }
                     }
                 }
                 if (msg.hasOwnProperty('pauseProgress')) {
