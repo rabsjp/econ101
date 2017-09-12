@@ -177,4 +177,5 @@ class Player(BasePlayer):
             if 'realizedPayoffs' in tick.value:
                 self.payoff += tick.value['realizedPayoffs'][self.participant.code]
                 total_subperiods += 1
-        self.payoff /= total_subperiods
+        if total_subperiods:
+            self.payoff /= total_subperiods
