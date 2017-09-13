@@ -136,13 +136,13 @@
 						{
 							name: 'Your Payoff',
 							type: "area",
-							data: [[0, myInitialPayoff], [0, myInitialPayoff]],
+							data: [[0, myInitialPayoff], [Number.EPSILON, myInitialPayoff]],
 							step: "left"
 						},
 						{
 							name: 'Other Payoff',
 							type: "line",
-							data: [[0, otherInitialPayoff], [0, otherInitialPayoff]],
+							data: [[0, otherInitialPayoff], [Number.EPSILON, otherInitialPayoff]],
 							step: "left"
 						}
 					],
@@ -167,16 +167,21 @@
 				const xval = (
 					(timestamp - this.start_time) /
 					(this.periodLength * 1000));
-				if (isNaN(xval)) return;
+				if (!isNaN(xval) && xval > 0) {
 
-				let dataset;
-				dataset = this.graph_obj.series[0];
-				this._lastElem(dataset.data).update({x: xval});
+					let dataset;
+					dataset = this.graph_obj.series[0];
+					if (xval > this._lastElem(dataset.data).x) {
+						this._lastElem(dataset.data).update({x: xval});
+					}
 
-				dataset = this.graph_obj.series[1];
-				this._lastElem(dataset.data).update({x: xval});
+					dataset = this.graph_obj.series[1];
+					if (xval > this._lastElem(dataset.data).x) {
+						this._lastElem(dataset.data).update({x: xval});
+					}
 
-				this.graph_obj.redraw();
+					this.graph_obj.redraw();
+				}
 
 				// recursively call update
 				this._animationID = window.requestAnimationFrame(this._updateGraph.bind(this));
@@ -199,25 +204,23 @@
 					((1 - this.myDecision) * this.otherDecision * this.otherPayoffs[2]) +
 					((1 - this.myDecision) * (1 - this.otherDecision) * this.otherPayoffs[3]);
 
-				// console.log(my_point_payoff, other_point_payoff);
-
 				// calculate new decision's timestamp as a value between 0 and 1
 				const xval = (
 					(performance.now() - this.start_time) /
 					(this.periodLength * 1000));
-				if (isNaN(xval)) return;
+				if (isNaN(xval) || xval <= 0) return;
 
 				// add point for my payoff
 				let dataset = this.graph_obj.series[0];
 				this._lastElem(dataset.data).remove();
 				dataset.addPoint([xval, my_point_payoff]);
-				dataset.addPoint([xval, my_point_payoff]);
+				dataset.addPoint([xval+Number.EPSILON, my_point_payoff]);
 
 				// add point for other payoff
 				dataset = this.graph_obj.series[1]
 				this._lastElem(dataset.data).remove()
 				dataset.addPoint([xval, other_point_payoff]);
-				dataset.addPoint([xval, other_point_payoff]);
+				dataset.addPoint([xval+Number.EPSILON, other_point_payoff]);
 			},
 			// called every time a matrix transition occurs
 			_addTransitionBand() {
