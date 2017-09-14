@@ -49,7 +49,6 @@ class Decision(Page):
         payoff_grid = self.subsession.get_cur_payoffs()
         if (self.player.id_in_group == 1):
             return {
-                "initial_decision": 0.5,
                 "my_A_A_payoff": payoff_grid[0][0],
                 "my_A_B_payoff": payoff_grid[1][0],
                 "my_B_A_payoff": payoff_grid[2][0],
@@ -63,7 +62,6 @@ class Decision(Page):
             }
         else:
             return {
-                "initial_decision": 0.5,
                 "my_A_A_payoff": payoff_grid[0][1],
                 "my_A_B_payoff": payoff_grid[1][1],
                 "my_B_A_payoff": payoff_grid[2][1],

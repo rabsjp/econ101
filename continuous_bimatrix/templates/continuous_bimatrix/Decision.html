@@ -33,9 +33,9 @@
 
 {% block content %}
     <continuous-bimatrix
-        initial-decision='{{ initial_decision }}'
+        initial-decision='{{ player.initial_decision }}'
         payoff-matrix='{{ payoff_matrix }}'
-        period-length='{{ Constants.period_length }}'>
+        period-length='{{ player.group.period_length }}'>
     </continuous-bimatrix>
 
 {% endblock %}

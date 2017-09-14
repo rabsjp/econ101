@@ -162,6 +162,9 @@ class Group(ContinuousDecisionGroup):
 
 class Player(BasePlayer):
 
+    def initial_decision(self):
+        return 0
+
     def other_player(self):
         return self.get_others_in_group()[0]
 
