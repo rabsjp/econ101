@@ -1,0 +1,14 @@
+{% extends "global/Page.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Introduction
+{% endblock %}
+
+{% block content %}
+
+    {% include 'continuous_bimatrix/Instructions.html' %}
+
+    {% next_button %}
+
+{% endblock %}
