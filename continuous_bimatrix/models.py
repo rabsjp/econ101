@@ -10,7 +10,7 @@ from otree_redwood.models import Event, ContinuousDecisionGroup
 doc = """
 This is a continuous time/continuous space bimatrix game.
 Two players can simultaneously choose a mixed strategy for the bimatrix game
-defined by the "payoff_grid" variable below. They can change their choice at
+defined by the "payoff_matrices" variable below. They can change their choice at
 any time and that change will be reflected on their counterpart's page. Payoff
 is determined by the integrating the instantaneous flow payoffs over time (i.e
 the longer you are at a payoff spot, the more it contributes to your final
@@ -23,8 +23,7 @@ class Constants(BaseConstants):
     players_per_group = 2
     num_rounds = 12
 
-    #payoff grids
-    payoff_grids = [
+    payoff_matrices = [
         [
             [800, 0], [0, 200],
             [0, 200], [200, 0],
@@ -57,13 +56,13 @@ class Subsession(BaseSubsession):
         roundno = self.round_number
 
         if roundno in [1, 2, 3]:
-            return Constants.payoff_grids[2]
+            return Constants.payoff_matrices[2]
         elif roundno in [4, 5, 6]:
-            return Constants.payoff_grids[3]
+            return Constants.payoff_matrices[3]
         elif roundno in [7, 8, 9]:
-            return Constants.payoff_grids[0]
+            return Constants.payoff_matrices[0]
         elif roundno in [10, 11, 12]:
-            return Constants.payoff_grids[1]
+            return Constants.payoff_matrices[1]
         else:
             print("invalid round number!")
 
@@ -102,28 +101,27 @@ class Player(BasePlayer):
         except Event.DoesNotExist:
             return float('nan')
 
-        payoff_grid = self.subsession.get_cur_payoffs()
+        payoff_matrix = self.subsession.get_cur_payoffs()
 
-        self.payoff = self.get_payoff(period_start, period_end, decisions, payoff_grid)
+        self.payoff = self.get_payoff(period_start, period_end, decisions, payoff_matrix)
         
 
-    def get_payoff(self, period_start, period_end, decisions, payoff_grid):
+    def get_payoff(self, period_start, period_end, decisions, payoff_matrix):
         period_duration = period_end.timestamp - period_start.timestamp
 
         payoff = 0
 
-        if (self.id_in_group == 1):
-            A_a_payoff = payoff_grid[0][0]
-            A_b_payoff = payoff_grid[1][0]
-            B_a_payoff = payoff_grid[2][0]
-            B_b_payoff = payoff_grid[3][0]
+        Aa = payoff_matrix[0][self.id_in_group-1]
+        Ab = payoff_matrix[1][self.id_in_group-1]
+        Ba = payoff_matrix[2][self.id_in_group-1]
+        Bb = payoff_matrix[3][self.id_in_group-1]
+
+        if self.id_in_group == 1:
             row_player = self.participant
+            q1, q2 = self.initial_decision(), self.other_player().initial_decision()
         else:
-            A_a_payoff = payoff_grid[0][1]
-            A_b_payoff = payoff_grid[1][1]
-            B_a_payoff = payoff_grid[2][1]
-            B_b_payoff = payoff_grid[3][1]
-            row_player = self.get_others_in_group()[0].participant
+            row_player = self.other_player.participant
+            q2, q1 = self.initial_decision(), self.other_player().initial_decision()
 
         q1, q2 = 0.5, 0.5
         for i, d in enumerate(decisions):
@@ -131,10 +129,10 @@ class Player(BasePlayer):
                 q1 = d.value
             else:
                 q2 = d.value
-            flow_payoff = ((A_a_payoff * q1 * q2) +
-                          (A_b_payoff * q1 * (1 - q2)) +
-                          (B_a_payoff * (1 - q1) * q2) +
-                          (B_b_payoff * (1 - q1) * (1 - q2)))
+            flow_payoff = ((Aa * q1 * q2) +
+                           (Ab * q1 * (1 - q2)) +
+                           (Ba * (1 - q1) * q2) +
+                           (Bb * (1 - q1) * (1 - q2)))
 
             if i + 1 < len(decisions):
                 next_change_time = decisions[i + 1].timestamp

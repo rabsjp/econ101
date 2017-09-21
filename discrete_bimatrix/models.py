@@ -10,7 +10,7 @@ from otree_redwood.models import Event, DiscreteDecisionGroup
 doc = """
 This is a discrete time/continuous space bimatrix game.
 Two players can simultaneously choose a mixed strategy for the bimatrix game
-defined by the "payoff_matrix" variable below. They can change their choice at
+defined by the "payoff_matrices" variable below. They can change their choice at
 any time but that change is only  reflected on their counterpart's page at the
 start of the next subperiod. Payoff is determined by the integrating the
 subperiod payoffs over time (i.e the longer you are at a payoff spot, the more
@@ -116,17 +116,14 @@ class Player(BasePlayer):
 
         payoff = 0
 
+        Aa = payoff_grid[0][self.id_in_group-1]
+        Ab = payoff_grid[1][self.id_in_group-1]
+        Ba = payoff_grid[2][self.id_in_group-1]
+        Bb = payoff_grid[3][self.id_in_group-1]
+        
         if self.id_in_group == 1:
-            A_a_payoff = payoff_matrix[0][0]
-            A_b_payoff = payoff_matrix[1][0]
-            B_a_payoff = payoff_matrix[2][0]
-            B_b_payoff = payoff_matrix[3][0]
             row_player = self.participant
         else:
-            A_a_payoff = payoff_matrix[0][1]
-            A_b_payoff = payoff_matrix[1][1]
-            B_a_payoff = payoff_matrix[2][1]
-            B_b_payoff = payoff_matrix[3][1]
             row_player = self.get_others_in_group()[0].participant
 
         for decisions in group_decisions:
@@ -136,10 +133,10 @@ class Player(BasePlayer):
                 q1, q2 = my_decision, other_decision
             else:
                 q1, q2 = other_decision, my_decision
-            subperiod_payoff = ((A_a_payoff * q1 * q2) +
-                                (A_b_payoff * q1 * (1 - q2)) +
-                                (B_a_payoff * (1 - q1) * q2) +
-                                (B_b_payoff * (1 - q1) * (1 - q2)))
+            subperiod_payoff = ((Aa * q1 * q2) +
+                                (Ab * q1 * (1 - q2)) +
+                                (Ba * (1 - q1) * q2) +
+                                (Bb * (1 - q1) * (1 - q2)))
 
             payoff += subperiod_payoff
 
