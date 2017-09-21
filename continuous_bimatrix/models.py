@@ -120,7 +120,7 @@ class Player(BasePlayer):
             row_player = self.participant
             q1, q2 = self.initial_decision(), self.other_player().initial_decision()
         else:
-            row_player = self.other_player.participant
+            row_player = self.other_player().participant
             q2, q1 = self.initial_decision(), self.other_player().initial_decision()
 
         q1, q2 = 0.5, 0.5

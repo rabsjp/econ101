@@ -7,7 +7,8 @@
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-period/otree-period.html">
 
 <link rel="import" href="/static/webcomponents/reusable/bimatrix-heatmap/bimatrix-heatmap.html">
-<link rel="import" href="/static/webcomponents/reusable/otree-thermometer/otree-thermometer.html">
+<link rel="import" href="/static/webcomponents/reusable/heatmap-thermometer/heatmap-thermometer.html">
+<link rel="import" href="/static/webcomponents/reusable/high-chart/high-chart.html">
 <link rel="import" href="/static/webcomponents/reusable/payoff-graph/payoff-graph.html">
 <link rel="import" href="/static/webcomponents/reusable/strategy-graph/strategy-graph.html">
 <link rel="import" href="/static/webcomponents/reusable/styled-range/styled-range.html">
@@ -43,7 +44,7 @@
                 height: 315px;
             }
 
-            otree-thermometer {
+            heatmap-thermometer {
                 margin-bottom: 20px;
                 height: 243px;
             }
@@ -53,7 +54,7 @@
                 height: 200px;
             }
 
-            payoff-graph {
+            payoff-graph, high-chart {
                 width: 510px;
                 height: 305px;
             }
@@ -113,23 +114,24 @@
 
             <div id="graphs-column" class="layout horizontal">
                 <div class="layout horizontal end">
-                    <otree-thermometer
+                    <heatmap-thermometer
                         color="rainbow"
                         class="self-end">
-                    </otree-thermometer>
+                    </heatmap-thermometer>
                     <div class="layout vertical">
                         <strategy-graph
                             my-decision="[[ myDecision ]]"
                             other-decision="[[ otherDecision ]]"
                             period-length="[[ periodLength ]]"
                         ></strategy-graph>
-                        <payoff-graph
+                        <high-chart></high-chart>
+                        <!--payoff-graph
                             my-decision="[[ myDecision ]]"
                             other-decision="[[ otherDecision ]]"
                             my-payoffs="[[ myPayoffs ]]"
                             other-payoffs="[[ otherPayoffs ]]"
                             period-length="[[ periodLength ]]"
-                        ></payoff-graph>
+                        ></payoff-graph-->
                     </div>
                 </div>
             </div>
