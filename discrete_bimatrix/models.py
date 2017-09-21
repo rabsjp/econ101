@@ -116,10 +116,10 @@ class Player(BasePlayer):
 
         payoff = 0
 
-        Aa = payoff_grid[0][self.id_in_group-1]
-        Ab = payoff_grid[1][self.id_in_group-1]
-        Ba = payoff_grid[2][self.id_in_group-1]
-        Bb = payoff_grid[3][self.id_in_group-1]
+        Aa = payoff_matrix[0][self.id_in_group-1]
+        Ab = payoff_matrix[1][self.id_in_group-1]
+        Ba = payoff_matrix[2][self.id_in_group-1]
+        Bb = payoff_matrix[3][self.id_in_group-1]
         
         if self.id_in_group == 1:
             row_player = self.participant
