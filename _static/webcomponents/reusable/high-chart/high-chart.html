@@ -27,7 +27,6 @@
 			properties: {
 				title: {
 					type: String,
-					value: '',
 				},
 				series: {
 					type: Array,
@@ -103,14 +102,13 @@
 					chart: {
 						animation: false,
 						renderTo: this.$.chart,
-						enabled: false,
+						enabled: true,
 						width: this.offsetWidth,
 						height: this.offsetHeight,
 					},
 					title: { text: this.title },
 					exporting: { enabled: false },
 					tooltip: { enabled: false },
-					legend: { enabled: false },
 					credits: { enabled: false },
 					xAxis: this.xAxis,
 					yAxis: this.yAxis,

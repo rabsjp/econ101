@@ -124,7 +124,7 @@ class Player(BasePlayer):
         if self.id_in_group == 1:
             row_player = self.participant
         else:
-            row_player = self.get_others_in_group()[0].participant
+            row_player = self.other_player().participant
 
         for decisions in group_decisions:
             my_decision = decisions.value[self.participant.code]
