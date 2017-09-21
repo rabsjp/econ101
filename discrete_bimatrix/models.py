@@ -92,27 +92,12 @@ class Player(BasePlayer):
                 content_type=ContentType.objects.get_for_model(self.group),
                 group_pk=self.group.pk).order_by("timestamp"))
 
-        try:
-            period_start = Event.objects.get(
-                    channel='state',
-                    content_type=ContentType.objects.get_for_model(self.group),
-                    group_pk=self.group.pk,
-                    value='period_start')
-            period_end = Event.objects.get(
-                    channel='state',
-                    content_type=ContentType.objects.get_for_model(self.group),
-                    group_pk=self.group.pk,
-                    value='period_end')
-        except Event.DoesNotExist:
-            return float('nan')
-
         payoff_matrix = self.subsession.get_cur_payoffs()
 
-        self.payoff = self.get_payoff(period_start, period_end, group_decisions, payoff_matrix)
+        self.payoff = self.get_payoff(group_decisions, payoff_matrix)
         
 
-    def get_payoff(self, period_start, period_end, group_decisions, payoff_matrix):
-        period_duration = period_end.timestamp - period_start.timestamp
+    def get_payoff(self, group_decisions, payoff_matrix):
 
         payoff = 0
 
@@ -128,7 +113,7 @@ class Player(BasePlayer):
 
         for decisions in group_decisions:
             my_decision = decisions.value[self.participant.code]
-            other_decision = decisions.value[self.get_others_in_group()[0]]
+            other_decision = decisions.value[self.other_player().participant.code]
             if self.id_in_group == 1:
                 q1, q2 = my_decision, other_decision
             else:
@@ -140,4 +125,4 @@ class Player(BasePlayer):
 
             payoff += subperiod_payoff
 
-        return payoff / period_duration.total_seconds()
+        return payoff / len(group_decisions) if group_decisions else 0

@@ -36,20 +36,28 @@ def test_get_payoff():
     start = timezone.now()
 
     MockEvent = namedtuple('Event', ['channel', 'value', 'participant', 'timestamp'])
-    decisions = []
+    group_decisions = []
 
-    period_start = MockEvent('state', 'period_start', p1, start+timezone.timedelta(seconds=0))
+    group_decisions.append(MockEvent('group_decisions', {
+        p1.code: 0.2,
+        p2.code: 0.5,
+    }, None, start+timezone.timedelta(seconds=10)))
 
-    decisions.append(MockEvent('decisions', 0.5, p1, start+timezone.timedelta(seconds=0)))
-    decisions.append(MockEvent('decisions', 0.5, p2, start+timezone.timedelta(seconds=0)))
+    group_decisions.append(MockEvent('group_decisions', {
+        p1.code: 0.3,
+        p2.code: 0.8,
+    }, None, start+timezone.timedelta(seconds=20)))
+
+    group_decisions.append(MockEvent('group_decisions', {
+        p1.code: 0.1,
+        p2.code: 0.4,
+    }, None, start+timezone.timedelta(seconds=20)))
+
+    group_decisions.append(MockEvent('group_decisions', {
+        p1.code: 0.8,
+        p2.code: 0.1,
+    }, None, start+timezone.timedelta(seconds=20)))
  
-    decisions.append(MockEvent('decisions', 0.8, p2, start+timezone.timedelta(seconds=5)))
-    decisions.append(MockEvent('decisions', 0.9, p1, start+timezone.timedelta(seconds=10)))
-    decisions.append(MockEvent('decisions', 0.4, p1, start+timezone.timedelta(seconds=18)))
-    decisions.append(MockEvent('decisions', 0.7, p1, start+timezone.timedelta(seconds=20)))
-
-    period_end = MockEvent('state', 'period_end', p1, start+timezone.timedelta(seconds=30))
-
     payoff_grid = [
         [ 100, 100 ], [   0, 800 ],
         [ 800,   0 ], [ 300, 300 ]
@@ -64,10 +72,10 @@ def test_get_payoff():
     group.player_set = { player1, player2 }
     player1.group, player2.group = group, group
 
-    payoff1 = player1.get_payoff(period_start, period_end, decisions, payoff_grid)
-    payoff2 = player2.get_payoff(period_start, period_end, decisions, payoff_grid)
+    payoff1 = player1.get_payoff(group_decisions, payoff_grid)
+    payoff2 = player2.get_payoff(group_decisions, payoff_grid)
 
     assert 0 <= payoff1 and payoff1 <= 800
     assert 0 <= payoff2 and payoff2 <= 800
-    assert abs(payoff1 - 271) < 1
-    assert abs(payoff2 - 205) < 1
+    assert abs(payoff1 - 374) < 1
+    assert abs(payoff2 - 294) < 1
