@@ -64,16 +64,19 @@
         <otree-period
             running="{{ _isPeriodRunning }}">
         </otree-period>
+
         <otree-continuous-decision
             initial-decision="[[ initialDecision ]]"
-            my-decision="{{ myDecision }}"
+            my-decision="{{ myPlannedDecision }}"
+            my-current-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}">
         </otree-continuous-decision>
-        <otree-continuous-decision-bot
+
+        <!--otree-continuous-decision-bot
             id="bot"
             my-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}">
-        </otree-continuous-decision-bot>
+        </otree-continuous-decision-bot-->
 
         <div id="app" class="layout horizontal">
             
@@ -94,7 +97,7 @@
                                 max="1"
                                 step="0.01"
                                 disabled="[[ !_isPeriodRunning ]]"
-                                value="{{ myDecision }}">
+                                value="{{ myPlannedDecision }}">
                             </styled-range>
                         </div>
                         <bimatrix-heatmap
@@ -144,6 +147,9 @@
                 initialDecision: {
                     type: Number,
                 },
+                myPlannedDecision: {
+                    type: Number,
+                },
                 myDecision: {
                     type: Number,
                 },
@@ -151,6 +157,10 @@
                     type: Number
                 },
                 periodLength: Number,
+                discreteTime: {
+                    type: Boolean,
+                    value: false
+                },
                 // set by otree-period
                 _isPeriodRunning: {
                     type: Boolean
@@ -184,6 +194,7 @@
                 this.otherPayoffs = this.payoffMatrix.map(
                     val => parseInt(val[this.otherPayoffIndex]));
 
+                /*
                 this.$.bot.payoffFunction = (myDecision, otherDecision) => {
                     const m = this.myPayoffs;
                     const row1 = myDecision * m[0] + (1 - myDecision) * m[2];
@@ -191,6 +202,7 @@
                     const flowPayoff = otherDecision * row1 + (1 - otherDecision) * row2;
                     return flowPayoff;
                 };
+                */
             },
         })
     </script>
