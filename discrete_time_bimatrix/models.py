@@ -19,7 +19,7 @@ it contributes to your final payoff).
 
 
 class Constants(BaseConstants):
-    name_in_url = 'discrete_bimatrix'
+    name_in_url = 'discrete_time_bimatrix'
     players_per_group = 2
     num_rounds = 12
 
@@ -47,7 +47,7 @@ class Constants(BaseConstants):
     # Amount of time the game stays on the decision page in seconds.
     period_length = 120
 
-    seconds_per_tick = 10
+    num_subperiods = 12
 
 
 class Subsession(BaseSubsession):
@@ -74,8 +74,8 @@ class Group(DiscreteDecisionGroup):
     def period_length(self):
         return Constants.period_length
 
-    def seconds_per_tick(self):
-        return Constants.seconds_per_tick
+    def num_subperiods(self):
+        return Constants.num_subperiods
 
 
 class Player(BasePlayer):

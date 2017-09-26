@@ -25,6 +25,7 @@ class Decision(Page):
     def vars_for_template(self):
         return {
             "payoff_matrix": self.subsession.get_cur_payoffs(),
+            'pure_strategy': False,
         }
 
 

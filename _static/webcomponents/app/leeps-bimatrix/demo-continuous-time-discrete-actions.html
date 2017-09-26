@@ -6,7 +6,7 @@
     </script>
     <link
         rel="import"
-        href="/static/webcomponents/app/continuous-bimatrix/continuous-bimatrix.html">
+        href="/static/webcomponents/app/leeps-bimatrix/leeps-bimatrix.html">
     <link
         rel="import"
         href="/static/otree-redwood/webcomponents/otree-redwood-debug/otree-redwood-debug.html">
@@ -24,19 +24,22 @@
             oTree.group = 1;
             oTree.role = 'demo';
             oTree.participantCode = 'demo';
-            oTree.appName = "continuous-bimatrix";
+            oTree.appName = 'demo';
             oTree.idInGroup = 1;
             oTree.debug = true;
         })();
     </script>
-    <continuous-bimatrix
-        initial-decision="0.5"
-        payoff-matrix="[
-            [ 400, 400 ], [ 0,   800 ],
-            [ 800, 0   ], [ 200, 200 ]
-        ]"
-        period-length="120">
-    </continuous-bimatrix>
-    <otree-redwood-debug></otree-redwood-debug>
+    <div style="margin: 0 10px 0 10px;">
+        <leeps-bimatrix
+            initial-decision="0.5"
+            payoff-matrix="[
+                [ 400, 400 ], [ 0,   800 ],
+                [ 800, 0   ], [ 200, 200 ]
+            ]"
+            period-length="120"
+            pure-strategy>
+        </leeps-bimatrix>
+        <otree-redwood-debug></otree-redwood-debug>
+    </div>
   </body>
 </html>

@@ -6,7 +6,7 @@
     href="/static/otree-redwood/webcomponents/otree-channel/otree-channel.html">
 <link
     rel="import"
-    href="/static/otree-redwood/webcomponents/otree-continuous-decision/otree-continuous-decision.html">
+    href="/static/otree-redwood/webcomponents/otree-decision/otree-decision.html">
 <link
     rel="import"
     href="/static/otree-redwood/webcomponents/otree-period/otree-period.html">
@@ -64,10 +64,10 @@
         </style>
 	
         <otree-period></otree-period>
-        <otree-continuous-decision
+        <otree-decision
             initial-decision="[[ initialDecision ]]"
             my-decision="{{ myDecision }}">
-        </otree-continuous-decision>
+        </otree-decision>
         <otree-channel
             channel="tick"
             on-event="_onTick">
@@ -121,7 +121,7 @@
                 payoffMatrix: Array,
                 // 2x2 array of probability based on player's decision.
                 probabilityMatrix: Array,
-                // synced by the otree-continuous-decision component
+                // synced by the otree-decision component
                 myDecision: Number,
                 // True if the progress bar should be hidden.
                 hideProgress: {

@@ -28,15 +28,18 @@
 
     <link
         rel="import"
-        href="{% static "webcomponents/app/continuous-bimatrix/continuous-bimatrix.html" %}">
+        href="{% static "webcomponents/app/leeps-bimatrix/leeps-bimatrix.html" %}">
 {% endblock %}
 
 {% block content %}
-    <continuous-bimatrix
+    <leeps-bimatrix
         initial-decision='{{ player.initial_decision }}'
         payoff-matrix='{{ payoff_matrix }}'
         period-length='{{ player.group.period_length }}'
-        discrete-time>
-    </continuous-bimatrix>
+        {% if pure_strategy %}
+        pure-strategy
+        {% endif %}
+        >
+    </leeps-bimatrix>
 
 {% endblock %}

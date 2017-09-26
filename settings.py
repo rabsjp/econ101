@@ -156,10 +156,10 @@ SESSION_CONFIGS = [
         'display_average_ab_graph': False,
     },
     {
-        'name': 'continuous_bimatrix',
+        'name': 'continuous_time_bimatrix',
         'display_name': "Continuous Time Bimatrix Game",
         'num_demo_participants': 2,
-        'app_sequence': ['continuous_bimatrix', 'payment_info'],
+        'app_sequence': ['continuous_time_bimatrix', 'payment_info'],
     },
     {
         'name': 'stochastic_bimatrix',
@@ -169,10 +169,10 @@ SESSION_CONFIGS = [
         'treatment': 'A'
     },
     {
-        'name': 'discrete_bimatrix',
+        'name': 'discrete_time_bimatrix',
         'display_name': "Discrete Time Bimatrix Game",
         'num_demo_participants': 2,
-        'app_sequence': ['discrete_bimatrix', 'payment_info'],
+        'app_sequence': ['discrete_time_bimatrix', 'payment_info'],
     },
 ]
 

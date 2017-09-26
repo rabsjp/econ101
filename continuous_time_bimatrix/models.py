@@ -19,7 +19,7 @@ payoff).
 
 
 class Constants(BaseConstants):
-    name_in_url = 'continuous_bimatrix'
+    name_in_url = 'continuous_time_bimatrix'
     players_per_group = 2
     num_rounds = 12
 
