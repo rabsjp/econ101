@@ -17,13 +17,8 @@ class DecisionWaitPage(WaitPage):
 
 
 class Decision(Page):
+    pass
     
-    def vars_for_template(self):
-        return {
-            'payoff_matrix': self.subsession.get_cur_payoffs(),
-            'pure_strategy': False,
-        }
-
 
 class Results(Page):
     timeout_seconds = 30

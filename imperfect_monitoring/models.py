@@ -4,7 +4,7 @@ from jsonfield import JSONField
 from otree.api import models
 from otree.constants import BaseConstants
 from otree.models import BaseSubsession, BasePlayer
-from otree_redwood.models import Event, ContinuousDecisionGroup
+from otree_redwood.models import Event, DecisionGroup
 from otree_redwood.utils import DiscreteEventEmitter
 import random
 
@@ -52,7 +52,7 @@ class Subsession(BaseSubsession):
         self.group_randomly()
 
 
-class Group(ContinuousDecisionGroup):
+class Group(DecisionGroup):
 
     state = models.CharField(max_length=10)
     t = models.PositiveIntegerField()

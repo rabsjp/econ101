@@ -34,10 +34,12 @@
 {% block content %}
     <leeps-bimatrix
         initial-decision='{{ player.initial_decision }}'
-        payoff-matrix='{{ payoff_matrix }}'
+        payoff-matrix='{{ player.subsession.payoff_matrix }}'
         period-length='{{ player.group.period_length }}'
-        num-subperiods="{{ group.num_subperiods }}"
-        {% if pure_strategy %}
+        {% if player.group.num_subperiods %}
+        num-subperiods='{{ player.group.num_subperiods }}'
+        {% endif %}
+        {% if player.subsession.pure_strategy %}
         pure-strategy
         {% endif %}
         >

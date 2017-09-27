@@ -5,21 +5,15 @@ from django.contrib.contenttypes.models import ContentType
 from otree.constants import BaseConstants
 from otree.models import BasePlayer, BaseSubsession
 
-from otree_redwood.models import Event, ContinuousDecisionGroup
+from otree_redwood.models import Event, DecisionGroup
 
 doc = """
-This is a continuous time/continuous space bimatrix game.
-Two players can simultaneously choose a mixed strategy for the bimatrix game
-defined by the "payoff_matrices" variable below. They can change their choice at
-any time and that change will be reflected on their counterpart's page. Payoff
-is determined by the integrating the instantaneous flow payoffs over time (i.e
-the longer you are at a payoff spot, the more it contributes to your final
-payoff).
+This is a configurable bimatrix game.
 """
 
 
 class Constants(BaseConstants):
-    name_in_url = 'continuous_time_bimatrix'
+    name_in_url = 'bimatrix'
     players_per_group = 2
     num_rounds = 12
 
@@ -52,7 +46,7 @@ class Subsession(BaseSubsession):
     def before_session_starts(self):
         self.group_randomly()
 
-    def get_cur_payoffs(self):
+    def payoff_matrix(self):
         roundno = self.round_number
 
         if roundno in [1, 2, 3]:
@@ -66,8 +60,25 @@ class Subsession(BaseSubsession):
         else:
             print("invalid round number!")
 
+    def pure_strategy(self):
+        return self.round_number % 2 == 0
 
-class Group(ContinuousDecisionGroup):
+
+class Group(DecisionGroup):
+
+    def num_subperiods(self):
+        roundno = self.round_number
+
+        if roundno in [1, 2, 3]:
+            return None
+        elif roundno in [4, 5, 6]:
+            return 10
+        elif roundno in [7, 8, 9]:
+            return None
+        elif roundno in [10, 11, 12]:
+            return 10
+        else:
+            print("invalid round number!")
 
     def period_length(self):
         return Constants.period_length
@@ -101,7 +112,7 @@ class Player(BasePlayer):
         except Event.DoesNotExist:
             return float('nan')
 
-        payoff_matrix = self.subsession.get_cur_payoffs()
+        payoff_matrix = self.subsession.payoff_matrix()
 
         self.payoff = self.get_payoff(period_start, period_end, decisions, payoff_matrix)
         

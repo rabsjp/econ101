@@ -7,7 +7,9 @@
 
 {% block content %}
 
-    {% include 'discrete_time_bimatrix/Instructions.html' %}
+	{% with template_name=subsession.app_name|add:"/Instructions.html" %}
+		{% include template_name %}
+	{% endwith %}
 
     {% next_button %}
 
