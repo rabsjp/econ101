@@ -160,6 +160,7 @@ SESSION_CONFIGS = [
         'display_name': "Generic Bimatrix Game",
         'num_demo_participants': 2,
         'app_sequence': ['bimatrix', 'payment_info'],
+        'config_file': 'demo.csv',
     },
     {
         'name': 'stochastic_bimatrix',
