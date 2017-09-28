@@ -3,13 +3,13 @@
 	href="/static/bower_components/polymer/polymer.html" />
 <link
     rel="import"
-    href="/static/otree-redwood/webcomponents/otree-channel/otree-channel.html">
+    href="/static/otree-redwood/webcomponents/redwood-channel/redwood-channel.html">
 <link
     rel="import"
-    href="/static/otree-redwood/webcomponents/otree-decision/otree-decision.html">
+    href="/static/otree-redwood/webcomponents/redwood-decision/redwood-decision.html">
 <link
     rel="import"
-    href="/static/otree-redwood/webcomponents/otree-period/otree-period.html">
+    href="/static/otree-redwood/webcomponents/redwood-period/redwood-period.html">
 
     
 <dom-module id="imperfect-monitoring">
@@ -63,15 +63,15 @@
             } 
         </style>
 	
-        <otree-period></otree-period>
-        <otree-decision
+        <redwood-period></redwood-period>
+        <redwood-decision
             initial-decision="[[ initialDecision ]]"
             my-decision="{{ myDecision }}">
-        </otree-decision>
-        <otree-channel
+        </redwood-decision>
+        <redwood-channel
             channel="tick"
             on-event="_onTick">
-        </otree-channel>
+        </redwood-channel>
 
         <div id="progressAndGraphs">
             <progress
@@ -121,7 +121,7 @@
                 payoffMatrix: Array,
                 // 2x2 array of probability based on player's decision.
                 probabilityMatrix: Array,
-                // synced by the otree-decision component
+                // synced by the redwood-decision component
                 myDecision: Number,
                 // True if the progress bar should be hidden.
                 hideProgress: {
