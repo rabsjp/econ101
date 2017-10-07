@@ -1,14 +1,22 @@
-FROM python:3.4
+FROM python:3-alpine
 
-# Force stdio/out/err to be unbuffered - we want to see errors pronto.
-ENV PYTHONUNBUFFERED 1
+ENV REDIS_URL="redis://redis:6379" \
+    DJANGO_SETTINGS_MODULE="settings"
 
-ADD requirements.txt /requirements.txt
-ADD requirements_base.txt /requirements_base.txt
-ADD requirements_server.txt /requirements_server.txt
+ADD ./ /opt/otree
 
-RUN pip install -r requirements.txt
+RUN apk -U add --no-cache bash \
+                          curl \
+                          gcc \
+                          musl-dev \
+                          postgresql \
+                          postgresql-dev \
+    && pip install --no-cache-dir -r /opt/otree/requirements.txt \
+    && mkdir -p /opt/init \
+    && chmod +x /opt/otree/entrypoint.sh \
+    && apk del curl gcc musl-dev postgresql-dev
 
-RUN mkdir /code
-WORKDIR /code
-ADD . /code
+WORKDIR /opt/otree
+VOLUME /opt/init
+ENTRYPOINT /opt/otree/entrypoint.sh
+EXPOSE 80
